@@ -349,6 +349,7 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
 // STATE
 // ════════════════════════════════════════════
 let DOSSIERS=[], META={}, ST={}, jugDate=null, gCalY, gCalM;
+let FILTER_DONE=false;
 let SIEGE={juge:'',cons1:'',cons2:'',gref:''};
 let DIVISION='';
 const perCal={};
@@ -530,14 +531,16 @@ function genText(num){
   function nomComp(c,party){if(!c)return party;if(c.type==='personne')return c.name||party;if(c.loco&&c.loco.trim())return'Maître '+c.loco.trim()+' loco Maître '+(c.name||'…');return'Maître '+(c.name||'…');}
   const rd=s.remDate?fd(s.remDate):'[date à préciser]';
   const jd=jugDate?fd(jugDate):'[date des jugements]';
-  if(s.dec==='rc')lines.push(`À la demande des parties qui comparaissent, l'affaire est remise au ${rd}.`);
+  if(s.dec==='rc'){lines.push(`À la demande des parties qui comparaissent, l'affaire est remise au ${rd}.`);if(s.note)lines.push(s.note);}
   else if(s.dec==='rd'){
     const pres=!demAbsent?demStr:defStr,abs=demAbsent?demStr:defStr;
     lines.push(`À la demande de la partie ${pres}, l'affaire est remise au ${rd}.`);
     if(s.remPli)lines.push(`Elle sollicite l'envoi d'un pli judiciaire à ${abs}, conformément à l'article 803 C.j.`);
+    if(s.note)lines.push(s.note);
   }else if(s.dec==='jd'){
     const abs=demAbsent?demStr:defStr,pn=nomComp(demAbsent?defComp:demComp,demAbsent?defStr:demStr);
     lines.push(`La partie ${abs} est défaillante. ${pn} est entendu(e) et sollicite jugement par défaut. Il/Elle dépose son dossier de pièces ainsi que son état de dépens.`);
+    if(s.note)lines.push(s.note);
     lines.push(`Le tribunal clôt les débats et met la cause en délibéré. Un jugement sera prononcé le ${jd}.`);
   }else if(s.dec==='jc'){
     const em={conseils:'Leurs conseils sont entendus.',parties:'Les parties sont entendues.','cons-dem':'Le conseil de la demanderesse et la partie défenderesse sont entendus.','cons-def':'La partie demanderesse et le conseil de la défenderesse sont entendus.'};
@@ -548,16 +551,17 @@ function genText(num){
     if(s.jugDC)l+=' La défenderesse conteste la demande.';
     if(s.jugDT){if(s.jtt==='mens')l+=` La défenderesse ne conteste pas mais sollicite des termes et délais, soit l'étalement en ${s.jtv||'…'} mensualités.`;else l+=` La défenderesse ne conteste pas mais sollicite des termes et délais, soit un paiement de ${s.jtv||'…'} € par mois.`;}
     lines.push(l);
+    if(s.note)lines.push(s.note);
     lines.push(`Le tribunal clôt les débats et met la cause en délibéré. Un jugement sera prononcé le ${jd}.`);
   }else if(s.dec==='vc')lines.push('Les parties sollicitent le renvoi au rôle.');
-  else if(s.dec==='vd')lines.push('La partie '+(demAbsent?defStr:demStr)+' sollicite le renvoi au rôle.');
-  else if(s.dec==='ea')lines.push("Les parties déposent un calendrier de mise en état amiable. Une ordonnance de confirmation des délais et de fixation de la cause pour être plaidée sera prononcée ultérieurement.");
-  else if(s.dec==='et')lines.push("Les parties sollicitent la mise en état et la fixation de la cause pour plaidoiries. Une ordonnance sera prononcée dans le délai légal.");
-  else if(s.dec==='ac')lines.push(`Les parties sont parvenues à un accord et sollicitent qu'il leur en soit donné acte. La cause est plaidée. Un jugement sera prononcé le ${jd}.`);
-  else if(s.dec==='co')lines.push('Un PV de conciliation est rédigé ce jour.');
-  else if(s.dec==='ca')lines.push("La conciliation n'aboutit pas car la partie "+(demAbsent?demStr:defStr)+" est défaillante.");
-  else if(s.dec==='cd')lines.push("La conciliation n'aboutit pas car les parties ne sont pas parvenues à un accord.");
-  if(s.note)lines.push(s.note);
+  else if(s.dec==='vd'){lines.push('La partie '+(demAbsent?defStr:demStr)+' sollicite le renvoi au rôle.');if(s.note)lines.push(s.note);}
+  else if(s.dec==='ea'){lines.push("Les parties déposent un calendrier de mise en état amiable. Une ordonnance de confirmation des délais et de fixation de la cause pour être plaidée sera prononcée ultérieurement.");if(s.note)lines.push(s.note);}
+  else if(s.dec==='et'){lines.push("Les parties sollicitent la mise en état et la fixation de la cause pour plaidoiries. Une ordonnance sera prononcée dans le délai légal.");if(s.note)lines.push(s.note);}
+  else if(s.dec==='ac'){lines.push(`Les parties sont parvenues à un accord et sollicitent qu'il leur en soit donné acte. La cause est plaidée. Un jugement sera prononcé le ${jd}.`);if(s.note)lines.push(s.note);}
+  else if(s.dec==='co'){lines.push('Un PV de conciliation est rédigé ce jour.');if(s.note)lines.push(s.note);}
+  else if(s.dec==='ca'){lines.push("La conciliation n'aboutit pas car la partie "+(demAbsent?demStr:defStr)+" est défaillante.");if(s.note)lines.push(s.note);}
+  else if(s.dec==='cd'){lines.push("La conciliation n'aboutit pas car les parties ne sont pas parvenues à un accord.");if(s.note)lines.push(s.note);}
+  // note déjà insérée au bon endroit dans chaque branche — ne pas rajouter ici
   return lines.filter(Boolean).join('\n');
 }
 
@@ -647,6 +651,20 @@ function renderCard(d){
   </div>`;
 }
 
+
+function toggleFilter(){
+  FILTER_DONE=!FILTER_DONE;
+  const btn=document.getElementById('btn-filter');
+  btn.textContent=FILTER_DONE?'👁 Afficher tout':'👁 Afficher uniquement les non validés';
+  btn.style.background=FILTER_DONE?'rgba(255,200,0,.25)':'rgba(255,255,255,.1)';
+  renderAll();
+}
+function applyFilter(){
+  document.querySelectorAll('.dossier-card').forEach(el=>{
+    const num=el.getAttribute('data-num');
+    el.style.display=(FILTER_DONE&&ST[num]&&ST[num].done)?'none':'';
+  });
+}
 function renderAll(){
   let html='';
   DOSSIERS.forEach(sec=>{
