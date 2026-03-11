@@ -1,4 +1,6 @@
 {
+  "version": 2,
+  "installCommand": "npm install",
   "functions": {
     "api/analyze.js": {
       "maxDuration": 30
