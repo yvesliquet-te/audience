@@ -1,3 +1,5 @@
+const mammoth = require('mammoth');
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -6,19 +8,25 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { content, docxBase64 } = req.body;
-    let texte = content;
+    // Parse manuel du body
+    let body = req.body;
+    if (typeof body === 'string') {
+      try { body = JSON.parse(body); } catch(e) { return res.status(400).json({ error: 'JSON invalide' }); }
+    }
+    if (!body) return res.status(400).json({ error: 'Body vide' });
+
+    const { content, docxBase64 } = body;
+    let texte = content || '';
 
     if (docxBase64) {
-      const mammoth = require('mammoth');
       const buffer = Buffer.from(docxBase64, 'base64');
       const result = await mammoth.extractRawText({ buffer });
       texte = result.value;
     }
 
-    if (!texte) return res.status(400).json({ error: 'Contenu manquant' });
-
-    console.log('TEXTE EXTRAIT:', texte.substring(0, 500));
+    if (!texte || texte.trim().length === 0) {
+      return res.status(400).json({ error: 'Texte vide après extraction' });
+    }
 
     const prompt = `Extrais les données de cette feuille d'audience judiciaire belge et retourne UNIQUEMENT ce JSON brut, sans markdown, sans explication :
 {
