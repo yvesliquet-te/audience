@@ -203,9 +203,9 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
       <div class="step-content active" id="sc1">
         <p style="font-size:.83rem;color:var(--muted);margin-bottom:14px;">Sélectionnez la division :</p>
         <div class="div-grid">
-          <div class="div-btn" onclick="selDiv('Liège')"><span class="div-icon">🏛</span>Liège</div>
-          <div class="div-btn" onclick="selDiv('Verviers')"><span class="div-icon">⚖</span>Verviers</div>
-          <div class="div-btn" onclick="selDiv('Huy')"><span class="div-icon">🏰</span>Huy</div>
+          <div class="div-btn" data-div="Liège" onclick="selDiv('Liège')"><span class="div-icon">🏛</span>Liège</div>
+          <div class="div-btn" data-div="Verviers" onclick="selDiv('Verviers')"><span class="div-icon">⚖</span>Verviers</div>
+          <div class="div-btn" data-div="Huy" onclick="selDiv('Huy')"><span class="div-icon">🏰</span>Huy</div>
         </div>
         <div class="step-btns"><div></div><button class="btn-next" id="btn1" onclick="goStep(2)" disabled>Suivant →</button></div>
       </div>
@@ -297,7 +297,7 @@ const DEC_LBL={rc:'Remise contradictoire',rd:'Remise par défaut',jc:'Jugement c
 
 function selDiv(div){
   DIVISION=div;
-  document.querySelectorAll('.div-btn').forEach(b=>b.classList.toggle('sel',b.textContent.trim()===div));
+  document.querySelectorAll('.div-btn').forEach(b=>b.classList.toggle('sel',b.dataset.div===div));
   document.getElementById('btn1').disabled=false;
 }
 function goStep(n){
@@ -796,4 +796,3 @@ function dlHtml(type){
 </script>
 </body>
 </html>
-
