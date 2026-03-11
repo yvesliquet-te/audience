@@ -1,5 +1,3 @@
-const mammoth = require('mammoth');
-
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -8,25 +6,8 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    // Parse manuel du body
-    let body = req.body;
-    if (typeof body === 'string') {
-      try { body = JSON.parse(body); } catch(e) { return res.status(400).json({ error: 'JSON invalide' }); }
-    }
-    if (!body) return res.status(400).json({ error: 'Body vide' });
-
-    const { content, docxBase64 } = body;
-    let texte = content || '';
-
-    if (docxBase64) {
-      const buffer = Buffer.from(docxBase64, 'base64');
-      const result = await mammoth.extractRawText({ buffer });
-      texte = result.value;
-    }
-
-    if (!texte || texte.trim().length === 0) {
-      return res.status(400).json({ error: 'Texte vide après extraction' });
-    }
+    const { content } = req.body;
+    if (!content) return res.status(400).json({ error: 'Missing content' });
 
     const prompt = `Extrais les données de cette feuille d'audience judiciaire belge et retourne UNIQUEMENT ce JSON brut, sans markdown, sans explication :
 {
@@ -36,7 +17,7 @@ module.exports = async function handler(req, res) {
 Règles : conc=true si ref commence par M/ — avDem/avDef : "Me NOM" si avocat mentionné sinon "" — inclure TOUS les dossiers.
 
 FEUILLE :
-${texte}`;
+${content}`;
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
