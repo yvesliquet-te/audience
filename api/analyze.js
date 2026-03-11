@@ -9,14 +9,31 @@ module.exports = async function handler(req, res) {
     const { content } = req.body;
     if (!content) return res.status(400).json({ error: 'Missing content' });
 
-    const prompt = `Extrais les données de cette feuille d'audience judiciaire belge et retourne UNIQUEMENT ce JSON brut, sans markdown, sans explication :
-{
-  "meta":{"tribunal":"...","division":"...","date":"...","heure":"...","juges":["..."]},
-  "sections":[{"section":"NOM","items":[{"num":"1.1","ref":"A/26/00061","type":"...","conc":false,"dem":"...","avDem":"Me NOM ou vide","def":"...","avDef":"Me NOM ou vide"}]}]
-}
-Règles : conc=true si ref commence par M/ — avDem/avDef : "Me NOM" si avocat mentionné sinon "" — inclure TOUS les dossiers.
+    const prompt = `Extrais les données de cette feuille d'audience judiciaire belge et retourne UNIQUEMENT ce JSON brut, sans markdown, sans explication.
 
-FEUILLE :
+RÈGLES IMPORTANTES :
+- "dem" et "def" peuvent contenir PLUSIEURS parties séparées par " / "
+- Exemple : si on voit "Déf) SCIARRABBA BIANCA" suivi de "MUTZHAGEN SRL - Me. ORBAN JUDITH" sur la ligne suivante (sans "Déf)"), ce sont deux défendeurs : def = "SCIARRABBA BIANCA / MUTZHAGEN SRL"
+- "avDem" et "avDef" : prendre le dernier avocat mentionné (celui du dernier défendeur/demandeur si plusieurs)
+- conc = true si la référence commence par M/
+- Inclure TOUS les dossiers sans exception
+
+Format JSON attendu :
+{
+  "meta": {"tribunal":"...","division":"...","date":"...","heure":"...","juges":["..."]},
+  "sections": [{"section":"NOM SECTION","items":[{
+    "num":"1.1",
+    "ref":"A/26/00061",
+    "type":"description courte",
+    "conc": false,
+    "dem": "NOM DEMANDEUR ou NOM1 / NOM2 si plusieurs",
+    "avDem": "Me NOM ou vide",
+    "def": "NOM DÉFENDEUR ou NOM1 / NOM2 si plusieurs",
+    "avDef": "Me NOM ou vide"
+  }]}]
+}
+
+FEUILLE D'AUDIENCE :
 ${content}`;
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
