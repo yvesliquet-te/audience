@@ -555,7 +555,7 @@ function genText(num){
   else if(s.dec==='et')lines.push("Les parties sollicitent la mise en état et la fixation de la cause pour plaidoiries. Une ordonnance sera prononcée dans le délai légal.");
   else if(s.dec==='ac')lines.push(`Les parties sont parvenues à un accord et sollicitent qu'il leur en soit donné acte. La cause est plaidée. Un jugement sera prononcé le ${jd}.`);
   else if(s.dec==='co')lines.push('Un PV de conciliation est rédigé ce jour.');
-  else if(s.dec==='ca')lines.push('La conciliation n'aboutit pas car la partie '+(demAbsent?demStr:defStr)+' est défaillante.');
+  else if(s.dec==='ca')lines.push("La conciliation n'aboutit pas car la partie "+(demAbsent?demStr:defStr)+" est défaillante.");
   else if(s.dec==='cd')lines.push("La conciliation n'aboutit pas car les parties ne sont pas parvenues à un accord.");
   if(s.note)lines.push(s.note);
   return lines.filter(Boolean).join('\n');
@@ -875,7 +875,7 @@ function buildAll(){
 // ════════════════════════════════════════════
 function openExport(){document.getElementById('exp-modal').classList.add('open');}
 function closeExport(){document.getElementById('exp-modal').classList.remove('open');}
-document.getElementById('exp-modal').addEventListener('click',function(e){if(e.target===this)closeExport();});
+// exp-modal click handler moved to window.load
 
 function getHTML(type){
   if(type==='fa')return buildFA();
@@ -937,6 +937,7 @@ function loadJSON(event){
   reader.readAsText(file);event.target.value='';
 }
 window.addEventListener('load',function(){
+  document.getElementById('exp-modal').addEventListener('click',function(e){if(e.target===this)closeExport();});
   try{
     const raw=localStorage.getItem(LS_KEY);if(!raw)return;
     const snap=JSON.parse(raw);if(!snap.DOSSIERS||!snap.DOSSIERS.length)return;
