@@ -227,9 +227,9 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
       <div class="step-content active" id="sc1">
         <p style="font-size:.83rem;color:var(--muted);margin-bottom:14px;">Sélectionnez la division :</p>
         <div class="div-grid">
-          <div class="div-btn" onclick="selDiv('Liège')"><span class="div-icon">🏛</span>Liège</div>
-          <div class="div-btn" onclick="selDiv('Verviers')"><span class="div-icon">⚖</span>Verviers</div>
-          <div class="div-btn" onclick="selDiv('Huy')"><span class="div-icon">🏰</span>Huy</div>
+          <div class="div-btn" data-div="Liège" onclick="selDiv('Liège')"><span class="div-icon">🏛</span>Liège</div>
+          <div class="div-btn" data-div="Verviers" onclick="selDiv('Verviers')"><span class="div-icon">⚖</span>Verviers</div>
+          <div class="div-btn" data-div="Huy" onclick="selDiv('Huy')"><span class="div-icon">🏰</span>Huy</div>
         </div>
         <div class="step-btns">
           <div></div>
@@ -362,7 +362,7 @@ const DEC_LBL={rc:'Remise contradictoire',rd:'Remise par défaut',jc:'Jugement c
 // ════════════════════════════════════════════
 function selDiv(div){
   DIVISION=div;
-  document.querySelectorAll('.div-btn').forEach(b=>b.classList.toggle('sel',b.textContent.trim()===div));
+  document.querySelectorAll('.div-btn').forEach(b=>b.classList.toggle('sel',b.getAttribute('data-div')===div));
   document.getElementById('btn1').disabled=false;
 }
 
@@ -940,6 +940,8 @@ window.addEventListener('load',function(){
   try{
     const raw=localStorage.getItem(LS_KEY);if(!raw)return;
     const snap=JSON.parse(raw);if(!snap.DOSSIERS||!snap.DOSSIERS.length)return;
+    // Ne proposer la restauration QUE si une audience était en cours (pas juste le setup)
+    if(!snap.META||!snap.META.date)return;
     const d=new Date(snap.ts);
     const label=d.toLocaleDateString('fr-BE')+' à '+d.toLocaleTimeString('fr-BE',{hour:'2-digit',minute:'2-digit'});
     if(!confirm('Session du '+label+' trouvée. La reprendre ?'))return;
