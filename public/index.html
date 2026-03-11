@@ -13,6 +13,7 @@
   --cream:#f7f4ee;--cream-d:#ece8df;--cream-dd:#ddd8cc;
   --text:#1e1e1e;--muted:#7a7468;
   --green:#2a6e47;--green-l:#e4f2eb;
+  --green-active:#d4edda;
   --red:#8b2020;--red-l:#fdf0f0;
   --blue:#1a4a8a;--blue-l:#e6eef8;
   --purple:#5a2d82;--purple-l:#f0e8f8;
@@ -25,98 +26,106 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--cream);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.5;min-height:100vh;}
 
-/* ── SETUP SCREEN ── */
-#setup-screen{display:flex;align-items:flex-start;justify-content:center;min-height:100vh;padding:32px 24px;background:linear-gradient(135deg,#1a2744 0%,#243360 50%,#1a3a5a 100%);}
-.setup-card{background:white;border-radius:16px;box-shadow:var(--sh-lg);width:100%;max-width:600px;overflow:hidden;}
-.setup-header{background:var(--navy);padding:24px 32px;text-align:center;border-bottom:3px solid var(--gold);}
-.setup-header h1{font-family:'Playfair Display',serif;font-size:1.5rem;color:white;font-weight:700;}
-.setup-header p{font-size:.78rem;color:rgba(255,255,255,.5);margin-top:4px;text-transform:uppercase;letter-spacing:.08em;}
-.setup-body{padding:24px 32px;}
-.setup-section{margin-bottom:22px;}
-.setup-section h3{font-family:'Playfair Display',serif;font-size:.95rem;color:var(--navy);font-weight:700;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--cream-dd);}
-.div-btns{display:flex;gap:8px;}
-.div-btn{flex:1;padding:10px 8px;border:2px solid var(--cream-dd);border-radius:var(--r);background:white;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;color:var(--muted);transition:all .15s;text-align:center;}
-.div-btn:hover{border-color:var(--navy-l);color:var(--navy);}
-.div-btn.active{border-color:var(--navy);background:var(--navy);color:white;}
-.siege-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.siege-field{display:flex;flex-direction:column;gap:4px;}
-.siege-field label{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;}
-.siege-field input{border:1.5px solid var(--cream-dd);border-radius:6px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:.82rem;background:var(--cream);color:var(--text);}
-.siege-field input:focus{outline:none;border-color:var(--navy);background:white;}
-.siege-field.full{grid-column:1/-1;}
-.paste-zone textarea{width:100%;height:180px;border:1.5px solid var(--cream-dd);border-radius:var(--r);padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:.82rem;background:var(--cream);color:var(--text);resize:vertical;line-height:1.6;transition:border-color .2s;}
+#setup-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:linear-gradient(135deg,#1a2744 0%,#243360 50%,#1a3a5a 100%);}
+.up-card{background:white;border-radius:16px;box-shadow:var(--sh-lg);width:100%;max-width:600px;overflow:hidden;}
+.up-header{background:var(--navy);padding:24px 32px;text-align:center;border-bottom:3px solid var(--gold);}
+.up-header h1{font-family:'Playfair Display',serif;font-size:1.5rem;color:white;font-weight:700;}
+.up-header p{font-size:.78rem;color:rgba(255,255,255,.5);margin-top:4px;text-transform:uppercase;letter-spacing:.08em;}
+.up-body{padding:26px 32px;}
+.steps{display:flex;gap:0;margin-bottom:24px;}
+.step{flex:1;text-align:center;padding:8px 4px;font-size:.72rem;font-weight:600;color:var(--muted);border-bottom:2px solid var(--cream-dd);transition:all .2s;}
+.step.active{color:var(--navy);border-bottom-color:var(--gold);}
+.step.done{color:var(--green);border-bottom-color:var(--green);}
+.step-n{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--cream-d);color:var(--muted);font-size:.7rem;margin-right:5px;transition:all .2s;}
+.step.active .step-n{background:var(--navy);color:white;}
+.step.done .step-n{background:var(--green);color:white;}
+.step-content{display:none;}.step-content.active{display:block;}
+.div-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px;}
+.div-btn{border:2px solid var(--cream-dd);border-radius:var(--r);padding:14px 8px;text-align:center;cursor:pointer;background:white;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;color:var(--muted);transition:all .15s;}
+.div-btn:hover{border-color:var(--navy);color:var(--navy);}
+.div-btn.sel{border-color:var(--navy);background:var(--navy);color:white;}
+.div-btn .div-icon{font-size:1.4rem;display:block;margin-bottom:4px;}
+.siege-grid{display:grid;gap:10px;margin-bottom:4px;}
+.siege-row{display:flex;flex-direction:column;gap:3px;}
+.siege-lbl{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;}
+.siege-inp{border:1.5px solid var(--cream-dd);border-radius:6px;padding:8px 11px;font-family:'DM Sans',sans-serif;font-size:.85rem;background:var(--cream);color:var(--text);width:100%;transition:border-color .2s;}
+.siege-inp:focus{outline:none;border-color:var(--navy);background:white;}
+.paste-zone textarea{width:100%;height:200px;border:1.5px solid var(--cream-dd);border-radius:var(--r);padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:.82rem;background:var(--cream);color:var(--text);resize:vertical;line-height:1.6;transition:border-color .2s;}
 .paste-zone textarea:focus{outline:none;border-color:var(--navy);background:white;}
 .paste-zone textarea::placeholder{color:#bbb;font-style:italic;}
-.paste-hint{font-size:.72rem;color:var(--muted);margin-top:6px;}
-.analyze-btn{width:100%;margin-top:16px;padding:13px;background:var(--gold);color:var(--navy);border:none;border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;}
-.analyze-btn:hover{background:var(--gold-l);transform:translateY(-1px);box-shadow:var(--sh-md);}
-.analyze-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
-.u-status{margin-top:12px;padding:11px 14px;border-radius:var(--r);font-size:.82rem;display:none;}
+.paste-hint{font-size:.74rem;color:var(--muted);margin-top:8px;}
+.step-btns{display:flex;justify-content:space-between;margin-top:18px;gap:10px;}
+.btn-next{flex:1;padding:11px;background:var(--gold);color:var(--navy);border:none;border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-next:hover{background:var(--gold-l);}
+.btn-next:disabled{opacity:.4;cursor:not-allowed;}
+.btn-prev{padding:11px 18px;background:var(--cream-d);color:var(--muted);border:none;border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;}
+.btn-prev:hover{background:var(--cream-dd);}
+.u-status{margin-top:14px;padding:11px 14px;border-radius:var(--r);font-size:.82rem;display:none;}
 .u-status.loading{background:var(--blue-l);color:var(--blue);display:flex;align-items:center;gap:8px;}
 .u-status.error{background:var(--red-l);color:var(--red);display:block;}
 .spinner{flex-shrink:0;width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
-/* ── MAIN APP ── */
 #main-app{display:none;}
-.header{background:var(--navy);color:white;padding:11px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--sh-md);border-bottom:3px solid var(--gold);}
+.header{background:var(--navy);color:white;padding:11px 22px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--sh-md);border-bottom:3px solid var(--gold);}
 .h-title h1{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;}
-.h-title p{font-size:.67rem;opacity:.5;margin-top:1px;text-transform:uppercase;letter-spacing:.06em;}
+.h-title p{font-size:.68rem;opacity:.5;margin-top:1px;text-transform:uppercase;letter-spacing:.06em;}
 .h-right{display:flex;gap:7px;align-items:center;}
-.prog{display:flex;align-items:center;gap:7px;color:rgba(255,255,255,.65);font-size:.73rem;margin-right:4px;}
-.prog-bar{width:76px;height:3px;background:rgba(255,255,255,.2);border-radius:2px;overflow:hidden;}
+.prog{display:flex;align-items:center;gap:7px;color:rgba(255,255,255,.7);font-size:.75rem;margin-right:4px;}
+.prog-bar{width:80px;height:3px;background:rgba(255,255,255,.2);border-radius:2px;overflow:hidden;}
 .prog-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .4s;}
-.btn{border:none;border-radius:6px;padding:6px 13px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.76rem;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s;}
+.btn{border:none;border-radius:6px;padding:6px 13px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.77rem;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s;}
 .btn-gold{background:var(--gold);color:var(--navy);}.btn-gold:hover{background:var(--gold-l);}
-.btn-ghost{background:rgba(255,255,255,.1);color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.2);}.btn-ghost:hover{background:rgba(255,255,255,.18);}
-
-.jug-global{background:var(--navy-l);border-bottom:2px solid var(--gold);padding:7px 20px;display:flex;align-items:center;gap:12px;color:white;font-size:.78rem;flex-wrap:wrap;}
+.btn-navy{background:var(--navy-l);color:white;}.btn-navy:hover{background:var(--navy-ll);}
+.btn-ghost{background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.2);}.btn-ghost:hover{background:rgba(255,255,255,.18);}
+.jug-global{background:var(--navy-l);border-bottom:2px solid var(--gold);padding:8px 22px;display:flex;align-items:center;gap:12px;color:white;font-size:.8rem;flex-wrap:wrap;}
 .jug-global label{font-weight:600;color:var(--gold-ll);white-space:nowrap;}
-
 .sec-label{display:flex;align-items:center;gap:12px;margin:20px 16px 6px;}
 .sec-label h2{font-family:'Playfair Display',serif;font-size:.82rem;color:var(--navy);font-weight:700;text-transform:uppercase;letter-spacing:.12em;white-space:nowrap;}
 .sec-line{flex:1;height:1px;background:linear-gradient(to right,var(--gold),transparent);}
-
 .dossiers-wrap{padding:0 14px 48px;}
 
-/* dossier cards */
-.dossier-card{background:white;border:1px solid var(--cream-dd);border-bottom:none;overflow:hidden;transition:opacity .2s;}
+/* CARDS */
+.dossier-card{background:white;border:1px solid var(--cream-dd);border-bottom:none;overflow:hidden;transition:opacity .25s,filter .25s,background .2s;}
 .dossier-card:first-child{border-radius:10px 10px 0 0;}
 .dossier-card:last-child{border-radius:0 0 10px 10px;border-bottom:1px solid var(--cream-dd);}
 .dossier-card:only-child{border-radius:10px;border-bottom:1px solid var(--cream-dd);}
-
+/* OPEN = vert clair */
+.dossier-card.open{background:var(--green-active);border-color:#a8d5b5;border-bottom:1px solid #a8d5b5 !important;border-radius:10px !important;margin:4px 0;box-shadow:0 2px 12px rgba(42,110,71,.15);}
+.dossier-card.open .c-head{background:transparent;}
+.dossier-card.open .c-body{background:white;border-radius:0 0 8px 8px;border-top:1px solid #a8d5b5;}
 /* DONE = fortement grisé */
-.dossier-card.done{opacity:.38;filter:grayscale(.6);}
-.dossier-card.done:hover{opacity:.6;}
-.dossier-card.done .c-head{background:#f0f0f0;}
-.dossier-card.done .d-num{background:#ddd;color:#888;}
+.dossier-card.done{opacity:.32;filter:grayscale(70%);}
+.dossier-card.done:hover{opacity:.5;filter:grayscale(40%);}
+.dossier-card.done .c-head{background:#f5f5f5;}
+.dossier-card.done .d-num{background:#e0e0e0;color:#999;}
 
-.c-head{padding:9px 13px;display:flex;align-items:center;gap:8px;cursor:pointer;background:white;transition:background .15s;user-select:none;}
+.c-head{padding:10px 14px;display:flex;align-items:center;gap:9px;cursor:pointer;background:white;transition:background .15s;user-select:none;}
 .c-head:hover{background:var(--cream);}
-.d-num{font-family:'Playfair Display',serif;font-size:.78rem;font-weight:700;color:var(--navy);background:var(--cream-d);padding:2px 6px;border-radius:4px;min-width:30px;text-align:center;flex-shrink:0;}
-.d-ref{font-size:.68rem;color:var(--muted);font-style:italic;flex-shrink:0;}
+.dossier-card.open .c-head:hover{background:rgba(255,255,255,.5);}
+.d-num{font-family:'Playfair Display',serif;font-size:.8rem;font-weight:700;color:var(--navy);background:var(--cream-d);padding:2px 6px;border-radius:4px;min-width:30px;text-align:center;flex-shrink:0;}
+.d-ref{font-size:.7rem;color:var(--muted);font-style:italic;flex-shrink:0;}
 .d-parties{flex:1;min-width:0;}
-.d-dem{font-size:.78rem;font-weight:600;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.d-def{font-size:.73rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.badge{font-size:.66rem;padding:2px 8px;border-radius:10px;font-weight:600;flex-shrink:0;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.d-dem{font-size:.8rem;font-weight:600;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.d-def{font-size:.75rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.badge{font-size:.68rem;padding:2px 8px;border-radius:10px;font-weight:600;flex-shrink:0;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .badge-p{background:#f0f0f0;color:#999;}
-.badge-d{background:#ddd;color:#777;}
-.chev{color:var(--muted);font-size:.78rem;transition:transform .2s;flex-shrink:0;}
+.badge-d{background:#e0e0e0;color:#888;}
+.chev{color:var(--muted);font-size:.8rem;transition:transform .2s;flex-shrink:0;}
 .dossier-card.open .chev{transform:rotate(180deg);}
-.c-body{display:none;padding:12px 13px 15px;border-top:1px solid var(--cream-d);}
+.c-body{display:none;padding:13px 14px 16px;border-top:1px solid var(--cream-d);}
 .dossier-card.open .c-body{display:block;}
 
-.sec-ttl{font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600;margin-bottom:6px;}
-.comp-section{margin-bottom:12px;}
+.sec-ttl{font-size:.67rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600;margin-bottom:7px;}
+.comp-section{margin-bottom:13px;}
 .comp-row{display:flex;align-items:center;gap:7px;margin-bottom:5px;flex-wrap:wrap;}
-.comp-lbl{font-size:.73rem;color:var(--navy);font-weight:600;min-width:66px;flex-shrink:0;}
-.check-row{display:flex;align-items:center;gap:5px;font-size:.75rem;cursor:pointer;white-space:nowrap;}
+.comp-lbl{font-size:.75rem;color:var(--navy);font-weight:600;min-width:68px;flex-shrink:0;}
+.check-row{display:flex;align-items:center;gap:5px;font-size:.77rem;cursor:pointer;white-space:nowrap;}
 .check-row input{accent-color:var(--navy);}
-select,input[type=text]{border:1.5px solid var(--cream-dd);border-radius:5px;padding:5px 8px;font-family:'DM Sans',sans-serif;font-size:.77rem;background:var(--cream);color:var(--text);transition:border-color .2s;}
-select:focus,input[type=text]:focus{outline:none;border-color:var(--navy);background:white;}
-
-.dec-btns{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;}
-.dbtn{border:1.5px solid;border-radius:6px;padding:5px 10px;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:500;cursor:pointer;transition:all .15s;background:white;line-height:1.3;}
+select,input[type=text]{border:1.5px solid var(--cream-dd);border-radius:5px;padding:5px 8px;font-family:'DM Sans',sans-serif;font-size:.78rem;background:var(--cream);color:var(--text);transition:border-color .2s;}
+select:focus,input:focus{outline:none;border-color:var(--navy);background:white;}
+.dec-btns{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:11px;}
+.dbtn{border:1.5px solid;border-radius:6px;padding:5px 11px;font-family:'DM Sans',sans-serif;font-size:.77rem;font-weight:500;cursor:pointer;transition:all .15s;background:white;line-height:1.3;}
 .dbtn:active{transform:scale(.97);}
 .db-rc{border-color:#b8950a;color:#7a6010;}.db-rc.act{background:#fef3b0;font-weight:700;}
 .db-rd{border-color:#b07010;color:#7a4a00;}.db-rd.act{background:#fde8b0;font-weight:700;}
@@ -130,118 +139,99 @@ select:focus,input[type=text]:focus{outline:none;border-color:var(--navy);backgr
 .db-co{border-color:#2a8040;color:#1a6030;}.db-co.act{background:#d0f0d8;font-weight:700;}
 .db-ca{border-color:var(--red);color:var(--red);}.db-ca.act{background:var(--red-l);font-weight:700;}
 .db-cd{border-color:#aa4040;color:#882020;}.db-cd.act{background:#fde0e0;font-weight:700;}
-
-.sub-opts{display:none;background:var(--cream);border-radius:var(--r);padding:10px;margin-bottom:10px;border:1px solid var(--cream-d);}
+.sub-opts{display:none;background:var(--cream);border-radius:var(--r);padding:11px;margin-bottom:11px;border:1px solid var(--cream-d);}
 .sub-opts.vis{display:block;}
-.sub-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;}
+.sub-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;flex-wrap:wrap;}
 .sub-row:last-child{margin-bottom:0;}
-.sub-lbl{font-size:.7rem;color:var(--muted);font-weight:600;min-width:58px;flex-shrink:0;}
+.sub-lbl{font-size:.72rem;color:var(--muted);font-weight:600;min-width:60px;flex-shrink:0;}
 .ent-opts{display:flex;gap:4px;flex-wrap:wrap;}
-.ent-btn{border:1.5px solid var(--cream-dd);border-radius:5px;padding:3px 8px;font-size:.71rem;cursor:pointer;background:white;font-family:'DM Sans',sans-serif;transition:all .12s;}
+.ent-btn{border:1.5px solid var(--cream-dd);border-radius:5px;padding:3px 8px;font-size:.73rem;cursor:pointer;background:white;font-family:'DM Sans',sans-serif;transition:all .12s;}
 .ent-btn.act{border-color:var(--navy);background:var(--navy);color:white;}
-
-.preview{background:#eef2fa;border-left:3px solid var(--blue);border-radius:0 6px 6px 0;padding:8px 11px;font-size:.76rem;color:var(--navy);margin:8px 0;line-height:1.8;font-style:italic;white-space:pre-wrap;}
-.note-area{margin-top:8px;}
-.note-area label{font-size:.65rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600;display:block;margin-bottom:3px;}
-.note-area textarea{width:100%;border:1.5px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;font-size:.78rem;resize:vertical;min-height:42px;background:var(--cream);}
+.preview{background:#eef2fa;border-left:3px solid var(--blue);border-radius:0 6px 6px 0;padding:9px 12px;font-size:.78rem;color:var(--navy);margin:9px 0;line-height:1.8;font-style:italic;white-space:pre-wrap;}
+.note-area{margin-top:9px;}
+.note-area label{font-size:.67rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;}
+.note-area textarea{width:100%;border:1.5px solid var(--cream-dd);border-radius:6px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:.8rem;resize:vertical;min-height:44px;background:var(--cream);}
 .note-area textarea:focus{outline:none;border-color:var(--navy);background:white;}
-.c-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;}
-.btn-val{background:var(--navy);color:white;border:none;padding:7px 16px;border-radius:6px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.78rem;cursor:pointer;}
+.c-foot{display:flex;justify-content:space-between;align-items:center;margin-top:11px;}
+.btn-val{background:var(--navy);color:white;border:none;padding:7px 18px;border-radius:6px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;}
 .btn-val:hover{background:var(--navy-l);}
-.btn-rst{background:none;border:1.5px solid var(--cream-dd);border-radius:6px;padding:5px 10px;font-size:.71rem;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;}
+.btn-rst{background:none;border:1.5px solid var(--cream-dd);border-radius:6px;padding:5px 11px;font-size:.73rem;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;}
 .btn-rst:hover{border-color:var(--red);color:var(--red);}
-
-/* calendar */
-.mini-cal{background:white;border:1px solid var(--cream-dd);border-radius:var(--r);padding:9px;width:246px;box-shadow:var(--sh-md);}
+.mini-cal{background:white;border:1px solid var(--cream-dd);border-radius:var(--r);padding:9px;width:248px;box-shadow:var(--sh-md);}
 .mc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
-.mc-head span{font-size:.78rem;font-weight:600;color:var(--navy);}
-.mc-nav{background:none;border:none;cursor:pointer;color:var(--navy);font-size:.88rem;padding:2px 5px;border-radius:3px;}
+.mc-head span{font-size:.8rem;font-weight:600;color:var(--navy);}
+.mc-nav{background:none;border:none;cursor:pointer;color:var(--navy);font-size:.9rem;padding:2px 5px;border-radius:3px;}
 .mc-nav:hover{background:var(--cream-d);}
 .mc-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;}
-.mc-dh{font-size:.6rem;text-align:center;color:var(--muted);font-weight:600;padding:1px;}
-.mc-d{font-size:.71rem;text-align:center;padding:3px 1px;border-radius:3px;cursor:pointer;color:var(--text);}
+.mc-dh{font-size:.62rem;text-align:center;color:var(--muted);font-weight:600;padding:1px;}
+.mc-d{font-size:.73rem;text-align:center;padding:3px 1px;border-radius:3px;cursor:pointer;color:var(--text);}
 .mc-d:hover{background:var(--cream-d);}
 .mc-d.sel{background:var(--navy);color:white;font-weight:600;}
 .mc-d.tod{border:1px solid var(--gold);}
 .mc-d.emp{cursor:default;}
-.date-btn{font-size:.77rem;font-weight:500;cursor:pointer;padding:4px 8px;background:white;border:1.5px solid rgba(255,255,255,.3);border-radius:5px;display:inline-flex;align-items:center;gap:4px;color:white;}
+.date-btn{font-size:.79rem;font-weight:500;cursor:pointer;padding:4px 8px;background:white;border:1.5px solid rgba(255,255,255,.3);border-radius:5px;display:inline-flex;align-items:center;gap:4px;color:white;}
 .date-btn:hover{border-color:rgba(255,255,255,.6);}
 .popover{position:absolute;z-index:200;top:calc(100% + 4px);left:0;display:none;}
 .popover.open{display:block;}
 .mc-wrap{position:relative;}
-
-/* modal */
 .modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;backdrop-filter:blur(2px);}
 .modal-ov.open{display:flex;}
-.modal{background:white;border-radius:12px;padding:24px;width:500px;max-width:96vw;box-shadow:var(--sh-lg);max-height:88vh;overflow-y:auto;}
+.modal{background:white;border-radius:12px;padding:24px;width:520px;max-width:96vw;box-shadow:var(--sh-lg);max-height:88vh;overflow-y:auto;}
 .modal h2{font-family:'Playfair Display',serif;color:var(--navy);margin-bottom:14px;font-size:1.1rem;}
 .modal-opt{background:var(--cream);border-radius:var(--r);padding:13px;margin-bottom:9px;border:1px solid var(--cream-d);}
-.modal-opt h4{font-size:.82rem;font-weight:600;color:var(--navy);margin-bottom:3px;}
-.modal-opt p{font-size:.76rem;color:var(--muted);margin-bottom:8px;}
+.modal-opt h4{font-size:.83rem;font-weight:600;color:var(--navy);margin-bottom:3px;}
+.modal-opt p{font-size:.77rem;color:var(--muted);margin-bottom:8px;}
+.modal-opt-row{display:flex;gap:8px;flex-wrap:wrap;}
 .modal-btns{display:flex;gap:8px;margin-top:14px;justify-content:flex-end;}
 .btn-cancel{background:var(--cream-d);border:none;padding:7px 14px;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;font-size:.8rem;}
 </style>
 </head>
 <body>
 
-<!-- ══ SETUP SCREEN ══ -->
 <div id="setup-screen">
-  <div class="setup-card">
-    <div class="setup-header">
+  <div class="up-card">
+    <div class="up-header">
       <h1>⚖ Feuille d'Audience</h1>
       <p>Tribunal de l'Entreprise de Liège</p>
     </div>
-    <div class="setup-body">
-
-      <!-- Division -->
-      <div class="setup-section">
-        <h3>📍 Division</h3>
-        <div class="div-btns">
-          <button class="div-btn active" onclick="setDiv('LIÈGE')">Liège</button>
-          <button class="div-btn" onclick="setDiv('VERVIERS')">Verviers</button>
-          <button class="div-btn" onclick="setDiv('HUY')">Huy</button>
-        </div>
+    <div class="up-body">
+      <div class="steps">
+        <div class="step active" id="stp1"><span class="step-n">1</span>Division</div>
+        <div class="step" id="stp2"><span class="step-n">2</span>Siège</div>
+        <div class="step" id="stp3"><span class="step-n">3</span>Feuille</div>
       </div>
-
-      <!-- Siège -->
-      <div class="setup-section">
-        <h3>👥 Composition du siège</h3>
+      <div class="step-content active" id="sc1">
+        <p style="font-size:.83rem;color:var(--muted);margin-bottom:14px;">Sélectionnez la division :</p>
+        <div class="div-grid">
+          <div class="div-btn" onclick="selDiv('Liège')"><span class="div-icon">🏛</span>Liège</div>
+          <div class="div-btn" onclick="selDiv('Verviers')"><span class="div-icon">⚖</span>Verviers</div>
+          <div class="div-btn" onclick="selDiv('Huy')"><span class="div-icon">🏰</span>Huy</div>
+        </div>
+        <div class="step-btns"><div></div><button class="btn-next" id="btn1" onclick="goStep(2)" disabled>Suivant →</button></div>
+      </div>
+      <div class="step-content" id="sc2">
+        <p style="font-size:.83rem;color:var(--muted);margin-bottom:14px;">Membres du siège :</p>
         <div class="siege-grid">
-          <div class="siege-field full">
-            <label>Président (juge professionnel)</label>
-            <input type="text" id="s-pres" placeholder="ex : M. J.-F. WASINSKI, juge">
-          </div>
-          <div class="siege-field">
-            <label>Juge consulaire 1</label>
-            <input type="text" id="s-jc1" placeholder="ex : M. B. WYZEN">
-          </div>
-          <div class="siege-field">
-            <label>Juge consulaire 2</label>
-            <input type="text" id="s-jc2" placeholder="ex : M. R. PICHOT">
-          </div>
-          <div class="siege-field full">
-            <label>Greffier</label>
-            <input type="text" id="s-gref" placeholder="ex : M. Y. LIQUET, greffier">
-          </div>
+          <div class="siege-row"><label class="siege-lbl">👨‍⚖️ Juge professionnel (président)</label><input class="siege-inp" id="s-juge" type="text" placeholder="Ex : Monsieur J.-F. WASINSKI"></div>
+          <div class="siege-row"><label class="siege-lbl">🤝 Juge consulaire 1</label><input class="siege-inp" id="s-cons1" type="text" placeholder="Ex : Monsieur B. WYZEN"></div>
+          <div class="siege-row"><label class="siege-lbl">🤝 Juge consulaire 2</label><input class="siege-inp" id="s-cons2" type="text" placeholder="Ex : Monsieur R. PICHOT"></div>
+          <div class="siege-row"><label class="siege-lbl">📋 Greffier</label><input class="siege-inp" id="s-gref" type="text" placeholder="Ex : Monsieur Y. LIQUET"></div>
         </div>
+        <div class="step-btns"><button class="btn-prev" onclick="goStep(1)">← Retour</button><button class="btn-next" onclick="goStep(3)">Suivant →</button></div>
       </div>
-
-      <!-- Feuille -->
-      <div class="setup-section">
-        <h3>📋 Feuille d'audience</h3>
+      <div class="step-content" id="sc3">
+        <p style="font-size:.83rem;color:var(--muted);margin-bottom:10px;">Collez le texte de la feuille d'audience :</p>
         <div class="paste-zone">
-          <textarea id="paste-input" placeholder="Collez ici le texte de la feuille d'audience&#10;(Ctrl+A dans Word → Ctrl+C → Ctrl+V ici)"></textarea>
-          <div class="paste-hint">💡 Dans Word : sélectionnez tout (Ctrl+A), copiez (Ctrl+C), collez ici (Ctrl+V).</div>
+          <textarea id="paste-input" placeholder="Ctrl+A dans Word → Ctrl+C → Ctrl+V ici"></textarea>
+          <div class="paste-hint">💡 Sélectionnez tout dans Word (Ctrl+A), copiez (Ctrl+C), collez ici (Ctrl+V).</div>
         </div>
+        <div class="step-btns"><button class="btn-prev" onclick="goStep(2)">← Retour</button><button class="btn-next" id="btn3" onclick="analyze()">▶ Analyser</button></div>
+        <div class="u-status" id="u-status"></div>
       </div>
-
-      <button class="analyze-btn" id="analyze-btn" onclick="analyze()">▶ Analyser la feuille d'audience</button>
-      <div class="u-status" id="u-status"></div>
     </div>
   </div>
 </div>
 
-<!-- ══ MAIN APP ══ -->
 <div id="main-app">
   <div class="header">
     <div class="h-title">
@@ -254,36 +244,41 @@ select:focus,input[type=text]:focus{outline:none;border-color:var(--navy);backgr
       <button class="btn btn-ghost" onclick="newAud()">↩ Nouvelle audience</button>
     </div>
   </div>
-
   <div class="jug-global">
     <label>📅 Date commune des jugements :</label>
     <div class="mc-wrap" id="gc-wrap">
       <div class="date-btn" onclick="toggleGC()"><span id="gc-lbl">Choisir une date</span> ▾</div>
       <div class="popover" id="gc-pop"><div class="mini-cal" id="gc-cal"></div></div>
     </div>
-    <span style="opacity:.4;font-size:.72rem">— jugements et accords</span>
+    <span style="opacity:.4;font-size:.73rem">— jugements et accords</span>
   </div>
-
   <div id="app-body"></div>
-
-  <!-- Export modal -->
   <div class="modal-ov" id="exp-modal">
     <div class="modal">
       <h2>⬇ Exporter</h2>
       <div class="modal-opt">
         <h4>📄 Feuille d'audience complète</h4>
-        <p>Une page avec tous les dossiers dans l'ordre.</p>
-        <button class="btn btn-gold" onclick="printFeuille();closeExport()">🖨 Ouvrir / Imprimer</button>
+        <p>Tous les dossiers sur une seule feuille, avec Rép. et en-tête officiel.</p>
+        <div class="modal-opt-row">
+          <button class="btn btn-navy" onclick="printDirect('fa');closeExport()">🖨 Ouvrir / Imprimer</button>
+          <button class="btn btn-gold" onclick="dlHtml('fa');closeExport()">⬇ Télécharger</button>
+        </div>
       </div>
       <div class="modal-opt">
-        <h4>📑 Procès-verbaux individuels</h4>
-        <p>Un PV par dossier avec en-tête complet — uniquement les dossiers validés.</p>
-        <button class="btn btn-gold" onclick="printPV();closeExport()">🖨 Ouvrir / Imprimer</button>
+        <h4>📋 Procès-verbaux individuels</h4>
+        <p>Un PV par dossier validé, en-tête complet sans numéro Rép.</p>
+        <div class="modal-opt-row">
+          <button class="btn btn-navy" onclick="printDirect('pv');closeExport()">🖨 Ouvrir / Imprimer</button>
+          <button class="btn btn-gold" onclick="dlHtml('pv');closeExport()">⬇ Télécharger</button>
+        </div>
       </div>
       <div class="modal-opt">
-        <h4>📑 Tous les PV (validés + non validés)</h4>
-        <p>Génère un PV pour chaque dossier, qu'il soit validé ou non.</p>
-        <button class="btn btn-gold" onclick="printPV(true);closeExport()">🖨 Ouvrir / Imprimer</button>
+        <h4>📦 Tout exporter</h4>
+        <p>Feuille d'audience + tous les PV en un seul fichier.</p>
+        <div class="modal-opt-row">
+          <button class="btn btn-navy" onclick="printDirect('all');closeExport()">🖨 Ouvrir / Imprimer</button>
+          <button class="btn btn-gold" onclick="dlHtml('all');closeExport()">⬇ Télécharger</button>
+        </div>
       </div>
       <div class="modal-btns"><button class="btn-cancel" onclick="closeExport()">Fermer</button></div>
     </div>
@@ -291,20 +286,28 @@ select:focus,input[type=text]:focus{outline:none;border-color:var(--navy);backgr
 </div>
 
 <script>
-// ══ STATE ══
 let DOSSIERS=[], META={}, ST={}, jugDate=null, gCalY, gCalM;
-let DIVISION='LIÈGE';
-let SIEGE={pres:'',jc1:'',jc2:'',gref:''};
+let SIEGE={juge:'',cons1:'',cons2:'',gref:''};
+let DIVISION='';
 const perCal={};
 const TEXT_FIELDS=new Set(['cDN','cDN2','cFN','cFN2','note','jtv']);
 const MF=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const DF=['Lu','Ma','Me','Je','Ve','Sa','Di'];
 const DEC_LBL={rc:'Remise contradictoire',rd:'Remise par défaut',jc:'Jugement contradictoire',jd:'Jugement par défaut',vc:'Renvoi au rôle',vd:'Renvoi au rôle (déf.)',ea:'Mise en état amiable',et:'Mise en état (tribunal)',ac:'Accord',co:'Conciliation OK',ca:'Pas de conciliation',cd:'Pas de conciliation'};
 
-// ══ SETUP ══
-function setDiv(div){
+function selDiv(div){
   DIVISION=div;
-  document.querySelectorAll('.div-btn').forEach(b=>b.classList.toggle('active',b.textContent.toUpperCase()===div));
+  document.querySelectorAll('.div-btn').forEach(b=>b.classList.toggle('sel',b.textContent.trim()===div));
+  document.getElementById('btn1').disabled=false;
+}
+function goStep(n){
+  [1,2,3].forEach(i=>{
+    document.getElementById('sc'+i).classList.toggle('active',i===n);
+    const s=document.getElementById('stp'+i);
+    s.classList.remove('active','done');
+    if(i===n)s.classList.add('active');
+    else if(i<n)s.classList.add('done');
+  });
 }
 
 function setStatus(type,msg){
@@ -318,37 +321,38 @@ async function analyze(){
   const txt=document.getElementById('paste-input').value.trim();
   if(!txt){showErr('Veuillez coller le texte de la feuille d\'audience');return;}
   SIEGE={
-    pres:document.getElementById('s-pres').value.trim(),
-    jc1:document.getElementById('s-jc1').value.trim(),
-    jc2:document.getElementById('s-jc2').value.trim(),
+    juge:document.getElementById('s-juge').value.trim(),
+    cons1:document.getElementById('s-cons1').value.trim(),
+    cons2:document.getElementById('s-cons2').value.trim(),
     gref:document.getElementById('s-gref').value.trim()
   };
   setStatus('loading','Analyse par l\'IA en cours…');
-  document.getElementById('analyze-btn').disabled=true;
+  document.getElementById('btn3').disabled=true;
   try{
-    const resp=await fetch('/api/analyze',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({content:txt})
-    });
+    const resp=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:txt})});
     const data=await resp.json();
     if(data.error)throw new Error(data.error);
     const raw=data.content.map(i=>i.text||'').join('').replace(/```json[\s\S]*?```|```/g,'').trim();
     const parsed=JSON.parse(raw);
     META=parsed.meta||{};
-    META.division='DIVISION '+DIVISION;
+    META.division=DIVISION;
     DOSSIERS=parsed.sections||[];
-    DOSSIERS.forEach(sec=>sec.items.forEach(d=>{if(typeof d.conc==='undefined')d.conc=(d.ref||'').startsWith('M/');}));
+    DOSSIERS.forEach(sec=>sec.items.forEach(d=>{
+      if(typeof d.conc==='undefined')d.conc=(d.ref||'').startsWith('M/');
+      // Normalise dem/def : si contient " / " on split en tableau
+      d.dems=d.dem?d.dem.split(/\s*\/\s*/).filter(Boolean):[d.dem||''];
+      d.defs=d.def?d.def.split(/\s*\/\s*/).filter(Boolean):[d.def||''];
+    }));
     launchApp();
   }catch(e){
     showErr(e.message||'Erreur lors de l\'analyse.');
-    document.getElementById('analyze-btn').disabled=false;
+    document.getElementById('btn3').disabled=false;
   }
 }
 
 function launchApp(){
   jugDate=null;initST();
-  document.getElementById('h-sub').textContent=`${META.tribunal||'TRIBUNAL DE L\'ENTREPRISE DE LIÈGE'} — ${META.division||''} — ${META.date||''}`;
+  document.getElementById('h-sub').textContent=`Tribunal de l'Entreprise de Liège — Division ${DIVISION} — ${META.date||''}`;
   document.getElementById('setup-screen').style.display='none';
   document.getElementById('main-app').style.display='block';
   renderAll();drawGC();
@@ -360,11 +364,12 @@ function newAud(){
   document.getElementById('main-app').style.display='none';
   document.getElementById('u-status').className='u-status';
   document.getElementById('paste-input').value='';
-  document.getElementById('analyze-btn').disabled=false;
-  DOSSIERS=[];jugDate=null;
+  document.getElementById('btn3').disabled=false;
+  goStep(1);DOSSIERS=[];jugDate=null;DIVISION='';
+  document.querySelectorAll('.div-btn').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('btn1').disabled=true;
 }
 
-// ══ STATE INIT ══
 function initST(){
   const n=new Date();gCalY=n.getFullYear();gCalM=n.getMonth();
   Object.keys(ST).forEach(k=>delete ST[k]);
@@ -374,7 +379,6 @@ function initST(){
   }));
 }
 
-// ══ CALENDRIER ══
 function fd(d){if(!d)return null;return`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;}
 
 function buildCal(id,sel,y,m,onSel,onNav){
@@ -416,38 +420,42 @@ document.addEventListener('click',function(e){
   document.querySelectorAll('.popover.open').forEach(p=>{const w=p.closest('.mc-wrap');if(w&&!w.contains(e.target))p.classList.remove('open');});
 });
 
-// ══ TEXTE JURIDIQUE ══
 function getDoss(num){for(const s of DOSSIERS)for(const d of s.items)if(d.num===num)return d;}
 function nid(n){return n.replace('.','_');}
 
-function personPhrase(type,name,name2,party){
-  if(type==='absent')return`Personne ne comparaît pour ${party}.`;
-  if(type==='personne')return`${name||party} comparaît en personne.`;
-  if(name2&&name2.trim())return`Maître ${name2.trim()} loco Maître ${name||'…'} comparaît pour ${party}.`;
-  return`Maître ${name||'…'} comparaît pour ${party}.`;
+function personPhrase(type,name,name2,parties){
+  // parties peut être un tableau
+  const partyStr=Array.isArray(parties)?parties.join(' et '):parties;
+  if(type==='absent')return`Personne ne comparaît pour ${partyStr}.`;
+  if(type==='personne')return`${name||partyStr} comparaît en personne.`;
+  if(name2&&name2.trim())return`Maître ${name2.trim()} loco Maître ${name||'…'} comparaît pour ${partyStr}.`;
+  return`Maître ${name||'…'} comparaît pour ${partyStr}.`;
 }
 
 function genText(num){
   const s=ST[num],d=getDoss(num),lines=[];
   if(!d)return'';
-  lines.push(personPhrase(s.cDT,s.cDN,s.cDN2,d.dem));
-  lines.push(personPhrase(s.cFT,s.cFN,s.cFN2,d.def));
+  const demParty=d.dems||[d.dem];
+  const defParty=d.defs||[d.def];
+  lines.push(personPhrase(s.cDT,s.cDN,s.cDN2,demParty));
+  lines.push(personPhrase(s.cFT,s.cFN,s.cFN2,defParty));
+  const demStr=demParty.join(' et '),defStr=defParty.join(' et ');
   const rd=s.remDate?fd(s.remDate):'[date à préciser]';
   const jd=jugDate?fd(jugDate):'[date des jugements]';
   if(s.dec==='rc')lines.push(`À la demande des parties qui comparaissent, l'affaire est remise au ${rd}.`);
   else if(s.dec==='rd'){
-    const pres=s.cDT!=='absent'?d.dem:d.def,abs=s.cDT==='absent'?d.dem:d.def;
+    const pres=s.cDT!=='absent'?demStr:defStr,abs=s.cDT==='absent'?demStr:defStr;
     lines.push(`À la demande de la partie ${pres}, l'affaire est remise au ${rd}.`);
     if(s.remPli)lines.push(`Elle sollicite l'envoi d'un pli judiciaire à ${abs}, conformément à l'article 803 C.j.`);
   }else if(s.dec==='jd'){
-    const abs=s.cDT==='absent'?d.dem:d.def;
-    const pn=s.cDT!=='absent'?(s.cDT==='personne'?(s.cDN||d.dem):(s.cDN2&&s.cDN2.trim()?`Maître ${s.cDN2.trim()} loco Maître ${s.cDN||'…'}`:`Maître ${s.cDN||'…'}`)): (s.cFT==='personne'?(s.cFN||d.def):(s.cFN2&&s.cFN2.trim()?`Maître ${s.cFN2.trim()} loco Maître ${s.cFN||'…'}`:`Maître ${s.cFN||'…'}`));
+    const abs=s.cDT==='absent'?demStr:defStr;
+    const pn=s.cDT!=='absent'?(s.cDT==='personne'?(s.cDN||demStr):(s.cDN2&&s.cDN2.trim()?`Maître ${s.cDN2.trim()} loco Maître ${s.cDN||'…'}`:`Maître ${s.cDN||'…'}`)): (s.cFT==='personne'?(s.cFN||defStr):(s.cFN2&&s.cFN2.trim()?`Maître ${s.cFN2.trim()} loco Maître ${s.cFN||'…'}`:`Maître ${s.cFN||'…'}`));
     lines.push(`La partie ${abs} est défaillante. ${pn} est entendu(e) et sollicite jugement par défaut. Il/Elle dépose son dossier de pièces ainsi que son état de dépens.`);
     lines.push(`Le tribunal clôt les débats et met la cause en délibéré. Un jugement sera prononcé le ${jd}.`);
   }else if(s.dec==='jc'){
     const em={conseils:'Leurs conseils sont entendus.',parties:'Les parties sont entendues.','cons-dem':'Le conseil de la demanderesse et la partie défenderesse sont entendus.','cons-def':'La partie demanderesse et le conseil de la défenderesse sont entendus.'};
     lines.push(em[s.jugEnt]||'Les parties sont entendues.');
-    const ds=s.cDT==='avocat'?`Le conseil de la demanderesse`:(s.cDN||d.dem);
+    const ds=s.cDT==='avocat'?`Le conseil de la demanderesse`:(s.cDN||demStr);
     let l=`${ds} sollicite jugement. Il/Elle dépose son dossier de pièces ainsi que son état de dépens.`;
     if(s.jugDD)l+=` Le conseil de la défenderesse dépose également son dossier de pièces.`;
     if(s.jugDC)l+=` La défenderesse conteste la demande.`;
@@ -455,12 +463,12 @@ function genText(num){
     lines.push(l);
     lines.push(`Le tribunal clôt les débats et met la cause en délibéré. Un jugement sera prononcé le ${jd}.`);
   }else if(s.dec==='vc')lines.push('Les parties sollicitent le renvoi au rôle.');
-  else if(s.dec==='vd')lines.push(`La partie ${s.cDT!=='absent'?d.dem:d.def} sollicite le renvoi au rôle.`);
+  else if(s.dec==='vd')lines.push(`La partie ${s.cDT!=='absent'?demStr:defStr} sollicite le renvoi au rôle.`);
   else if(s.dec==='ea')lines.push("Les parties déposent un calendrier de mise en état amiable. Une ordonnance de confirmation des délais et de fixation de la cause pour être plaidée sera prononcée ultérieurement.");
   else if(s.dec==='et')lines.push("Les parties sollicitent la mise en état et la fixation de la cause pour plaidoiries. Une ordonnance sera prononcée dans le délai légal.");
   else if(s.dec==='ac')lines.push(`Les parties sont parvenues à un accord et sollicitent qu'il leur en soit donné acte. La cause est plaidée. Un jugement sera prononcé le ${jd}.`);
   else if(s.dec==='co')lines.push('Un PV de conciliation est rédigé ce jour.');
-  else if(s.dec==='ca')lines.push(`La conciliation n'aboutit pas car la partie ${s.cDT==='absent'?d.dem:d.def} est défaillante.`);
+  else if(s.dec==='ca')lines.push(`La conciliation n'aboutit pas car la partie ${s.cDT==='absent'?demStr:defStr} est défaillante.`);
   else if(s.dec==='cd')lines.push("La conciliation n'aboutit pas car les parties ne sont pas parvenues à un accord.");
   if(s.note)lines.push(s.note);
   return lines.filter(Boolean).join('\n');
@@ -469,10 +477,12 @@ function genText(num){
 function updatePreview(num){const el=document.getElementById('pv-'+nid(num));if(el)el.textContent=genText(num)||'(aucune saisie)';}
 function refreshPreviews(){DOSSIERS.forEach(s=>s.items.forEach(d=>updatePreview(d.num)));}
 
-// ══ RENDU ══
 function renderCard(d){
   const s=ST[d.num],id=nid(d.num),dec=s.dec;
   const badge=s.done?`<span class="badge badge-d">✓ ${DEC_LBL[dec]||'—'}</span>`:`<span class="badge badge-p">En attente</span>`;
+  // affichage parties multiples
+  const demDisplay=(d.dems||[d.dem]).join(' / ');
+  const defDisplay=(d.defs||[d.def]).join(' / ');
   function cRow(side,type,name,name2){
     const lbl=side==='dem'?'▲ Dem.':'▼ Déf.';
     const nF=side==='dem'?'cDN':'cFN',n2F=side==='dem'?'cDN2':'cFN2',tF=side==='dem'?'cDT':'cFT';
@@ -482,8 +492,8 @@ function renderCard(d){
       <label class="check-row"><input type="checkbox" ${isAbs?'checked':''} onchange="upd('${d.num}','${tF}',this.checked?'absent':'avocat')"> Absent(e)</label>
       ${!isAbs?`<label class="check-row"><input type="checkbox" ${isPers?'checked':''} onchange="upd('${d.num}','${tF}',this.checked?'personne':'avocat')"> En personne</label>
         <input type="text" value="${name}" placeholder="${isPers?'Nom…':'Titulaire…'}" style="flex:1;min-width:100px" oninput="upd('${d.num}','${nF}',this.value)">
-        ${!isPers?`<input type="text" value="${name2}" placeholder="Remplaçant (optionnel)" style="flex:1;min-width:100px" oninput="upd('${d.num}','${n2F}',this.value)">`:''}`:
-      `<span style="font-size:.73rem;color:var(--muted);font-style:italic">Personne ne comparaît</span>`}
+        ${!isPers?`<input type="text" value="${name2}" placeholder="Remplaçant (opt.)" style="flex:1;min-width:100px" oninput="upd('${d.num}','${n2F}',this.value)">`:''}`:
+      `<span style="font-size:.75rem;color:var(--muted);font-style:italic">Personne ne comparaît</span>`}
     </div>`;
   }
   const decBtns=d.conc
@@ -519,13 +529,13 @@ function renderCard(d){
     </div>
     ${s.jugDT?`<div class="sub-row"><span class="sub-lbl">Type :</span>
       <select onchange="upd('${d.num}','jtt',this.value)"><option value="mens" ${s.jtt==='mens'?'selected':''}>x mensualités</option><option value="mnt" ${s.jtt==='mnt'?'selected':''}>montant €/mois</option></select>
-      <input type="text" value="${s.jtv}" placeholder="${s.jtt==='mens'?'Nombre':'Montant €'}" style="width:72px" oninput="upd('${d.num}','jtv',this.value)">
+      <input type="text" value="${s.jtv}" placeholder="${s.jtt==='mens'?'Nombre':'Montant €'}" style="width:75px" oninput="upd('${d.num}','jtv',this.value)">
     </div>`:''}
   </div>`;
   return`<div class="dossier-card ${s.done?'done':''}" id="card-${id}">
     <div class="c-head" onclick="toggleCard('${d.num}')">
       <span class="d-num">${d.num}</span><span class="d-ref">${d.ref}</span>
-      <div class="d-parties"><div class="d-dem">▲ ${d.dem}</div><div class="d-def">▼ ${d.def}</div></div>
+      <div class="d-parties"><div class="d-dem">▲ ${demDisplay}</div><div class="d-def">▼ ${defDisplay}</div></div>
       ${badge}<span class="chev">▾</span>
     </div>
     <div class="c-body">
@@ -590,38 +600,69 @@ function updateProg(){
   document.getElementById('prog-fill').style.width=`${all.length?done/all.length*100:0}%`;
 }
 
-// ══ EN-TÊTE COMMUN (feuille + PV) ══
-function buildSiege(){
-  const lines=[];
-  if(SIEGE.pres)lines.push(SIEGE.pres+', président de la chambre');
-  if(SIEGE.jc1)lines.push(SIEGE.jc1+', juge consulaire');
-  if(SIEGE.jc2)lines.push(SIEGE.jc2+', juge consulaire');
-  if(SIEGE.gref)lines.push(SIEGE.gref);
-  return lines;
+// ════ LOGO SVG (Cours et Tribunaux belges) ════
+function logoSVG(w){
+  // Reproduction fidèle du logo : lignes bleues courbes représentant le palais de justice
+  const h=Math.round(w*0.65);
+  return`<svg width="${w}" height="${h}" viewBox="0 0 160 104" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6ab0d4;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#1a5a8a;stop-opacity:1"/>
+    </linearGradient>
+  </defs>
+  <!-- lignes courbes stylisées du logo belge des cours et tribunaux -->
+  <g fill="none" stroke="url(#lg)" stroke-linecap="round">
+    <path d="M10,85 Q40,20 130,15" stroke-width="12" opacity="0.25"/>
+    <path d="M10,80 Q42,25 132,20" stroke-width="9" opacity="0.35"/>
+    <path d="M10,74 Q44,30 134,26" stroke-width="7" opacity="0.45"/>
+    <path d="M10,67 Q46,36 136,33" stroke-width="5.5" opacity="0.55"/>
+    <path d="M10,59 Q48,42 138,40" stroke-width="4.5" opacity="0.65"/>
+    <path d="M10,51 Q50,48 140,47" stroke-width="3.5" opacity="0.75"/>
+    <path d="M10,43 Q52,54 142,54" stroke-width="3" opacity="0.82"/>
+    <path d="M10,35 Q54,60 144,61" stroke-width="2.5" opacity="0.88"/>
+    <path d="M10,27 Q56,65 146,68" stroke-width="2" opacity="0.93"/>
+    <path d="M10,20 Q58,70 148,75" stroke-width="1.5" opacity="0.97"/>
+    <path d="M10,13 Q60,74 150,82" stroke-width="1.2" opacity="1"/>
+  </g>
+</svg>`;
 }
 
-function buildEntete(){
-  const siege=buildSiege();
-  return`<div class="pg-hd">
-    <div>TRIBUNAL DE L'ENTREPRISE DE LIÈGE</div>
-    <div>DIVISION ${DIVISION}</div>
-    <div>Feuille d'audience de la 1ère chambre — ${META.date||''}</div>
-  </div>
-  ${siege.length?`<div class="judges">${siege.map(l=>`<div>${l}</div>`).join('')}</div>`:''}
-  <div class="debut">${META.heure?`L'audience débute à ${META.heure}.`:''}</div>
-  ${jugDate?`<div class="jug-date">Date commune des jugements : ${fd(jugDate)}</div>`:''}`;
+// ════ EN-TÊTE PRINT ════
+function buildEntete(avecRep){
+  const annee=new Date().getFullYear();
+  const rep=avecRep?`<div style="text-align:right;font-size:9pt;font-weight:normal;margin-bottom:1mm">Rép. : ${String(annee).slice(-2)}/</div>`:'';
+  const siegeLines=[];
+  if(SIEGE.juge)siegeLines.push(`<strong>${SIEGE.juge}</strong>, juge, président de la chambre`);
+  if(SIEGE.cons1)siegeLines.push(`<strong>${SIEGE.cons1}</strong>, juge consulaire`);
+  if(SIEGE.cons2)siegeLines.push(`<strong>${SIEGE.cons2}</strong>, juge consulaire`);
+  if(SIEGE.gref)siegeLines.push(`<strong>${SIEGE.gref}</strong>, greffier`);
+  return`<table class="hd-table"><tr>
+    <td class="hd-logo">${logoSVG(110)}</td>
+    <td class="hd-right">${rep}<div class="hd-trib">TRIBUNAL DE L'ENTREPRISE DE LIÈGE</div><div class="hd-div">DIVISION ${DIVISION.toUpperCase()}</div></td>
+  </tr></table>
+  <div class="hd-line"></div>
+  <div class="hd-chambre">Feuille d'audience de la 1<sup>ère</sup> chambre – ${META.date||''}</div>
+  <div class="hd-line2"></div>
+  <div class="judges">${siegeLines.map(l=>`<div>${l}</div>`).join('')}</div>
+  <div class="hd-spacer"></div>`;
 }
 
-const PRINT_CSS=`
-@page{size:A4;margin:15mm 18mm;}
+function printCSS(){
+  return`@page{size:A4;margin:12mm 18mm;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:Aptos,Calibri,Arial,sans-serif;font-size:10pt;color:#000;background:white;}
-.pg-hd{text-align:right;margin-bottom:4mm;border-top:1.5pt solid #000;border-bottom:1.5pt solid #000;padding:3pt 0;}
-.pg-hd div{font-weight:bold;font-size:11pt;}
-.judges{margin-bottom:3mm;font-size:10pt;}.judges div{margin-bottom:1pt;}
-.debut{margin-bottom:4mm;font-size:10pt;}
-.jug-date{font-size:9pt;color:#555;font-style:italic;margin-bottom:4mm;text-align:center;}
-.sec-hd{font-weight:bold;font-size:10.5pt;text-transform:uppercase;letter-spacing:.05em;margin:5mm 0 2mm;border-bottom:.5pt solid #999;padding-bottom:1pt;}
+.hd-table{width:100%;border-collapse:collapse;margin-bottom:0;}
+.hd-logo{width:120pt;vertical-align:middle;padding:2pt 0;}
+.hd-right{text-align:right;vertical-align:middle;padding:2pt 0;}
+.hd-trib{font-size:11pt;font-weight:bold;}
+.hd-div{font-size:11pt;font-weight:bold;}
+.hd-line{border-top:1.5pt solid #000;margin:3mm 0 1.5mm;}
+.hd-chambre{font-size:10.5pt;font-weight:bold;margin-bottom:1.5mm;}
+.hd-line2{border-top:1pt solid #000;margin-bottom:2mm;}
+.judges{font-size:10pt;margin-bottom:1mm;}.judges div{margin-bottom:1pt;}
+.hd-spacer{height:4mm;}
+.sec-hd{font-weight:bold;font-size:10.5pt;text-transform:uppercase;letter-spacing:.05em;margin:4mm 0 2mm;border-bottom:.5pt solid #999;padding-bottom:1pt;}
 .doss{margin-bottom:4mm;page-break-inside:avoid;}
 .doss-hd{display:flex;align-items:baseline;gap:8pt;margin-bottom:1pt;font-size:10pt;}
 .dn{font-weight:bold;min-width:28pt;}.dr{font-weight:bold;min-width:70pt;}.dt{font-size:9pt;color:#444;}
@@ -632,67 +673,102 @@ body{font-family:Aptos,Calibri,Arial,sans-serif;font-size:10pt;color:#000;backgr
 .el{height:12pt;border-bottom:.5pt dotted #ccc;margin-bottom:4pt;}
 .pv-page{page-break-after:always;}
 .pv-page:last-child{page-break-after:auto;}
+sup{font-size:7pt;vertical-align:super;}
 @media print{.no-print{display:none!important}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
-.print-btn{position:fixed;bottom:20px;right:20px;background:#1a2744;color:white;border:none;padding:12px 24px;border-radius:8px;font-size:12pt;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.3);}`;
+.print-btn{position:fixed;bottom:20px;right:20px;background:#1a2744;color:white;border:none;padding:12px 24px;border-radius:8px;font-size:11pt;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.3);}`;
+}
 
-// ══ EXPORT FEUILLE ══
-function buildFeuilleHTML(){
+function partiesBloc(d){
+  const dems=d.dems||[d.dem];
+  const defs=d.defs||[d.def];
+  const avDem=d.avDem?` — <strong>${d.avDem}</strong>`:'';
+  const avDef=d.avDef?` — <strong>${d.avDef}</strong>`:'';
+  let html='<div class="parts">';
+  dems.forEach((nm,i)=>{html+=`<div><span class="pl">${i===0?'Dem)':''}</span>${i===0?` ${nm}${avDem}`:` ${nm}`}</div>`;});
+  defs.forEach((nm,i)=>{html+=`<div><span class="pl">${i===0?'Déf)':''}</span>${i===0?` ${nm}${avDef}`:` ${nm}`}</div>`;});
+  html+='</div>';
+  return html;
+}
+
+function dossBlocFA(d){
+  const txt=genText(d.num),lines=txt?txt.split('\n'):[],comp=lines.slice(0,2),dec=lines.slice(2);
+  return`<div class="doss">
+    <div class="doss-hd"><span class="dn">${d.num}</span><span class="dr">${d.ref}</span><span class="dt">${d.type||''}</span></div>
+    ${partiesBloc(d)}
+    <div class="aud-txt">${comp.map(l=>`<div class="cl">${l}</div>`).join('')}${dec.map(l=>`<div class="dl">${l}</div>`).join('')}${!txt?'<div class="el">&nbsp;</div><div class="el">&nbsp;</div>':''}</div>
+  </div>`;
+}
+
+function buildFA(){
   let body='';
   DOSSIERS.forEach(sec=>{
     body+=`<div class="sec-hd">${sec.section}</div>`;
-    sec.items.forEach(d=>{
-      const txt=genText(d.num),lines=txt?txt.split('\n'):[],comp=lines.slice(0,2),dec=lines.slice(2);
-      body+=`<div class="doss">
-        <div class="doss-hd"><span class="dn">${d.num}</span><span class="dr">${d.ref}</span><span class="dt">${d.type||''}</span></div>
-        <div class="parts"><div><span class="pl">Dem)</span> ${d.dem}${d.avDem?` — <strong>${d.avDem}</strong>`:''}</div>
-        <div><span class="pl">Déf)</span> ${d.def}${d.avDef?` — <strong>${d.avDef}</strong>`:''}</div></div>
-        <div class="aud-txt">${comp.map(l=>`<div class="cl">${l}</div>`).join('')}${dec.map(l=>`<div class="dl">${l}</div>`).join('')}${!txt?'<div class="el">&nbsp;</div><div class="el">&nbsp;</div>':''}</div>
-      </div>`;
-    });
+    sec.items.forEach(d=>{body+=dossBlocFA(d);});
   });
   return`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Feuille d'audience — ${META.date||''}</title>
-<style>${PRINT_CSS}</style></head><body>
-${buildEntete()}${body}
+<style>${printCSS()}</style></head><body>
+${buildEntete(true)}
+${jugDate?`<div style="text-align:center;font-size:9pt;color:#555;margin-bottom:3mm;font-style:italic">Date des jugements : ${fd(jugDate)}</div>`:''}
+${body}
 <button class="print-btn no-print" onclick="window.print()">🖨 Imprimer</button>
 </body></html>`;
 }
 
-// ══ EXPORT PV ══
-function buildPVHTML(tousLesDossiers=false){
-  const all=DOSSIERS.flatMap(s=>s.items);
-  const doss=tousLesDossiers?all:all.filter(d=>ST[d.num].done);
-  if(!doss.length)return null;
-  let pages='';
-  doss.forEach(d=>{
+function buildPV(){
+  const dossValides=DOSSIERS.flatMap(s=>s.items).filter(d=>ST[d.num]&&ST[d.num].done);
+  if(!dossValides.length)return null;
+  const pages=dossValides.map(d=>{
     const txt=genText(d.num),lines=txt?txt.split('\n'):[],comp=lines.slice(0,2),dec=lines.slice(2);
-    pages+=`<div class="pv-page">
-      ${buildEntete()}
-      <div class="doss" style="margin-top:6mm">
-        <div class="doss-hd"><span class="dn">${d.num}</span><span class="dr">${d.ref}</span><span class="dt">${d.type||''}</span></div>
-        <div class="parts"><div><span class="pl">Dem)</span> ${d.dem}${d.avDem?` — <strong>${d.avDem}</strong>`:''}</div>
-        <div><span class="pl">Déf)</span> ${d.def}${d.avDef?` — <strong>${d.avDef}</strong>`:''}</div></div>
-        <div class="aud-txt">${comp.map(l=>`<div class="cl">${l}</div>`).join('')}${dec.map(l=>`<div class="dl">${l}</div>`).join('')}${!txt?'<div class="el">&nbsp;</div><div class="el">&nbsp;</div>':''}</div>
+    return`<div class="pv-page">
+      ${buildEntete(false)}
+      <div class="doss-hd"><span class="dn">${d.num}</span><span class="dr">${d.ref}</span><span class="dt">${d.type||''}</span></div>
+      ${partiesBloc(d)}
+      <div class="aud-txt" style="margin-top:3mm">
+        ${comp.map(l=>`<div class="cl">${l}</div>`).join('')}
+        ${dec.map(l=>`<div class="dl">${l}</div>`).join('')}
       </div>
     </div>`;
-  });
-  return`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>PV d'audience — ${META.date||''}</title>
-<style>${PRINT_CSS}</style></head><body>
+  }).join('');
+  return`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>PV — ${META.date||''}</title>
+<style>${printCSS()}</style></head><body>
 ${pages}
 <button class="print-btn no-print" onclick="window.print()">🖨 Imprimer</button>
 </body></html>`;
+}
+
+function buildAll(){
+  const fa=buildFA();
+  const pvPart=DOSSIERS.flatMap(s=>s.items).filter(d=>ST[d.num]&&ST[d.num].done).map(d=>{
+    const txt=genText(d.num),lines=txt?txt.split('\n'):[],comp=lines.slice(0,2),dec=lines.slice(2);
+    return`<div class="pv-page">
+      ${buildEntete(false)}
+      <div class="doss-hd"><span class="dn">${d.num}</span><span class="dr">${d.ref}</span><span class="dt">${d.type||''}</span></div>
+      ${partiesBloc(d)}
+      <div class="aud-txt" style="margin-top:3mm">
+        ${comp.map(l=>`<div class="cl">${l}</div>`).join('')}
+        ${dec.map(l=>`<div class="dl">${l}</div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  return fa.replace('</body></html>',pvPart+'</body></html>');
 }
 
 function openExport(){document.getElementById('exp-modal').classList.add('open');}
 function closeExport(){document.getElementById('exp-modal').classList.remove('open');}
 document.getElementById('exp-modal').addEventListener('click',function(e){if(e.target===this)closeExport();});
 
-function printFeuille(){
-  const win=window.open('','_blank');win.document.write(buildFeuilleHTML());win.document.close();win.focus();
+function getHTML(type){
+  if(type==='fa')return buildFA();
+  if(type==='pv'){const h=buildPV();if(!h){alert('Aucun dossier validé. Validez au moins un dossier pour générer les PV.');return null;}return h;}
+  if(type==='all')return buildAll();
 }
-function printPV(tous=false){
-  const html=buildPVHTML(tous);
-  if(!html){alert('Aucun dossier validé à exporter.');return;}
-  const win=window.open('','_blank');win.document.write(html);win.document.close();win.focus();
+function printDirect(type){const html=getHTML(type);if(!html)return;const win=window.open('','_blank');win.document.write(html);win.document.close();win.focus();}
+function dlHtml(type){
+  const html=getHTML(type);if(!html)return;
+  const suffix=type==='fa'?'feuille':type==='pv'?'PV':'complet';
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=`audience_${suffix}_${(META.date||'').replace(/\s+/g,'-')}.html`;a.click();URL.revokeObjectURL(url);
 }
 </script>
 </body>
