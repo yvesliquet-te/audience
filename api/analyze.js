@@ -18,6 +18,8 @@ module.exports = async function handler(req, res) {
 
     if (!texte) return res.status(400).json({ error: 'Contenu manquant' });
 
+    console.log('TEXTE EXTRAIT:', texte.substring(0, 500));
+
     const prompt = `Extrais les données de cette feuille d'audience judiciaire belge et retourne UNIQUEMENT ce JSON brut, sans markdown, sans explication :
 {
   "meta":{"tribunal":"...","division":"...","date":"...","heure":"...","juges":["..."]},
