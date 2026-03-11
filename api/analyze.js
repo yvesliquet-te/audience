@@ -11,25 +11,38 @@ module.exports = async function handler(req, res) {
 
     const prompt = `Extrais les données de cette feuille d'audience judiciaire belge et retourne UNIQUEMENT ce JSON brut, sans markdown, sans explication.
 
-RÈGLES IMPORTANTES :
-- "dem" et "def" peuvent contenir PLUSIEURS parties séparées par " / "
-- Exemple : si on voit "Déf) SCIARRABBA BIANCA" suivi de "MUTZHAGEN SRL - Me. ORBAN JUDITH" sur la ligne suivante (sans "Déf)"), ce sont deux défendeurs : def = "SCIARRABBA BIANCA / MUTZHAGEN SRL"
-- "avDem" et "avDef" : prendre le dernier avocat mentionné (celui du dernier défendeur/demandeur si plusieurs)
-- conc = true si la référence commence par M/
-- Inclure TOUS les dossiers sans exception
+RÈGLES CRITIQUES pour dem / def / avDem / avDef :
 
-Format JSON attendu :
+1. Il peut y avoir PLUSIEURS demandeurs ou défendeurs. Dans ce cas :
+   - "dem" contient tous les demandeurs séparés par " / "  ex: "DUPONT SA / MARTIN SRL"
+   - "def" contient tous les défendeurs séparés par " / "  ex: "DURAND / LEBLANC"
+
+2. "avDem" et "avDef" doivent être alignés position par position sur "dem" et "def" :
+   - Un avocat par partie, séparés par " / "
+   - Si une partie n'a PAS d'avocat mentionné, mettre une chaîne VIDE à sa position
+   - Exemple : def = "SCIARRABBA BIANCA / MUTZHAGEN SRL"
+               avDef = " / Me. ORBAN JUDITH"   ← SCIARRABBA sans avocat, MUTZHAGEN avec
+   - Exemple : dem = "DUPONT / MARTIN"
+               avDem = "Me. SMITH / Me. JONES"  ← un avocat par demandeur
+
+3. conc = true si la référence commence par M/
+
+4. Inclure TOUS les dossiers sans exception.
+
+5. Les lignes sans "Dem)" ou "Déf)" qui suivent une ligne de parties appartiennent au même groupe.
+
+Format JSON :
 {
   "meta": {"tribunal":"...","division":"...","date":"...","heure":"...","juges":["..."]},
   "sections": [{"section":"NOM SECTION","items":[{
     "num":"1.1",
     "ref":"A/26/00061",
-    "type":"description courte",
+    "type":"...",
     "conc": false,
-    "dem": "NOM DEMANDEUR ou NOM1 / NOM2 si plusieurs",
-    "avDem": "Me NOM ou vide",
-    "def": "NOM DÉFENDEUR ou NOM1 / NOM2 si plusieurs",
-    "avDef": "Me NOM ou vide"
+    "dem": "NOM1 / NOM2 si plusieurs",
+    "avDem": "Me NOM1 / Me NOM2 (vide si absent, aligné sur dem)",
+    "def": "NOM1 / NOM2 si plusieurs",
+    "avDef": "Me NOM1 / Me NOM2 (vide si absent, aligné sur def)"
   }]}]
 }
 
