@@ -647,7 +647,7 @@ function renderCard(d){
       <input type="text" value="${s.jtv}" placeholder="${s.jtt==='mens'?'Nombre':'Montant €'}" style="width:75px" oninput="upd('${d.num}','jtv',this.value)">
     </div>`:''}
   </div>`;
-  return`<div class="dossier-card ${s.done?'done':''}" id="card-${id}">
+  return`<div class="dossier-card ${s.done?'done':''}" id="card-${id}" data-num="${d.num}">
     <div class="c-head" onclick="toggleCard('${d.num}')">
       <span class="d-num">${d.num}</span><span class="d-ref">${d.ref}</span>
       <div class="d-parties"><div class="d-dem">▲ ${(d.dems||[d.dem]).join(' / ')}</div><div class="d-def">▼ ${(d.defs||[d.def]).join(' / ')}</div></div>
