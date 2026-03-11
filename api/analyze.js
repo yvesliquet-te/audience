@@ -31,3 +31,32 @@ module.exports = async function handler(req, res) {
       '"num":"1.1","ref":"A/26/00061","type":"...","conc":false,' +
       '"dem":"NOM1 / NOM2 si plusieurs",' +
       '"avDem":"Me NOM1 / (vide si absent) — aligne sur dem",' +
+      '"def":"NOM1 / NOM2 si plusieurs",' +
+      '"avDef":"Me NOM1 / (vide si absent) — aligne sur def"' +
+      '}]}]}\n\n' +
+      "FEUILLE D'AUDIENCE :\n" +
+      content;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 16000,
+        system: "Tu es un extracteur de données JSON pour feuilles d'audience judiciaires belges. Tu réponds TOUJOURS et UNIQUEMENT avec du JSON brut valide, sans markdown, sans explication, sans refus.",
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+    if (data.error) return res.status(500).json({ error: data.error.message });
+    res.status(200).json(data);
+
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Erreur serveur' });
+  }
+};
