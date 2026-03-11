@@ -306,6 +306,9 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
     <span style="opacity:.4;font-size:.73rem">— jugements et accords</span>
   </div>
 
+  <div style="padding:4px 16px 8px">
+    <button id="btn-filter" onclick="toggleFilter()" style="font-size:.78rem;padding:5px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:white;cursor:pointer">👁 Afficher uniquement les non validés</button>
+  </div>
   <div id="app-body"></div>
 
   <!-- EXPORT MODAL -->
@@ -673,9 +676,9 @@ function toggleFilter(){
   renderAll();
 }
 function applyFilter(){
-  document.querySelectorAll('.dossier-card').forEach(el=>{
+  document.querySelectorAll('[data-num]').forEach(el=>{
     const num=el.getAttribute('data-num');
-    el.style.display=(FILTER_DONE&&ST[num]&&ST[num].done)?'none':'';
+    if(num)el.style.display=(FILTER_DONE&&ST[num]&&ST[num].done)?'none':'';
   });
 }
 function renderAll(){
