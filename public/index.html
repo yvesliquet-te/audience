@@ -306,8 +306,8 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
     <span style="opacity:.4;font-size:.73rem">— jugements et accords</span>
   </div>
 
-  <div style="padding:4px 16px 8px">
-    <button id="btn-filter" onclick="toggleFilter()" style="font-size:.78rem;padding:5px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:white;cursor:pointer">👁 Afficher uniquement les non validés</button>
+  <div style="padding:8px 16px">
+    <button id="btn-filter" onclick="toggleFilter()" style="font-size:.78rem;padding:5px 14px;border-radius:20px;border:1px solid #bbb;background:white;color:#1a2744;cursor:pointer;font-weight:500">👁 Afficher uniquement les non validés</button>
   </div>
   <div id="app-body"></div>
 
@@ -660,8 +660,8 @@ function renderCard(d){
       <div class="preview" id="pv-${id}">(aucune saisie)</div>
       <div class="note-area"><label>📝 Note libre</label><textarea oninput="upd('${d.num}','note',this.value)">${s.note}</textarea></div>
       <div class="c-foot">
-        <button class="btn-rst" onclick="rstCard('${d.num}')">↺ Réinitialiser</button>
-        <button class="btn-val" onclick="valider('${d.num}')">✓ Valider</button>
+        <button class="btn-val" onclick="valider('${d.num}')">${s.done?'✓ Validé':'✓ Valider'}</button>
+        <button class="btn-rst" onclick="modCard('${d.num}')">✏ Modifier</button>
       </div>
     </div>
   </div>`;
@@ -720,6 +720,13 @@ function valider(num){
   const all=DOSSIERS.flatMap(s=>s.items.map(d=>d.num));
   const next=all.slice(all.indexOf(num)+1).find(n=>!ST[n].done);
   if(next)setTimeout(()=>{toggleCard(next);document.getElementById('card-'+nid(next))?.scrollIntoView({behavior:'smooth',block:'center'});},80);
+}
+function modCard(num){
+  // Rouvre la carte sans effacer les données
+  ST[num].done=false;
+  replaceCard(num,true);
+  updateProg();
+  autoSave();
 }
 function rstCard(num){
   const d=getDoss(num);
