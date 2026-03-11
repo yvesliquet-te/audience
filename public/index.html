@@ -127,6 +127,7 @@ body{background:var(--cream);color:var(--text);font-family:'DM Sans',sans-serif;
 .dossier-card.open .c-head:hover{background:rgba(255,255,255,.4);}
 .dossier-card.open .c-body{background:white;border-radius:0 0 8px 8px;}
 .dossier-card.open .chev{transform:rotate(180deg);}
+.dec-group{display:flex;flex-direction:column;gap:4px;}
 .c-body{display:none;padding:13px 14px 16px;border-top:1px solid var(--cream-d);}
 .dossier-card.open .c-body{display:block;}
 
@@ -140,7 +141,6 @@ select,input[type=text]{border:1.5px solid var(--cream-dd);border-radius:5px;pad
 select:focus,input:focus{outline:none;border-color:var(--navy);background:white;}
 
 .dec-btns{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:11px;}
-.dec-group{display:flex;flex-direction:column;gap:4px;}
 .dbtn{border:1.5px solid;border-radius:6px;padding:5px 11px;font-family:'DM Sans',sans-serif;font-size:.77rem;font-weight:500;cursor:pointer;transition:all .15s;background:white;line-height:1.3;}
 .dbtn:active{transform:scale(.97);}
 .db-rc{border-color:#b8950a;color:#7a6010;}.db-rc.act{background:#fef3b0;font-weight:700;}
@@ -292,11 +292,12 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
     </div>
     <div class="h-right">
       <div class="prog"><span id="prog-txt">0/0</span><div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div></div>
-      <span id="autosave-lbl" style="font-size:.68rem;color:rgba(255,255,255,.35);margin-right:2px"></span><button class="btn btn-ghost" onclick="saveJSON()" title="Sauvegarder">💾</button><button class="btn btn-ghost" onclick="document.getElementById('json-input').click()" title="Reprendre session">📂</button><input type="file" id="json-input" accept=".json" style="display:none" onchange="loadJSON(event)"><button class="btn btn-gold" onclick="openExport()">⬇ Exporter</button>
+      <span id="autosave-lbl" style="font-size:.68rem;color:rgba(255,255,255,.35);margin-right:2px"></span><button class="btn btn-ghost" onclick="saveJSON()" title="Sauvegarder">💾</button><button class="btn btn-ghost" onclick="document.getElementById('json-input').click()" title="Reprendre">📂</button><input type="file" id="json-input" accept=".json" style="display:none" onchange="loadJSON(event)"><button class="btn btn-gold" onclick="openExport()">⬇ Exporter</button>
       <button class="btn btn-ghost" onclick="newAud()">↩ Nouvelle audience</button>
     </div>
   </div>
 
+  <div style="padding:8px 16px 4px"><button id="btn-filter" onclick="toggleFilter()" style="font-size:.78rem;padding:5px 14px;border-radius:20px;border:1px solid #bbb;background:white;color:#1a2744;cursor:pointer;font-weight:500">👁 Afficher uniquement les non validés</button></div>
   <div class="jug-global">
     <label>📅 Date commune des jugements :</label>
     <div class="mc-wrap" id="gc-wrap">
@@ -306,9 +307,6 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
     <span style="opacity:.4;font-size:.73rem">— jugements et accords</span>
   </div>
 
-  <div style="padding:8px 16px">
-    <button id="btn-filter" onclick="toggleFilter()" style="font-size:.78rem;padding:5px 14px;border-radius:20px;border:1px solid #bbb;background:white;color:#1a2744;cursor:pointer;font-weight:500">👁 Afficher uniquement les non validés</button>
-  </div>
   <div id="app-body"></div>
 
   <!-- EXPORT MODAL -->
@@ -457,11 +455,11 @@ function initST(){
   const n=new Date();gCalY=n.getFullYear();gCalM=n.getMonth();
   Object.keys(ST).forEach(k=>delete ST[k]);
   DOSSIERS.forEach(sec=>sec.items.forEach(d=>{
-    const _avDems=(d.avDem||'').split('/').map(s=>s.trim());
-    const _avDefs=(d.avDef||'').split('/').map(s=>s.trim());
+    const _ad=(d.avDem||'').split('/').map(s=>s.trim());
+    const _af=(d.avDef||'').split('/').map(s=>s.trim());
     ST[d.num]={
-      dem:(d.dems||[d.dem||'']).map((nm,i)=>({type:_avDems[i]?'avocat':'absent',name:_avDems[i]||'',loco:''})),
-      def:(d.defs||[d.def||'']).map((nm,i)=>({type:_avDefs[i]?'avocat':'absent',name:_avDefs[i]||'',loco:''})),
+      dem:(d.dems||[d.dem||'']).map((nm,i)=>({type:_ad[i]?'avocat':'absent',name:_ad[i]||'',loco:''})),
+      def:(d.defs||[d.def||'']).map((nm,i)=>({type:_af[i]?'avocat':'absent',name:_af[i]||'',loco:''})),
       dec:null,remDate:null,remPli:false,jugEnt:'conseils',jugDD:false,jugDC:false,jugDT:false,jtt:'mens',jtv:'',note:'',done:false};
   }));
 }
@@ -516,23 +514,28 @@ document.addEventListener('click',function(e){
 function getDoss(num){for(const s of DOSSIERS)for(const d of s.items)if(d.num===num)return d;}
 function nid(n){return n.replace('.','_');}
 
+function stripMe(s){return (s||'').replace(/^(Maître|Me\.?|M\.?)\s*/i,'').trim();}
 function personPhrase(comp,party){
   if(comp.type==='absent')return`Personne ne comparaît pour ${party}.`;
   if(comp.type==='personne')return`${comp.name||party} comparaît en personne.`;
-  if(comp.loco&&comp.loco.trim())return`Maître ${comp.loco.trim()} loco Maître ${comp.name||'…'} comparaît pour ${party}.`;
-  return`Maître ${comp.name||'…'} comparaît pour ${party}.`;
+  if(comp.loco&&comp.loco.trim())return`Maître ${stripMe(comp.loco)} loco Maître ${stripMe(comp.name)||'…'} comparaît pour ${party}.`;
+  return`Maître ${stripMe(comp.name)||'…'} comparaît pour ${party}.`;
 }
 
 function genText(num){
   const s=ST[num],d=getDoss(num),lines=[];
   if(!d)return'';
   const dems=d.dems||[d.dem||''],defs=d.defs||[d.def||''];
-  dems.forEach((nm,i)=>{const c=s.dem[i]||{type:'absent',name:'',loco:''};lines.push(personPhrase(c,nm));});
-  defs.forEach((nm,i)=>{const c=s.def[i]||{type:'absent',name:'',loco:''};lines.push(personPhrase(c,nm));});
+  dems.forEach((nm,i)=>{const cp=s.dem[i]||{type:'absent',name:'',loco:''};lines.push(personPhrase(cp,nm));});
+  defs.forEach((nm,i)=>{const cp=s.def[i]||{type:'absent',name:'',loco:''};lines.push(personPhrase(cp,nm));});
   const demStr=dems.join(' et '),defStr=defs.join(' et ');
-  const demAbsent=s.dem.every(c=>c.type==='absent'),defAbsent=s.def.every(c=>c.type==='absent');
-  const demComp=s.dem.find(c=>c.type!=='absent'),defComp=s.def.find(c=>c.type!=='absent');
-  function nomComp(c,party){if(!c)return party;if(c.type==='personne')return c.name||party;if(c.loco&&c.loco.trim())return'Maître '+c.loco.trim()+' loco Maître '+(c.name||'…');return'Maître '+(c.name||'…');}
+  const demAbsent=s.dem.every(cp=>cp.type==='absent');
+  const demComp=s.dem.find(cp=>cp.type!=='absent'),defComp=s.def.find(cp=>cp.type!=='absent');
+  function nomComp(cp,party){
+    if(!cp)return party;
+    if(cp.type==='personne')return cp.name||party;
+    if(cp.loco&&cp.loco.trim())return'Maître '+stripMe(cp.loco)+' loco Maître '+(stripMe(cp.name)||'…');
+    return'Maître '+(stripMe(cp.name)||'…');}
   const rd=s.remDate?fd(s.remDate):'[date à préciser]';
   const jd=jugDate?fd(jugDate):'[date des jugements]';
   if(s.dec==='rc'){if(s.note)lines.push(s.note);lines.push(`À la demande des parties qui comparaissent, l'affaire est remise au ${rd}.`);}
@@ -542,8 +545,8 @@ function genText(num){
     lines.push(`À la demande de la partie ${pres}, l'affaire est remise au ${rd}.`);
     if(s.remPli)lines.push(`Elle sollicite l'envoi d'un pli judiciaire à ${abs}, conformément à l'article 803 C.j.`);
   }else if(s.dec==='jd'){
-    const abs=demAbsent?demStr:defStr,pn=nomComp(demAbsent?defComp:demComp,demAbsent?defStr:demStr);
-    lines.push(`La partie ${abs} est défaillante. ${pn} est entendu(e) et sollicite jugement par défaut. Il/Elle dépose son dossier de pièces ainsi que son état de dépens.`);
+    const abs2=demAbsent?demStr:defStr,pn=nomComp(demAbsent?defComp:demComp,demAbsent?defStr:demStr);
+    lines.push(`La partie ${abs2} est défaillante. ${pn} est entendu(e) et sollicite jugement par défaut. Il/Elle dépose son dossier de pièces ainsi que son état de dépens.`);
     if(s.note)lines.push(s.note);
     lines.push(`Le tribunal clôt les débats et met la cause en délibéré. Un jugement sera prononcé le ${jd}.`);
   }else if(s.dec==='jc'){
@@ -557,15 +560,14 @@ function genText(num){
     lines.push(l);
     if(s.note)lines.push(s.note);
     lines.push(`Le tribunal clôt les débats et met la cause en délibéré. Un jugement sera prononcé le ${jd}.`);
-  }else if(s.dec==='vc')lines.push('Les parties sollicitent le renvoi au rôle.');
-  else if(s.dec==='vd'){if(s.note)lines.push(s.note);lines.push('La partie '+(demAbsent?defStr:demStr)+' sollicite le renvoi au rôle.');}
+  }else if(s.dec==='vc'){if(s.note)lines.push(s.note);lines.push('Les parties sollicitent le renvoi au rôle.');}
+  else if(s.dec==='vd'){if(s.note)lines.push(s.note);lines.push('La partie '+(!demAbsent?demStr:defStr)+' sollicite le renvoi au rôle.');}
   else if(s.dec==='ea'){lines.push("Les parties déposent un calendrier de mise en état amiable. Une ordonnance de confirmation des délais et de fixation de la cause pour être plaidée sera prononcée ultérieurement.");if(s.note)lines.push(s.note);}
   else if(s.dec==='et'){lines.push("Les parties sollicitent la mise en état et la fixation de la cause pour plaidoiries. Une ordonnance sera prononcée dans le délai légal.");if(s.note)lines.push(s.note);}
   else if(s.dec==='ac'){lines.push(`Les parties sont parvenues à un accord et sollicitent qu'il leur en soit donné acte.`);if(s.note)lines.push(s.note);lines.push(`La cause est plaidée. Un jugement sera prononcé le ${jd}.`);}
   else if(s.dec==='co'){lines.push('Un PV de conciliation est rédigé ce jour.');if(s.note)lines.push(s.note);}
   else if(s.dec==='ca'){lines.push("La conciliation n'aboutit pas car la partie "+(demAbsent?demStr:defStr)+" est défaillante.");if(s.note)lines.push(s.note);}
   else if(s.dec==='cd'){lines.push("La conciliation n'aboutit pas car les parties ne sont pas parvenues à un accord.");if(s.note)lines.push(s.note);}
-  // note déjà insérée au bon endroit dans chaque branche — ne pas rajouter ici
   return lines.filter(Boolean).join('\n');
 }
 
@@ -660,27 +662,15 @@ function renderCard(d){
       <div class="preview" id="pv-${id}">(aucune saisie)</div>
       <div class="note-area"><label>📝 Note libre</label><textarea oninput="upd('${d.num}','note',this.value)">${s.note}</textarea></div>
       <div class="c-foot">
-        <button class="btn-val" onclick="valider('${d.num}')">${s.done?'✓ Validé':'✓ Valider'}</button>
-        <button class="btn-rst" onclick="modCard('${d.num}')">✏ Modifier</button>
+        <div style="display:flex;gap:6px">
+          <button class="btn-val" onclick="valider('${d.num}')">${s.done?'✓ Validé':'✓ Valider'}</button>
+          <button class="btn-rst" onclick="modCard('${d.num}')">✏ Modifier</button>
+        </div>
       </div>
     </div>
   </div>`;
 }
 
-
-function toggleFilter(){
-  FILTER_DONE=!FILTER_DONE;
-  const btn=document.getElementById('btn-filter');
-  btn.textContent=FILTER_DONE?'👁 Afficher tout':'👁 Afficher uniquement les non validés';
-  btn.style.background=FILTER_DONE?'rgba(255,200,0,.25)':'rgba(255,255,255,.1)';
-  renderAll();
-}
-function applyFilter(){
-  document.querySelectorAll('[data-num]').forEach(el=>{
-    const num=el.getAttribute('data-num');
-    if(num)el.style.display=(FILTER_DONE&&ST[num]&&ST[num].done)?'none':'';
-  });
-}
 function renderAll(){
   let html='';
   DOSSIERS.forEach(sec=>{
@@ -708,6 +698,9 @@ function updComp(num,side,i,prop,value){
   if(prop==='name'||prop==='loco'){updatePreview(num);clearTimeout(updComp._t);updComp._t=setTimeout(autoSave,1200);}
   else{replaceCard(num,true);autoSave();}
 }
+function modCard(num){
+  ST[num].done=false;replaceCard(num,true);updateProg();autoSave();
+}
 function setDec(num,dec){ST[num].dec=dec;replaceCard(num,true);updatePreview(num);autoSave();}
 function toggleCard(num){
   const el=document.getElementById('card-'+nid(num));if(!el)return;
@@ -721,20 +714,13 @@ function valider(num){
   const next=all.slice(all.indexOf(num)+1).find(n=>!ST[n].done);
   if(next)setTimeout(()=>{toggleCard(next);document.getElementById('card-'+nid(next))?.scrollIntoView({behavior:'smooth',block:'center'});},80);
 }
-function modCard(num){
-  // Rouvre la carte sans effacer les données
-  ST[num].done=false;
-  replaceCard(num,true);
-  updateProg();
-  autoSave();
-}
 function rstCard(num){
   const d=getDoss(num);
-  const _avDems2=(d.avDem||'').split('/').map(s=>s.trim());
-  const _avDefs2=(d.avDef||'').split('/').map(s=>s.trim());
+  const _ad2=(d.avDem||'').split('/').map(s=>s.trim());
+  const _af2=(d.avDef||'').split('/').map(s=>s.trim());
   ST[num]={
-    dem:(d.dems||[d.dem||'']).map((nm,i)=>({type:_avDems2[i]?'avocat':'absent',name:_avDems2[i]||'',loco:''})),
-    def:(d.defs||[d.def||'']).map((nm,i)=>({type:_avDefs2[i]?'avocat':'absent',name:_avDefs2[i]||'',loco:''})),
+    dem:(d.dems||[d.dem||'']).map((nm,i)=>({type:_ad2[i]?'avocat':'absent',name:_ad2[i]||'',loco:''})),
+    def:(d.defs||[d.def||'']).map((nm,i)=>({type:_af2[i]?'avocat':'absent',name:_af2[i]||'',loco:''})),
     dec:null,remDate:null,remPli:false,jugEnt:'conseils',jugDD:false,jugDC:false,jugDT:false,jtt:'mens',jtv:'',note:'',done:false};
   replaceCard(num,true);updateProg();
 }
@@ -750,11 +736,7 @@ function updateProg(){
 function logoSVG(w){
   const h=Math.round(w*.62);
   return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 160 99" xmlns="http://www.w3.org/2000/svg">'
-  +'<defs><linearGradient id="lgg" x1="0%" y1="0%" x2="100%" y2="0%">'
-  +'<stop offset="0%" style="stop-color:#4a9cc8"/>'
-  +'<stop offset="55%" style="stop-color:#2878aa"/>'
-  +'<stop offset="100%" style="stop-color:#1a5a8a;stop-opacity:.1"/>'
-  +'</linearGradient></defs>'
+  +'<defs><linearGradient id="lgg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#4a9cc8"/><stop offset="55%" style="stop-color:#2878aa"/><stop offset="100%" style="stop-color:#1a5a8a;stop-opacity:.1"/></linearGradient></defs>'
   +'<g fill="none" stroke="url(#lgg)" stroke-linecap="round">'
   +'<path d="M3,95 L55,95 Q80,94 100,82 Q120,68 155,65" stroke-width="1.1" opacity=".40"/>'
   +'<path d="M3,91 L54,91 Q78,89 98,76 Q118,61 154,57" stroke-width="1.2" opacity=".48"/>'
@@ -780,14 +762,11 @@ function buildEntete(avecRep){
   if(SIEGE.cons1)siegeLines.push('<strong>'+SIEGE.cons1+'</strong>, juge consulaire');
   if(SIEGE.cons2)siegeLines.push('<strong>'+SIEGE.cons2+'</strong>, juge consulaire');
   if(SIEGE.gref)siegeLines.push('<strong>'+SIEGE.gref+'</strong>, greffier');
-  return '<table class="hd-table"><tr>'
-    +'<td class="hd-logo">'+logoSVG(110)+'</td>'
+  return '<table class="hd-table"><tr><td class="hd-logo">'+logoSVG(110)+'</td>'
     +'<td class="hd-right">'+rep+'<div class="hd-trib">TRIBUNAL DE L’ENTREPRISE DE LIÈGE</div><div class="hd-div">DIVISION '+DIVISION.toUpperCase()+'</div></td>'
     +'</tr></table>'
-    +'<div class="hd-line"></div>'
-    +'<div class="hd-chambre">Feuille d’audience de la 1<sup>ère</sup> chambre – '+(META.date||'')+'</div>'
-    +'<div class="hd-line2"></div>'
-    +'<div class="judges">'+siegeLines.map(l=>'<div>'+l+'</div>').join('')+'</div>'
+    +'<div class="hd-line"></div><div class="hd-chambre">Feuille d’audience de la 1<sup>ère</sup> chambre – '+(META.date||'')+'</div>'
+    +'<div class="hd-line2"></div><div class="judges">'+siegeLines.map(l=>'<div>'+l+'</div>').join('')+'</div>'
     +'<div class="hd-spacer"></div>';}
 
 function printCSS(){
@@ -823,15 +802,7 @@ function dossBlocFA(d){
   const txt=genText(d.num),lines=txt?txt.split('\n'):[],comp=lines.slice(0,2),dec=lines.slice(2);
   return`<div class="doss">
     <div class="doss-hd"><span class="dn">${d.num}</span><span class="dr">${d.ref}</span><span class="dt">${d.type||''}</span></div>
-    ${(()=>{const dd=d.dems||[d.dem||""],df=d.defs||[d.def||""];
-      let h='<div class="parts">';
-      dd.forEach((nm,i)=>{const c=(ST[d.num]&&ST[d.num].dem[i])||{type:"absent",name:"",loco:""};
-        const av=c.type==="absent"?"":c.loco?" — <strong>Me "+c.loco+" loco Me "+c.name+"</strong>":c.name?" — <strong>Me "+c.name+"</strong>":"";
-        h+=`<div><span class="pl">Dem)</span> ${nm}${av}${c.type==="absent"?" — <em>absent(e)</em>":""}</div>`;});
-      df.forEach((nm,i)=>{const c=(ST[d.num]&&ST[d.num].def[i])||{type:"absent",name:"",loco:""};
-        const av=c.type==="absent"?"":c.loco?" — <strong>Me "+c.loco+" loco Me "+c.name+"</strong>":c.name?" — <strong>Me "+c.name+"</strong>":"";
-        h+=`<div><span class="pl">Déf)</span> ${nm}${av}${c.type==="absent"?" — <em>absent(e)</em>":""}</div>`;});
-      return h+"</div>";})()}
+    ${(()=>{const dd=d.dems||[d.dem||''],df=d.defs||[d.def||''];let h='<div class="parts">';dd.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].dem[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';h+=`<div><span class="pl">Dem)</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});df.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].def[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';h+=`<div><span class="pl">Déf)</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});return h+'</div>';})()}
     <div class="aud-txt">${comp.map(l=>`<div class="cl">${l}</div>`).join('')}${dec.map(l=>`<div class="dl">${l}</div>`).join('')}${!txt?'<div class="el">&nbsp;</div><div class="el">&nbsp;</div>':''}</div>
   </div>`;
 }
@@ -860,15 +831,7 @@ function buildPV(){
       ${buildEntete(false)}
       <div style="margin-top:6mm">
         <div class="doss-hd"><span class="dn">${d.num}</span><span class="dr">${d.ref}</span><span class="dt">${d.type||''}</span></div>
-        ${(()=>{const dd=d.dems||[d.dem||""],df=d.defs||[d.def||""];
-          let h='<div class="parts">';
-          dd.forEach((nm,i)=>{const c=(ST[d.num]&&ST[d.num].dem[i])||{type:"absent",name:"",loco:""};
-            const av=c.type==="absent"?"":c.loco?" — <strong>Me "+c.loco+" loco Me "+c.name+"</strong>":c.name?" — <strong>Me "+c.name+"</strong>":"";
-            h+=`<div><span class="pl">Dem)</span> ${nm}${av}${c.type==="absent"?" — <em>absent(e)</em>":""}</div>`;});
-          df.forEach((nm,i)=>{const c=(ST[d.num]&&ST[d.num].def[i])||{type:"absent",name:"",loco:""};
-            const av=c.type==="absent"?"":c.loco?" — <strong>Me "+c.loco+" loco Me "+c.name+"</strong>":c.name?" — <strong>Me "+c.name+"</strong>":"";
-            h+=`<div><span class="pl">Déf)</span> ${nm}${av}${c.type==="absent"?" — <em>absent(e)</em>":""}</div>`;});
-          return h+"</div>";})()}
+        ${(()=>{const dd=d.dems||[d.dem||''],df=d.defs||[d.def||''];let h='<div class="parts">';dd.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].dem[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';h+=`<div><span class="pl">Dem)</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});df.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].def[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';h+=`<div><span class="pl">Déf)</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});return h+'</div>';})()}
         <div class="aud-txt" style="margin-top:5mm">
           ${comp.map(l=>`<div class="cl">${l}</div>`).join('')}
           ${dec.map(l=>`<div class="dl">${l}</div>`).join('')}
@@ -891,15 +854,7 @@ function buildAll(){
       ${buildEntete(false)}
       <div style="margin-top:6mm">
         <div class="doss-hd"><span class="dn">${d.num}</span><span class="dr">${d.ref}</span><span class="dt">${d.type||''}</span></div>
-        ${(()=>{const dd=d.dems||[d.dem||""],df=d.defs||[d.def||""];
-          let h='<div class="parts">';
-          dd.forEach((nm,i)=>{const c=(ST[d.num]&&ST[d.num].dem[i])||{type:"absent",name:"",loco:""};
-            const av=c.type==="absent"?"":c.loco?" — <strong>Me "+c.loco+" loco Me "+c.name+"</strong>":c.name?" — <strong>Me "+c.name+"</strong>":"";
-            h+=`<div><span class="pl">Dem)</span> ${nm}${av}${c.type==="absent"?" — <em>absent(e)</em>":""}</div>`;});
-          df.forEach((nm,i)=>{const c=(ST[d.num]&&ST[d.num].def[i])||{type:"absent",name:"",loco:""};
-            const av=c.type==="absent"?"":c.loco?" — <strong>Me "+c.loco+" loco Me "+c.name+"</strong>":c.name?" — <strong>Me "+c.name+"</strong>":"";
-            h+=`<div><span class="pl">Déf)</span> ${nm}${av}${c.type==="absent"?" — <em>absent(e)</em>":""}</div>`;});
-          return h+"</div>";})()}
+        ${(()=>{const dd=d.dems||[d.dem||''],df=d.defs||[d.def||''];let h='<div class="parts">';dd.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].dem[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';h+=`<div><span class="pl">Dem)</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});df.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].def[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';h+=`<div><span class="pl">Déf)</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});return h+'</div>';})()}
         <div class="aud-txt" style="margin-top:5mm">
           ${comp.map(l=>`<div class="cl">${l}</div>`).join('')}
           ${dec.map(l=>`<div class="dl">${l}</div>`).join('')}
@@ -916,7 +871,7 @@ function buildAll(){
 // ════════════════════════════════════════════
 function openExport(){document.getElementById('exp-modal').classList.add('open');}
 function closeExport(){document.getElementById('exp-modal').classList.remove('open');}
-// exp-modal click handler moved to window.load
+// moved to window.load
 
 function getHTML(type){
   if(type==='fa')return buildFA();
@@ -936,35 +891,50 @@ function dlHtml(type){
   a.href=url;a.download=`audience_${suffix}_${(META.date||'').replace(/\s+/g,'-')}.html`;a.click();URL.revokeObjectURL(url);
 }
 
-// ════ PERSISTANCE ════
-const LS_KEY='audience_session_v1';
-function buildSnapshot(){return{version:1,ts:Date.now(),DIVISION,META,SIEGE,DOSSIERS,ST,jugDate:jugDate?jugDate.toISOString():null,perCal};}
+function applyFilter(){
+  document.querySelectorAll('[data-num]').forEach(function(el){
+    var num=el.getAttribute('data-num');
+    if(num) el.style.display=(FILTER_DONE&&ST[num]&&ST[num].done)?'none':'';
+  });
+}
+function toggleFilter(){
+  FILTER_DONE=!FILTER_DONE;
+  var btn=document.getElementById('btn-filter');
+  if(btn){
+    btn.textContent=FILTER_DONE?'👁 Afficher tout':'👁 Afficher uniquement les non validés';
+    btn.style.background=FILTER_DONE?'#fff3cd':'white';
+    btn.style.borderColor=FILTER_DONE?'#ffc107':'#bbb';
+  }
+  applyFilter();
+}
+var LS_KEY='audience_session_v1';
+function buildSnapshot(){return{version:1,ts:Date.now(),DIVISION:DIVISION,META:META,SIEGE:SIEGE,DOSSIERS:DOSSIERS,ST:ST,jugDate:jugDate?jugDate.toISOString():null,perCal:perCal};}
 function applySnapshot(snap){
   DIVISION=snap.DIVISION||'';META=snap.META||{};SIEGE=snap.SIEGE||{juge:'',cons1:'',cons2:'',gref:''};
   DOSSIERS=snap.DOSSIERS||[];
   jugDate=snap.jugDate?new Date(snap.jugDate):null;
-  Object.keys(snap.ST||{}).forEach(k=>{ST[k]=snap.ST[k];if(ST[k].remDate)ST[k].remDate=new Date(ST[k].remDate);});
+  Object.keys(snap.ST||{}).forEach(function(k){ST[k]=snap.ST[k];if(ST[k].remDate)ST[k].remDate=new Date(ST[k].remDate);});
   Object.assign(perCal,snap.perCal||{});
 }
 function autoSave(){
   try{
     localStorage.setItem(LS_KEY,JSON.stringify(buildSnapshot()));
-    const lbl=document.getElementById('autosave-lbl');
-    if(lbl){const t=new Date();lbl.textContent='● '+String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
-    lbl.style.color='rgba(180,255,180,.7)';setTimeout(()=>{lbl.style.color='rgba(255,255,255,.35)';},2000);}
+    var lbl=document.getElementById('autosave-lbl');
+    if(lbl){var t=new Date();lbl.textContent='● '+String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
+    lbl.style.color='rgba(180,255,180,.7)';setTimeout(function(){lbl.style.color='rgba(255,255,255,.35)';},2000);}
   }catch(e){}
 }
 function saveJSON(){
-  const blob=new Blob([JSON.stringify(buildSnapshot(),null,2)],{type:'application/json'});
-  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  var blob=new Blob([JSON.stringify(buildSnapshot(),null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob),a=document.createElement('a');
   a.href=url;a.download='audience_'+(META.date||'session').replace(/\s+/g,'-')+'.json';a.click();URL.revokeObjectURL(url);
 }
 function loadJSON(event){
-  const file=event.target.files[0];if(!file)return;
-  const reader=new FileReader();
+  var file=event.target.files[0];if(!file)return;
+  var reader=new FileReader();
   reader.onload=function(e){
     try{
-      const snap=JSON.parse(e.target.result);
+      var snap=JSON.parse(e.target.result);
       if(!snap.DOSSIERS)throw new Error('Fichier invalide');
       applySnapshot(snap);
       document.getElementById('setup-screen').style.display='none';
@@ -980,12 +950,10 @@ function loadJSON(event){
 window.addEventListener('load',function(){
   document.getElementById('exp-modal').addEventListener('click',function(e){if(e.target===this)closeExport();});
   try{
-    const raw=localStorage.getItem(LS_KEY);if(!raw)return;
-    const snap=JSON.parse(raw);if(!snap.DOSSIERS||!snap.DOSSIERS.length)return;
-    // Ne proposer la restauration QUE si une audience était en cours (pas juste le setup)
-    if(!snap.META||!snap.META.date)return;
-    const d=new Date(snap.ts);
-    const label=d.toLocaleDateString('fr-BE')+' à '+d.toLocaleTimeString('fr-BE',{hour:'2-digit',minute:'2-digit'});
+    var raw=localStorage.getItem(LS_KEY);if(!raw)return;
+    var snap=JSON.parse(raw);if(!snap.DOSSIERS||!snap.DOSSIERS.length||!snap.META||!snap.META.date)return;
+    var d2=new Date(snap.ts);
+    var label=d2.toLocaleDateString('fr-BE')+' à '+d2.toLocaleTimeString('fr-BE',{hour:'2-digit',minute:'2-digit'});
     if(!confirm('Session du '+label+' trouvée. La reprendre ?'))return;
     applySnapshot(snap);
     document.getElementById('setup-screen').style.display='none';
