@@ -1,0 +1,712 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feuille d'Audience — Tribunal de l'Entreprise de Liège</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1a2744;--navy-l:#243360;--navy-ll:#2d3f75;
+  --gold:#c9a84c;--gold-l:#e0bc6a;--gold-ll:#f0d48a;
+  --cream:#f7f4ee;--cream-d:#ece8df;--cream-dd:#ddd8cc;
+  --text:#1e1e1e;--muted:#7a7468;
+  --green:#2a6e47;--green-l:#e4f2eb;
+  --red:#8b2020;--red-l:#fdf0f0;
+  --blue:#1a4a8a;--blue-l:#e6eef8;
+  --purple:#5a2d82;--purple-l:#f0e8f8;
+  --teal:#1a6060;--teal-l:#e4f4f4;
+  --amber:#996010;--amber-l:#fff3d0;
+  --sh:0 1px 8px rgba(26,39,68,.08);
+  --sh-md:0 4px 20px rgba(26,39,68,.12);
+  --sh-lg:0 8px 40px rgba(26,39,68,.18);
+  --r:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.5;min-height:100vh;}
+
+/* ── UPLOAD SCREEN ── */
+#upload-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:linear-gradient(135deg,#1a2744 0%,#243360 50%,#1a3a5a 100%);}
+.up-card{background:white;border-radius:16px;box-shadow:var(--sh-lg);width:100%;max-width:580px;overflow:hidden;}
+.up-header{background:var(--navy);padding:28px 32px;text-align:center;border-bottom:3px solid var(--gold);}
+.up-header h1{font-family:'Playfair Display',serif;font-size:1.6rem;color:white;font-weight:700;letter-spacing:-.01em;}
+.up-header p{font-size:.8rem;color:rgba(255,255,255,.55);margin-top:5px;text-transform:uppercase;letter-spacing:.08em;}
+.up-body{padding:28px 32px;}
+
+/* tabs */
+.tabs{display:flex;gap:0;border:1.5px solid var(--cream-dd);border-radius:var(--r);overflow:hidden;margin-bottom:22px;}
+.tab{flex:1;padding:9px 0;text-align:center;font-size:.82rem;font-weight:600;cursor:pointer;background:white;color:var(--muted);border:none;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.tab.active{background:var(--navy);color:white;}
+.tab:first-child{border-right:1.5px solid var(--cream-dd);}
+
+.tab-content{display:none;} .tab-content.active{display:block;}
+
+/* drop zone */
+.drop-zone{border:2px dashed var(--cream-dd);border-radius:var(--r);padding:32px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--cream);}
+.drop-zone:hover,.drop-zone.drag{border-color:var(--navy);background:#f0eee8;}
+.drop-zone.drag{border-style:solid;}
+.drop-icon{font-size:2.2rem;margin-bottom:10px;}
+.drop-title{font-weight:600;color:var(--navy);font-size:.9rem;margin-bottom:3px;}
+.drop-sub{font-size:.76rem;color:var(--muted);}
+.drop-or{text-align:center;color:var(--muted);font-size:.76rem;margin:12px 0;position:relative;}
+.drop-or::before,.drop-or::after{content:'';position:absolute;top:50%;width:44%;height:1px;background:var(--cream-dd);}
+.drop-or::before{left:0;}.drop-or::after{right:0;}
+.browse-btn{background:var(--navy);color:white;border:none;border-radius:6px;padding:8px 20px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;}
+.browse-btn:hover{background:var(--navy-l);}
+#file-input{display:none;}
+
+/* paste zone */
+.paste-zone textarea{width:100%;height:200px;border:1.5px solid var(--cream-dd);border-radius:var(--r);padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:.82rem;background:var(--cream);color:var(--text);resize:vertical;line-height:1.6;transition:border-color .2s;}
+.paste-zone textarea:focus{outline:none;border-color:var(--navy);background:white;}
+.paste-zone textarea::placeholder{color:#bbb;font-style:italic;}
+.paste-hint{font-size:.74rem;color:var(--muted);margin-top:7px;}
+
+.analyze-btn{width:100%;margin-top:16px;padding:12px;background:var(--gold);color:var(--navy);border:none;border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.01em;}
+.analyze-btn:hover{background:var(--gold-l);transform:translateY(-1px);box-shadow:var(--sh-md);}
+.analyze-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+.u-status{margin-top:14px;padding:11px 14px;border-radius:var(--r);font-size:.82rem;display:none;}
+.u-status.loading{background:var(--blue-l);color:var(--blue);display:flex;align-items:center;gap:8px;}
+.u-status.error{background:var(--red-l);color:var(--red);display:block;}
+.u-status.success{background:var(--green-l);color:var(--green);display:block;}
+.spinner{flex-shrink:0;width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── MAIN APP ── */
+#main-app{display:none;}
+.header{background:var(--navy);color:white;padding:12px 22px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--sh-md);border-bottom:3px solid var(--gold);}
+.h-title h1{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;}
+.h-title p{font-size:.7rem;opacity:.55;margin-top:1px;text-transform:uppercase;letter-spacing:.06em;}
+.h-right{display:flex;gap:8px;align-items:center;}
+.prog{display:flex;align-items:center;gap:7px;color:rgba(255,255,255,.7);font-size:.75rem;margin-right:4px;}
+.prog-bar{width:80px;height:3px;background:rgba(255,255,255,.2);border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .4s;}
+.btn{border:none;border-radius:6px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.78rem;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s;}
+.btn-gold{background:var(--gold);color:var(--navy);}.btn-gold:hover{background:var(--gold-l);}
+.btn-navy{background:var(--navy-l);color:white;}.btn-navy:hover{background:var(--navy-ll);}
+.btn-ghost{background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.2);}.btn-ghost:hover{background:rgba(255,255,255,.18);}
+
+.jug-global{background:var(--navy-l);border-bottom:2px solid var(--gold);padding:8px 22px;display:flex;align-items:center;gap:12px;color:white;font-size:.8rem;flex-wrap:wrap;}
+.jug-global label{font-weight:600;color:var(--gold-ll);white-space:nowrap;}
+
+.sec-label{display:flex;align-items:center;gap:12px;margin:22px 18px 7px;}
+.sec-label h2{font-family:'Playfair Display',serif;font-size:.85rem;color:var(--navy);font-weight:700;text-transform:uppercase;letter-spacing:.12em;white-space:nowrap;}
+.sec-line{flex:1;height:1px;background:linear-gradient(to right,var(--gold),transparent);}
+
+.dossiers-wrap{padding:0 16px 48px;}
+.dossier-card{background:white;border:1px solid var(--cream-dd);border-bottom:none;overflow:hidden;}
+.dossier-card:first-child{border-radius:10px 10px 0 0;}
+.dossier-card:last-child{border-radius:0 0 10px 10px;border-bottom:1px solid var(--cream-dd);}
+.dossier-card:only-child{border-radius:10px;border-bottom:1px solid var(--cream-dd);}
+.dossier-card.done{border-left:4px solid var(--green);}
+.dossier-card.done .c-head{background:#f5fbf7;}
+.c-head{padding:10px 14px;display:flex;align-items:center;gap:9px;cursor:pointer;background:white;transition:background .15s;user-select:none;}
+.c-head:hover{background:var(--cream);}
+.d-num{font-family:'Playfair Display',serif;font-size:.8rem;font-weight:700;color:var(--navy);background:var(--cream-d);padding:2px 6px;border-radius:4px;min-width:30px;text-align:center;flex-shrink:0;}
+.dossier-card.done .d-num{background:var(--green-l);color:var(--green);}
+.d-ref{font-size:.7rem;color:var(--muted);font-style:italic;flex-shrink:0;}
+.d-parties{flex:1;min-width:0;}
+.d-dem{font-size:.8rem;font-weight:600;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.d-def{font-size:.75rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.badge{font-size:.68rem;padding:2px 8px;border-radius:10px;font-weight:600;flex-shrink:0;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.badge-p{background:#f0f0f0;color:#999;}
+.badge-d{background:var(--green-l);color:var(--green);}
+.chev{color:var(--muted);font-size:.8rem;transition:transform .2s;flex-shrink:0;}
+.dossier-card.open .chev{transform:rotate(180deg);}
+.c-body{display:none;padding:13px 14px 16px;border-top:1px solid var(--cream-d);}
+.dossier-card.open .c-body{display:block;}
+
+.sec-ttl{font-size:.67rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600;margin-bottom:7px;}
+.comp-section{margin-bottom:13px;}
+.comp-row{display:flex;align-items:center;gap:7px;margin-bottom:5px;flex-wrap:wrap;}
+.comp-lbl{font-size:.75rem;color:var(--navy);font-weight:600;min-width:68px;flex-shrink:0;}
+.check-row{display:flex;align-items:center;gap:5px;font-size:.77rem;cursor:pointer;white-space:nowrap;}
+.check-row input{accent-color:var(--navy);}
+select,input[type=text]{border:1.5px solid var(--cream-dd);border-radius:5px;padding:5px 8px;font-family:'DM Sans',sans-serif;font-size:.78rem;background:var(--cream);color:var(--text);transition:border-color .2s;}
+select:focus,input:focus{outline:none;border-color:var(--navy);background:white;}
+
+.dec-btns{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:11px;}
+.dbtn{border:1.5px solid;border-radius:6px;padding:5px 11px;font-family:'DM Sans',sans-serif;font-size:.77rem;font-weight:500;cursor:pointer;transition:all .15s;background:white;line-height:1.3;}
+.dbtn:active{transform:scale(.97);}
+.db-rc{border-color:#b8950a;color:#7a6010;}.db-rc.act{background:#fef3b0;font-weight:700;}
+.db-rd{border-color:#b07010;color:#7a4a00;}.db-rd.act{background:#fde8b0;font-weight:700;}
+.db-jc{border-color:var(--blue);color:var(--blue);}.db-jc.act{background:var(--blue-l);font-weight:700;}
+.db-jd{border-color:#1a6090;color:#1a4060;}.db-jd.act{background:#ddeeff;font-weight:700;}
+.db-vc{border-color:var(--teal);color:var(--teal);}.db-vc.act{background:var(--teal-l);font-weight:700;}
+.db-vd{border-color:#2a7a6a;color:#1a5a4a;}.db-vd.act{background:#d8f0ea;font-weight:700;}
+.db-ea{border-color:var(--purple);color:var(--purple);}.db-ea.act{background:var(--purple-l);font-weight:700;}
+.db-et{border-color:#7a3a9a;color:#5a2a7a;}.db-et.act{background:#ead8f8;font-weight:700;}
+.db-ac{border-color:var(--green);color:var(--green);}.db-ac.act{background:var(--green-l);font-weight:700;}
+.db-co{border-color:#2a8040;color:#1a6030;}.db-co.act{background:#d0f0d8;font-weight:700;}
+.db-ca{border-color:var(--red);color:var(--red);}.db-ca.act{background:var(--red-l);font-weight:700;}
+.db-cd{border-color:#aa4040;color:#882020;}.db-cd.act{background:#fde0e0;font-weight:700;}
+
+.sub-opts{display:none;background:var(--cream);border-radius:var(--r);padding:11px;margin-bottom:11px;border:1px solid var(--cream-d);}
+.sub-opts.vis{display:block;}
+.sub-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;flex-wrap:wrap;}
+.sub-row:last-child{margin-bottom:0;}
+.sub-lbl{font-size:.72rem;color:var(--muted);font-weight:600;min-width:60px;flex-shrink:0;}
+.ent-opts{display:flex;gap:4px;flex-wrap:wrap;}
+.ent-btn{border:1.5px solid var(--cream-dd);border-radius:5px;padding:3px 8px;font-size:.73rem;cursor:pointer;background:white;font-family:'DM Sans',sans-serif;transition:all .12s;}
+.ent-btn.act{border-color:var(--navy);background:var(--navy);color:white;}
+
+.preview{background:#eef2fa;border-left:3px solid var(--blue);border-radius:0 6px 6px 0;padding:9px 12px;font-size:.78rem;color:var(--navy);margin:9px 0;line-height:1.8;font-style:italic;white-space:pre-wrap;}
+.note-area{margin-top:9px;}
+.note-area label{font-size:.67rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;}
+.note-area textarea{width:100%;border:1.5px solid var(--cream-dd);border-radius:6px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:.8rem;resize:vertical;min-height:44px;background:var(--cream);}
+.note-area textarea:focus{outline:none;border-color:var(--navy);background:white;}
+.c-foot{display:flex;justify-content:space-between;align-items:center;margin-top:11px;}
+.btn-val{background:var(--navy);color:white;border:none;padding:7px 18px;border-radius:6px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;display:flex;align-items:center;gap:5px;}
+.btn-val:hover{background:var(--navy-l);}
+.btn-rst{background:none;border:1.5px solid var(--cream-dd);border-radius:6px;padding:5px 11px;font-size:.73rem;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;}
+.btn-rst:hover{border-color:var(--red);color:var(--red);}
+
+/* calendar */
+.mini-cal{background:white;border:1px solid var(--cream-dd);border-radius:var(--r);padding:9px;width:248px;box-shadow:var(--sh-md);}
+.mc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.mc-head span{font-size:.8rem;font-weight:600;color:var(--navy);}
+.mc-nav{background:none;border:none;cursor:pointer;color:var(--navy);font-size:.9rem;padding:2px 5px;border-radius:3px;}
+.mc-nav:hover{background:var(--cream-d);}
+.mc-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;}
+.mc-dh{font-size:.62rem;text-align:center;color:var(--muted);font-weight:600;padding:1px;}
+.mc-d{font-size:.73rem;text-align:center;padding:3px 1px;border-radius:3px;cursor:pointer;color:var(--text);}
+.mc-d:hover{background:var(--cream-d);}
+.mc-d.sel{background:var(--navy);color:white;font-weight:600;}
+.mc-d.tod{border:1px solid var(--gold);}
+.mc-d.emp{cursor:default;}
+.date-btn{font-size:.79rem;color:var(--navy);font-weight:500;cursor:pointer;padding:4px 8px;background:white;border:1.5px solid rgba(255,255,255,.3);border-radius:5px;display:inline-flex;align-items:center;gap:4px;color:white;}
+.date-btn:hover{border-color:rgba(255,255,255,.6);}
+.popover{position:absolute;z-index:200;top:calc(100% + 4px);left:0;display:none;}
+.popover.open{display:block;}
+.mc-wrap{position:relative;}
+
+/* modal */
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;backdrop-filter:blur(2px);}
+.modal-ov.open{display:flex;}
+.modal{background:white;border-radius:12px;padding:24px;width:500px;max-width:96vw;box-shadow:var(--sh-lg);max-height:88vh;overflow-y:auto;}
+.modal h2{font-family:'Playfair Display',serif;color:var(--navy);margin-bottom:14px;font-size:1.1rem;}
+.modal-opt{background:var(--cream);border-radius:var(--r);padding:13px;margin-bottom:9px;border:1px solid var(--cream-d);}
+.modal-opt h4{font-size:.83rem;font-weight:600;color:var(--navy);margin-bottom:3px;}
+.modal-opt p{font-size:.77rem;color:var(--muted);margin-bottom:8px;}
+.modal-btns{display:flex;gap:8px;margin-top:14px;justify-content:flex-end;}
+.btn-cancel{background:var(--cream-d);border:none;padding:7px 14px;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;font-size:.8rem;}
+</style>
+</head>
+<body>
+
+<!-- ══ UPLOAD SCREEN ══ -->
+<div id="upload-screen">
+  <div class="up-card">
+    <div class="up-header">
+      <h1>⚖ Feuille d'Audience</h1>
+      <p>Tribunal de l'Entreprise de Liège — Division Verviers</p>
+    </div>
+    <div class="up-body">
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('docx')">📄 Fichier Word (.docx)</button>
+        <button class="tab" onclick="switchTab('paste')">📋 Copier-coller</button>
+      </div>
+
+      <!-- TAB DOCX -->
+      <div class="tab-content active" id="tab-docx">
+        <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+          <div class="drop-icon">📄</div>
+          <div class="drop-title">Glisser-déposer le fichier ici</div>
+          <div class="drop-sub">Formats acceptés : .docx</div>
+        </div>
+        <div class="drop-or">ou</div>
+        <div style="text-align:center">
+          <button class="browse-btn" onclick="document.getElementById('file-input').click()">Parcourir…</button>
+        </div>
+        <input type="file" id="file-input" accept=".docx">
+      </div>
+
+      <!-- TAB PASTE -->
+      <div class="tab-content" id="tab-paste">
+        <div class="paste-zone">
+          <textarea id="paste-input" placeholder="Collez ici le texte de la feuille d'audience&#10;(Ctrl+A dans Word → Ctrl+C → Ctrl+V ici)"></textarea>
+          <div class="paste-hint">💡 Sélectionnez tout le texte dans Word (Ctrl+A), copiez (Ctrl+C), collez ici.</div>
+        </div>
+      </div>
+
+      <button class="analyze-btn" id="analyze-btn" onclick="analyze()">▶ Analyser la feuille d'audience</button>
+      <div class="u-status" id="u-status"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MAIN APP ══ -->
+<div id="main-app">
+  <div class="header">
+    <div class="h-title">
+      <h1>⚖ Feuille d'Audience</h1>
+      <p id="h-sub">—</p>
+    </div>
+    <div class="h-right">
+      <div class="prog"><span id="prog-txt">0/0</span><div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div></div>
+      <button class="btn btn-gold" onclick="openExport()">⬇ Exporter</button>
+      <button class="btn btn-ghost" onclick="newAud()">↩ Nouvelle audience</button>
+    </div>
+  </div>
+
+  <div class="jug-global">
+    <label>📅 Date commune des jugements :</label>
+    <div class="mc-wrap" id="gc-wrap">
+      <div class="date-btn" onclick="toggleGC()"><span id="gc-lbl">Choisir une date</span> ▾</div>
+      <div class="popover" id="gc-pop"><div class="mini-cal" id="gc-cal"></div></div>
+    </div>
+    <span style="opacity:.4;font-size:.73rem">— jugements et accords</span>
+  </div>
+
+  <div id="app-body"></div>
+
+  <div class="modal-ov" id="exp-modal">
+    <div class="modal">
+      <h2>🖨 Exporter / Imprimer</h2>
+      <div class="modal-opt">
+        <h4>🖨 Ouvrir et imprimer directement</h4>
+        <p>Ouvre la feuille complète dans un nouvel onglet avec un bouton "Imprimer".</p>
+        <button class="btn btn-navy" onclick="printDirect();closeExport()">Ouvrir la feuille</button>
+      </div>
+      <div class="modal-opt">
+        <h4>⬇ Télécharger en HTML</h4>
+        <p>Sauvegarde le fichier pour l'ouvrir et l'imprimer plus tard.</p>
+        <button class="btn btn-gold" onclick="dlHtml();closeExport()">Télécharger</button>
+      </div>
+      <div class="modal-btns"><button class="btn-cancel" onclick="closeExport()">Fermer</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════
+let DOSSIERS=[], META={}, ST={}, jugDate=null, gCalY, gCalM;
+const perCal={};
+const TEXT_FIELDS=new Set(['cDN','cDN2','cFN','cFN2','note','jtv']);
+const MF=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const DF=['Lu','Ma','Me','Je','Ve','Sa','Di'];
+const DEC_LBL={rc:'Remise contradictoire',rd:'Remise par défaut',jc:'Jugement contradictoire',jd:'Jugement par défaut',vc:'Renvoi au rôle',vd:'Renvoi au rôle (déf.)',ea:'Mise en état amiable',et:'Mise en état (tribunal)',ac:'Accord',co:'Conciliation OK',ca:'Pas de conciliation',cd:'Pas de conciliation'};
+
+// ════════════════════════════════════════════
+// TABS & UPLOAD UI
+// ════════════════════════════════════════════
+let activeTab='docx';
+function switchTab(tab){
+  activeTab=tab;
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',(tab==='docx'&&i===0)||(tab==='paste'&&i===1)));
+  document.getElementById('tab-docx').classList.toggle('active',tab==='docx');
+  document.getElementById('tab-paste').classList.toggle('active',tab==='paste');
+}
+
+// drag & drop
+const dz=document.getElementById('drop-zone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');const f=e.dataTransfer.files[0];if(f&&f.name.endsWith('.docx'))processDocx(f);else showErr('Veuillez déposer un fichier .docx');});
+document.getElementById('file-input').addEventListener('change',e=>{if(e.target.files[0])processDocx(e.target.files[0]);});
+
+function setStatus(type,msg){
+  const s=document.getElementById('u-status');
+  s.className='u-status '+type;
+  s.innerHTML=type==='loading'?`<div class="spinner"></div><span>${msg}</span>`:msg;
+}
+
+function showErr(msg){setStatus('error','⚠ '+msg);}
+
+// ════════════════════════════════════════════
+// ANALYSE — point d'entrée unique
+// ════════════════════════════════════════════
+async function analyze(){
+  if(activeTab==='docx'){
+    const f=document.getElementById('file-input').files[0];
+    if(!f){showErr('Veuillez sélectionner un fichier .docx');return;}
+    await processDocx(f);
+  } else {
+    const txt=document.getElementById('paste-input').value.trim();
+    if(!txt){showErr('Veuillez coller le texte de la feuille d\'audience');return;}
+    await processPaste(txt);
+  }
+}
+
+// ════════════════════════════════════════════
+// DOCX → API
+// ════════════════════════════════════════════
+async function processDocx(file){
+  setStatus('loading','Lecture du fichier…');
+  document.getElementById('analyze-btn').disabled=true;
+  try{
+    const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});
+    setStatus('loading','Analyse par l\'IA…');
+    await callAPI([{type:'document',source:{type:'base64',media_type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',data:b64}},{type:'text',text:getPrompt()}]);
+  }catch(e){showErr(e.message||'Erreur de lecture du fichier.');document.getElementById('analyze-btn').disabled=false;}
+}
+
+// ════════════════════════════════════════════
+// PASTE → API
+// ════════════════════════════════════════════
+async function processPaste(texte){
+  setStatus('loading','Analyse par l\'IA…');
+  document.getElementById('analyze-btn').disabled=true;
+  try{
+    await callAPI([{type:'text',text:`Voici le texte d'une feuille d'audience judiciaire belge :\n\n${texte}\n\n${getPrompt()}`}]);
+  }catch(e){showErr(e.message||'Erreur lors de l\'analyse.');document.getElementById('analyze-btn').disabled=false;}
+}
+
+function getPrompt(){
+  return`Extrais toutes les données structurées de cette feuille d'audience.
+Réponds UNIQUEMENT avec un objet JSON valide, sans markdown, sans backticks, sans commentaires.
+Format :
+{
+  "meta":{"tribunal":"...","division":"...","date":"12 mars 2026","heure":"9h00","juges":["M. X, fonction",...]},
+  "sections":[{"section":"NOM SECTION","items":[{
+    "num":"1.1","ref":"A/26/00061","type":"description courte",
+    "conc":false,
+    "dem":"NOM COMPLET DEMANDEUR","avDem":"Me NOM ou vide",
+    "def":"NOM(S) DÉFENDEUR(S) séparés par /","avDef":"Me NOM ou vide"
+  }]}]
+}
+Règles : conc=true si ref commence par M/ — avDem/avDef : "Me NOM" si avocat mentionné, "" sinon — inclure TOUS les dossiers.`;
+}
+
+// ════════════════════════════════════════════
+// APPEL API ANTHROPIC
+// ════════════════════════════════════════════
+async function callAPI(content){
+  const resp=await fetch('/api/analyze',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({content})
+  });
+  const data=await resp.json();
+  if(data.error)throw new Error(data.error.message);
+  const raw=data.content.map(i=>i.text||'').join('').replace(/```json[\s\S]*?```|```/g,'').trim();
+  const parsed=JSON.parse(raw);
+  META=parsed.meta||{};
+  DOSSIERS=parsed.sections||[];
+  DOSSIERS.forEach(sec=>sec.items.forEach(d=>{if(typeof d.conc==='undefined')d.conc=(d.ref||'').startsWith('M/');}));
+  launchApp();
+}
+
+// ════════════════════════════════════════════
+// LANCEMENT
+// ════════════════════════════════════════════
+function launchApp(){
+  jugDate=null;initST();
+  document.getElementById('h-sub').textContent=`${META.tribunal||''} — ${META.division||''} — ${META.date||''}`;
+  document.getElementById('upload-screen').style.display='none';
+  document.getElementById('main-app').style.display='block';
+  renderAll();drawGC();
+}
+
+function newAud(){
+  if(!confirm('Charger une nouvelle audience ? Les données actuelles seront perdues.'))return;
+  document.getElementById('upload-screen').style.display='flex';
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('u-status').className='u-status';
+  document.getElementById('file-input').value='';
+  document.getElementById('paste-input').value='';
+  document.getElementById('analyze-btn').disabled=false;
+  DOSSIERS=[];jugDate=null;
+}
+
+// ════════════════════════════════════════════
+// ÉTAT
+// ════════════════════════════════════════════
+function initST(){
+  const n=new Date();gCalY=n.getFullYear();gCalM=n.getMonth();
+  Object.keys(ST).forEach(k=>delete ST[k]);
+  DOSSIERS.forEach(sec=>sec.items.forEach(d=>{
+    ST[d.num]={cDT:'avocat',cDN:d.avDem||'',cDN2:'',cFT:d.avDef?'avocat':'absent',cFN:d.avDef||'',cFN2:'',
+      dec:null,remDate:null,remPli:false,jugEnt:'conseils',jugDD:false,jugDC:false,jugDT:false,jtt:'mens',jtv:'',note:'',done:false};
+  }));
+}
+
+// ════════════════════════════════════════════
+// CALENDRIER
+// ════════════════════════════════════════════
+function fd(d){if(!d)return null;return`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;}
+
+function buildCal(id,sel,y,m,onSel,onNav){
+  const el=document.getElementById(id);if(!el)return;
+  const first=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate(),off=first===0?6:first-1;
+  const today=new Date();today.setHours(0,0,0,0);
+  let h=`<div class="mc-head"><button class="mc-nav" onclick="(${onNav})(-1)">◀</button><span>${MF[m]} ${y}</span><button class="mc-nav" onclick="(${onNav})(1)">▶</button></div><div class="mc-grid">`;
+  DF.forEach(d=>{h+=`<div class="mc-dh">${d}</div>`;});
+  for(let i=0;i<off;i++)h+=`<div class="mc-d emp"></div>`;
+  for(let d=1;d<=dim;d++){
+    const dt=new Date(y,m,d),isSel=sel&&dt.toDateString()===sel.toDateString(),isTod=dt.toDateString()===today.toDateString();
+    h+=`<div class="mc-d${isSel?' sel':''}${isTod?' tod':''}" onclick="(${onSel})(${y},${m},${d})">${d}</div>`;
+  }
+  h+='</div>';el.innerHTML=h;
+}
+
+function toggleGC(){const p=document.getElementById('gc-pop');p.classList.toggle('open');if(p.classList.contains('open'))drawGC();}
+function drawGC(){
+  buildCal('gc-cal',jugDate,gCalY,gCalM,
+    `function(y,m,d){jugDate=new Date(y,m,d);document.getElementById('gc-lbl').textContent=fd(jugDate);document.getElementById('gc-pop').classList.remove('open');refreshPreviews();}`,
+    `function(dir){gCalM+=dir;if(gCalM>11){gCalM=0;gCalY++;}if(gCalM<0){gCalM=11;gCalY--;}drawGC();}`);
+}
+function toggleDC(num){
+  const id=nid(num),p=document.getElementById('cp-'+id);if(!p)return;
+  const was=p.classList.contains('open');
+  document.querySelectorAll('.popover.open').forEach(x=>x.classList.remove('open'));
+  if(!was){p.classList.add('open');drawDC(num);}
+}
+function drawDC(num){
+  if(!perCal[num]){const n=new Date();perCal[num]={y:n.getFullYear(),m:n.getMonth()};}
+  const {y,m}=perCal[num],sel=ST[num].remDate,id=nid(num);
+  buildCal('dc-'+id,sel,y,m,
+    `function(yr,mo,d){ST['${num}'].remDate=new Date(yr,mo,d);document.getElementById('dl-${id}').textContent=fd(ST['${num}'].remDate);document.getElementById('cp-${id}').classList.remove('open');updatePreview('${num}');}`,
+    `function(dir){perCal['${num}'].m+=dir;if(perCal['${num}'].m>11){perCal['${num}'].m=0;perCal['${num}'].y++;}if(perCal['${num}'].m<0){perCal['${num}'].m=11;perCal['${num}'].y--;}drawDC('${num}');}`);
+}
+document.addEventListener('click',function(e){
+  const gc=document.getElementById('gc-wrap');
+  if(gc&&!gc.contains(e.target)){const gp=document.getElementById('gc-pop');if(gp)gp.classList.remove('open');}
+  document.querySelectorAll('.popover.open').forEach(p=>{const w=p.closest('.mc-wrap');if(w&&!w.contains(e.target))p.classList.remove('open');});
+});
+
+// ════════════════════════════════════════════
+// TEXTE JURIDIQUE
+// ════════════════════════════════════════════
+function getDoss(num){for(const s of DOSSIERS)for(const d of s.items)if(d.num===num)return d;}
+function nid(n){return n.replace('.','_');}
+
+function personPhrase(type,name,name2,party){
+  if(type==='absent')return`Personne ne comparaît pour ${party}.`;
+  if(type==='personne')return`${name||party} comparaît en personne.`;
+  if(name2&&name2.trim())return`Maître ${name2.trim()} loco Maître ${name||'…'} comparaît pour ${party}.`;
+  return`Maître ${name||'…'} comparaît pour ${party}.`;
+}
+
+function genText(num){
+  const s=ST[num],d=getDoss(num),lines=[];
+  if(!d)return'';
+  lines.push(personPhrase(s.cDT,s.cDN,s.cDN2,d.dem));
+  lines.push(personPhrase(s.cFT,s.cFN,s.cFN2,d.def));
+  const rd=s.remDate?fd(s.remDate):'[date à préciser]';
+  const jd=jugDate?fd(jugDate):'[date des jugements]';
+  if(s.dec==='rc')lines.push(`À la demande des parties qui comparaissent, l'affaire est remise au ${rd}.`);
+  else if(s.dec==='rd'){
+    const pres=s.cDT!=='absent'?d.dem:d.def,abs=s.cDT==='absent'?d.dem:d.def;
+    lines.push(`À la demande de la partie ${pres}, l'affaire est remise au ${rd}.`);
+    if(s.remPli)lines.push(`Elle sollicite l'envoi d'un pli judiciaire à ${abs}, conformément à l'article 803 C.j.`);
+  }else if(s.dec==='jd'){
+    const abs=s.cDT==='absent'?d.dem:d.def;
+    const pn=s.cDT!=='absent'?(s.cDT==='personne'?(s.cDN||d.dem):(s.cDN2&&s.cDN2.trim()?`Maître ${s.cDN2.trim()} loco Maître ${s.cDN||'…'}`:`Maître ${s.cDN||'…'}`)): (s.cFT==='personne'?(s.cFN||d.def):(s.cFN2&&s.cFN2.trim()?`Maître ${s.cFN2.trim()} loco Maître ${s.cFN||'…'}`:`Maître ${s.cFN||'…'}`));
+    lines.push(`La partie ${abs} est défaillante. ${pn} est entendu(e) et sollicite jugement par défaut. Il/Elle dépose son dossier de pièces ainsi que son état de dépens.`);
+    lines.push(`Le tribunal clôt les débats et met la cause en délibéré. Un jugement sera prononcé le ${jd}.`);
+  }else if(s.dec==='jc'){
+    const em={conseils:'Leurs conseils sont entendus.',parties:'Les parties sont entendues.','cons-dem':'Le conseil de la demanderesse et la partie défenderesse sont entendus.','cons-def':'La partie demanderesse et le conseil de la défenderesse sont entendus.'};
+    lines.push(em[s.jugEnt]||'Les parties sont entendues.');
+    const ds=s.cDT==='avocat'?`Le conseil de la demanderesse`:(s.cDN||d.dem);
+    let l=`${ds} sollicite jugement. Il/Elle dépose son dossier de pièces ainsi que son état de dépens.`;
+    if(s.jugDD)l+=` Le conseil de la défenderesse dépose également son dossier de pièces.`;
+    if(s.jugDC)l+=` La défenderesse conteste la demande.`;
+    if(s.jugDT){if(s.jtt==='mens')l+=` La défenderesse ne conteste pas mais sollicite des termes et délais, soit l'étalement en ${s.jtv||'…'} mensualités.`;else l+=` La défenderesse ne conteste pas mais sollicite des termes et délais, soit un paiement de ${s.jtv||'…'} € par mois.`;}
+    lines.push(l);
+    lines.push(`Le tribunal clôt les débats et met la cause en délibéré. Un jugement sera prononcé le ${jd}.`);
+  }else if(s.dec==='vc')lines.push('Les parties sollicitent le renvoi au rôle.');
+  else if(s.dec==='vd')lines.push(`La partie ${s.cDT!=='absent'?d.dem:d.def} sollicite le renvoi au rôle.`);
+  else if(s.dec==='ea')lines.push("Les parties déposent un calendrier de mise en état amiable. Une ordonnance de confirmation des délais et de fixation de la cause pour être plaidée sera prononcée ultérieurement.");
+  else if(s.dec==='et')lines.push("Les parties sollicitent la mise en état et la fixation de la cause pour plaidoiries. Une ordonnance sera prononcée dans le délai légal.");
+  else if(s.dec==='ac')lines.push(`Les parties sont parvenues à un accord et sollicitent qu'il leur en soit donné acte. La cause est plaidée. Un jugement sera prononcé le ${jd}.`);
+  else if(s.dec==='co')lines.push('Un PV de conciliation est rédigé ce jour.');
+  else if(s.dec==='ca')lines.push(`La conciliation n'aboutit pas car la partie ${s.cDT==='absent'?d.dem:d.def} est défaillante.`);
+  else if(s.dec==='cd')lines.push("La conciliation n'aboutit pas car les parties ne sont pas parvenues à un accord.");
+  if(s.note)lines.push(s.note);
+  return lines.filter(Boolean).join('\n');
+}
+
+function updatePreview(num){const el=document.getElementById('pv-'+nid(num));if(el)el.textContent=genText(num)||'(aucune saisie)';}
+function refreshPreviews(){DOSSIERS.forEach(s=>s.items.forEach(d=>updatePreview(d.num)));}
+
+// ════════════════════════════════════════════
+// RENDU
+// ════════════════════════════════════════════
+function renderCard(d){
+  const s=ST[d.num],id=nid(d.num),dec=s.dec;
+  const badge=s.done?`<span class="badge badge-d">✓ ${DEC_LBL[dec]||'—'}</span>`:`<span class="badge badge-p">En attente</span>`;
+  function cRow(side,type,name,name2){
+    const lbl=side==='dem'?'▲ Dem.':'▼ Déf.';
+    const nF=side==='dem'?'cDN':'cFN',n2F=side==='dem'?'cDN2':'cFN2',tF=side==='dem'?'cDT':'cFT';
+    const isAbs=type==='absent',isPers=type==='personne';
+    return`<div class="comp-row">
+      <span class="comp-lbl">${lbl}</span>
+      <label class="check-row"><input type="checkbox" ${isAbs?'checked':''} onchange="upd('${d.num}','${tF}',this.checked?'absent':'avocat')"> Absent(e)</label>
+      ${!isAbs?`<label class="check-row"><input type="checkbox" ${isPers?'checked':''} onchange="upd('${d.num}','${tF}',this.checked?'personne':'avocat')"> En personne</label>
+        <input type="text" value="${name}" placeholder="${isPers?'Nom…':'Titulaire…'}" style="flex:1;min-width:100px" oninput="upd('${d.num}','${nF}',this.value)">
+        ${!isPers?`<input type="text" value="${name2}" placeholder="Remplaçant (optionnel)" style="flex:1;min-width:100px" oninput="upd('${d.num}','${n2F}',this.value)">`:''}`:
+      `<span style="font-size:.75rem;color:var(--muted);font-style:italic">Personne ne comparaît</span>`}
+    </div>`;
+  }
+  const decBtns=d.conc
+    ?`<button class="dbtn db-co ${dec==='co'?'act':''}" onclick="setDec('${d.num}','co')">🤝 Conciliation aboutit</button>
+       <button class="dbtn db-ca ${dec==='ca'?'act':''}" onclick="setDec('${d.num}','ca')">⚠ Partie absente</button>
+       <button class="dbtn db-cd ${dec==='cd'?'act':''}" onclick="setDec('${d.num}','cd')">✗ Pas d'accord</button>`
+    :`<button class="dbtn db-rc ${dec==='rc'?'act':''}" onclick="setDec('${d.num}','rc')">📅 Remise contradictoire</button>
+      <button class="dbtn db-rd ${dec==='rd'?'act':''}" onclick="setDec('${d.num}','rd')">📅 Remise par défaut</button>
+      <button class="dbtn db-jc ${dec==='jc'?'act':''}" onclick="setDec('${d.num}','jc')">⚖ Jugement contradictoire</button>
+      <button class="dbtn db-jd ${dec==='jd'?'act':''}" onclick="setDec('${d.num}','jd')">⚖ Jugement par défaut</button>
+      <button class="dbtn db-vc ${dec==='vc'?'act':''}" onclick="setDec('${d.num}','vc')">↩ Renvoi au rôle</button>
+      <button class="dbtn db-vd ${dec==='vd'?'act':''}" onclick="setDec('${d.num}','vd')">↩ Renvoi au rôle (défaut)</button>
+      <button class="dbtn db-ea ${dec==='ea'?'act':''}" onclick="setDec('${d.num}','ea')">📝 Mise en état amiable</button>
+      <button class="dbtn db-et ${dec==='et'?'act':''}" onclick="setDec('${d.num}','et')">📝 Mise en état (tribunal)</button>
+      <button class="dbtn db-ac ${dec==='ac'?'act':''}" onclick="setDec('${d.num}','ac')">🤝 Accord</button>`;
+  const showRem=dec==='rc'||dec==='rd';
+  const remSub=`<div class="sub-opts ${showRem?'vis':''}" id="sr-${id}">
+    <div class="sub-row"><span class="sub-lbl">📅 Date :</span>
+      <div class="mc-wrap"><div class="date-btn" style="color:var(--navy);border-color:var(--cream-dd);background:white;" onclick="toggleDC('${d.num}')"><span id="dl-${id}">${s.remDate?fd(s.remDate):'Choisir'}</span> ▾</div>
+      <div class="popover" id="cp-${id}"><div class="mini-cal" id="dc-${id}"></div></div></div>
+    </div>
+    ${dec==='rd'?`<div class="sub-row"><label class="check-row"><input type="checkbox" ${s.remPli?'checked':''} onchange="upd('${d.num}','remPli',this.checked)"> Pli judiciaire (art. 803 C.j.)</label></div>`:''}
+  </div>`;
+  const entOpts=[['conseils','Conseils'],['parties','Parties'],['cons-dem','Cons.dem + partie déf.'],['cons-def','Partie dem. + cons.déf.']];
+  const jcSub=`<div class="sub-opts ${dec==='jc'?'vis':''}" id="sj-${id}">
+    <div class="sub-row"><span class="sub-lbl">Entendus :</span>
+      <div class="ent-opts">${entOpts.map(([v,l])=>`<button class="ent-btn ${s.jugEnt===v?'act':''}" onclick="upd('${d.num}','jugEnt','${v}')">${l}</button>`).join('')}</div>
+    </div>
+    <div class="sub-row" style="gap:10px">
+      <label class="check-row"><input type="checkbox" ${s.jugDD?'checked':''} onchange="upd('${d.num}','jugDD',this.checked)"> Déf. dépose dossier</label>
+      <label class="check-row"><input type="checkbox" ${s.jugDC?'checked':''} onchange="upd('${d.num}','jugDC',this.checked)"> Déf. conteste</label>
+      <label class="check-row"><input type="checkbox" ${s.jugDT?'checked':''} onchange="upd('${d.num}','jugDT',this.checked)"> Termes et délais</label>
+    </div>
+    ${s.jugDT?`<div class="sub-row"><span class="sub-lbl">Type :</span>
+      <select onchange="upd('${d.num}','jtt',this.value)"><option value="mens" ${s.jtt==='mens'?'selected':''}>x mensualités</option><option value="mnt" ${s.jtt==='mnt'?'selected':''}>montant €/mois</option></select>
+      <input type="text" value="${s.jtv}" placeholder="${s.jtt==='mens'?'Nombre':'Montant €'}" style="width:75px" oninput="upd('${d.num}','jtv',this.value)">
+    </div>`:''}
+  </div>`;
+  return`<div class="dossier-card ${s.done?'done':''}" id="card-${id}">
+    <div class="c-head" onclick="toggleCard('${d.num}')">
+      <span class="d-num">${d.num}</span><span class="d-ref">${d.ref}</span>
+      <div class="d-parties"><div class="d-dem">▲ ${d.dem}</div><div class="d-def">▼ ${d.def}</div></div>
+      ${badge}<span class="chev">▾</span>
+    </div>
+    <div class="c-body">
+      <div class="sec-ttl">Comparutions</div>
+      <div class="comp-section">${cRow('dem',s.cDT,s.cDN,s.cDN2)}${cRow('def',s.cFT,s.cFN,s.cFN2)}</div>
+      <div class="sec-ttl">Décision</div>
+      <div class="dec-btns">${decBtns}</div>
+      ${remSub}${jcSub}
+      <div class="preview" id="pv-${id}">(aucune saisie)</div>
+      <div class="note-area"><label>📝 Note libre</label><textarea oninput="upd('${d.num}','note',this.value)">${s.note}</textarea></div>
+      <div class="c-foot">
+        <button class="btn-rst" onclick="rstCard('${d.num}')">↺ Réinitialiser</button>
+        <button class="btn-val" onclick="valider('${d.num}')">✓ Valider</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderAll(){
+  let html='';
+  DOSSIERS.forEach(sec=>{
+    html+=`<div class="sec-label"><h2>${sec.section}</h2><div class="sec-line"></div></div><div class="dossiers-wrap" style="padding-bottom:0">`;
+    sec.items.forEach(d=>{html+=renderCard(d);});
+    html+='</div>';
+  });
+  document.getElementById('app-body').innerHTML=html;
+  refreshPreviews();updateProg();
+}
+
+// ════════════════════════════════════════════
+// INTERACTIONS
+// ════════════════════════════════════════════
+function replaceCard(num,keepOpen){
+  const d=getDoss(num),el=document.getElementById('card-'+nid(num));if(!el)return;
+  const tmp=document.createElement('div');tmp.innerHTML=renderCard(d);
+  const nc=tmp.firstChild;if(keepOpen)nc.classList.add('open');
+  el.replaceWith(nc);updatePreview(num);
+}
+function upd(num,field,value){
+  ST[num][field]=value;
+  if(TEXT_FIELDS.has(field))updatePreview(num);
+  else{replaceCard(num,true);updateProg();}
+}
+function setDec(num,dec){ST[num].dec=dec;replaceCard(num,true);updatePreview(num);}
+function toggleCard(num){
+  const el=document.getElementById('card-'+nid(num));if(!el)return;
+  const open=el.classList.contains('open');
+  document.querySelectorAll('.dossier-card.open').forEach(c=>c.classList.remove('open'));
+  if(!open)el.classList.add('open');
+}
+function valider(num){
+  ST[num].done=true;replaceCard(num,false);updateProg();
+  const all=DOSSIERS.flatMap(s=>s.items.map(d=>d.num));
+  const next=all.slice(all.indexOf(num)+1).find(n=>!ST[n].done);
+  if(next)setTimeout(()=>{toggleCard(next);document.getElementById('card-'+nid(next))?.scrollIntoView({behavior:'smooth',block:'center'});},80);
+}
+function rstCard(num){
+  const d=getDoss(num);
+  ST[num]={cDT:'avocat',cDN:d.avDem||'',cDN2:'',cFT:d.avDef?'avocat':'absent',cFN:d.avDef||'',cFN2:'',dec:null,remDate:null,remPli:false,jugEnt:'conseils',jugDD:false,jugDC:false,jugDT:false,jtt:'mens',jtv:'',note:'',done:false};
+  replaceCard(num,true);updateProg();
+}
+function updateProg(){
+  const all=DOSSIERS.flatMap(s=>s.items.map(d=>d.num)),done=all.filter(n=>ST[n].done).length;
+  document.getElementById('prog-txt').textContent=`${done}/${all.length}`;
+  document.getElementById('prog-fill').style.width=`${all.length?done/all.length*100:0}%`;
+}
+
+// ════════════════════════════════════════════
+// EXPORT HTML IMPRIMABLE
+// ════════════════════════════════════════════
+function openExport(){document.getElementById('exp-modal').classList.add('open');}
+function closeExport(){document.getElementById('exp-modal').classList.remove('open');}
+document.getElementById('exp-modal').addEventListener('click',function(e){if(e.target===this)closeExport();});
+
+function buildPrintHTML(){
+  let body='';
+  DOSSIERS.forEach(sec=>{
+    body+=`<div class="sec-hd">${sec.section}</div>`;
+    sec.items.forEach(d=>{
+      const txt=genText(d.num),lines=txt?txt.split('\n'):[],comp=lines.slice(0,2),dec=lines.slice(2);
+      body+=`<div class="doss">
+        <div class="doss-hd"><span class="dn">${d.num}</span><span class="dr">${d.ref}</span><span class="dt">${d.type||''}</span></div>
+        <div class="parts"><div><span class="pl">Dem)</span> ${d.dem}${d.avDem?` — <strong>${d.avDem}</strong>`:''}</div>
+        <div><span class="pl">Déf)</span> ${d.def}${d.avDef?` — <strong>${d.avDef}</strong>`:''}</div></div>
+        <div class="aud-txt">${comp.map(l=>`<div class="cl">${l}</div>`).join('')}${dec.map(l=>`<div class="dl">${l}</div>`).join('')}${!txt?'<div class="el">&nbsp;</div><div class="el">&nbsp;</div>':''}</div>
+      </div>`;
+    });
+  });
+  return`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Feuille d'audience — ${META.date||''}</title>
+<style>
+@page{size:A4;margin:15mm 18mm;}*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Aptos,Calibri,Arial,sans-serif;font-size:10pt;color:#000;background:white;}
+.pg-hd{text-align:right;margin-bottom:4mm;border-top:1.5pt solid #000;border-bottom:1.5pt solid #000;padding:3pt 0;}
+.pg-hd div{font-weight:bold;font-size:11pt;}
+.judges{margin-bottom:4mm;font-size:10pt;}.judges div{margin-bottom:1pt;}
+.debut{margin-bottom:5mm;font-size:10pt;}
+.sec-hd{font-weight:bold;font-size:10.5pt;text-transform:uppercase;letter-spacing:.05em;margin:5mm 0 2mm;border-bottom:.5pt solid #999;padding-bottom:1pt;}
+.doss{margin-bottom:4mm;page-break-inside:avoid;}
+.doss-hd{display:flex;align-items:baseline;gap:8pt;margin-bottom:1pt;font-size:10pt;}
+.dn{font-weight:bold;min-width:28pt;}.dr{font-weight:bold;min-width:70pt;}.dt{font-size:9pt;color:#444;}
+.parts{margin-left:36pt;margin-bottom:2pt;font-size:10pt;}.parts div{margin-bottom:1pt;}.pl{font-weight:bold;}
+.aud-txt{margin-left:36pt;margin-top:2pt;border-left:2pt solid #1a2744;padding-left:6pt;}
+.cl{font-size:9.5pt;color:#333;font-style:italic;margin-bottom:1pt;}
+.dl{font-size:10pt;margin-bottom:1.5pt;}
+.el{height:12pt;border-bottom:.5pt dotted #ccc;margin-bottom:4pt;}
+@media print{.no-print{display:none!important}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+.print-btn{position:fixed;bottom:20px;right:20px;background:#1a2744;color:white;border:none;padding:12px 24px;border-radius:8px;font-size:12pt;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.3);}
+</style></head><body>
+<div class="pg-hd"><div>${META.tribunal||'TRIBUNAL DE L\'ENTREPRISE DE LIEGE'}</div><div>${META.division||'DIVISION VERVIERS'}</div><div>Feuille d'audience — ${META.date||''}</div></div>
+<div class="judges">${(META.juges||[]).map(j=>`<div>${j}</div>`).join('')}</div>
+<div class="debut">${META.heure?`L'audience débute à ${META.heure}.`:''}</div>
+${jugDate?`<div style="text-align:center;font-size:9pt;color:#555;margin-bottom:4mm;font-style:italic">Date des jugements : ${fd(jugDate)}</div>`:''}
+${body}
+<button class="print-btn no-print" onclick="window.print()">🖨 Imprimer</button>
+</body></html>`;
+}
+
+function dlHtml(){
+  const blob=new Blob([buildPrintHTML()],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=`feuille_audience_${(META.date||'').replace(/\s+/g,'-')}.html`;a.click();URL.revokeObjectURL(url);
+}
+function printDirect(){
+  const win=window.open('','_blank');win.document.write(buildPrintHTML());win.document.close();win.focus();
+}
+</script>
+</body>
+</html>
