@@ -124,10 +124,11 @@ body{background:var(--cream);color:var(--text);font-family:'DM Sans',sans-serif;
 .chev{color:var(--muted);font-size:.8rem;transition:transform .2s;flex-shrink:0;}
 .dossier-card.open{background:var(--green-active);border-color:#a8d5b5 !important;border-radius:10px !important;margin:4px 0;box-shadow:0 2px 12px rgba(42,110,71,.15);}
 .dossier-card.open .c-head{background:transparent;}
+.dossier-card.open .c-head:hover{background:rgba(255,255,255,.4);}
+.dossier-card.open .c-body{background:white;border-radius:0 0 8px 8px;}
 .dossier-card.open .chev{transform:rotate(180deg);}
 .c-body{display:none;padding:13px 14px 16px;border-top:1px solid var(--cream-d);}
-.dossier-card.open .c-body{display:block;background:white;border-radius:0 0 8px 8px;}
-.dossier-card.open .c-head:hover{background:rgba(255,255,255,.4);}
+.dossier-card.open .c-body{display:block;}
 
 .sec-ttl{font-size:.67rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600;margin-bottom:7px;}
 .comp-section{margin-bottom:13px;}
@@ -449,7 +450,11 @@ function initST(){
   const n=new Date();gCalY=n.getFullYear();gCalM=n.getMonth();
   Object.keys(ST).forEach(k=>delete ST[k]);
   DOSSIERS.forEach(sec=>sec.items.forEach(d=>{
-    ST[d.num]={cDT:'avocat',cDN:d.avDem||'',cDN2:'',cFT:d.avDef?'avocat':'absent',cFN:d.avDef||'',cFN2:'',
+    const _avDems=(d.avDem||'').split('/').map(s=>s.trim());
+    const _avDefs=(d.avDef||'').split('/').map(s=>s.trim());
+    ST[d.num]={
+      dem:(d.dems||[d.dem||'']).map((nm,i)=>({type:_avDems[i]?'avocat':'absent',name:_avDems[i]||'',loco:''})),
+      def:(d.defs||[d.def||'']).map((nm,i)=>({type:_avDefs[i]?'avocat':'absent',name:_avDefs[i]||'',loco:''})),
       dec:null,remDate:null,remPli:false,jugEnt:'conseils',jugDD:false,jugDC:false,jugDT:false,jtt:'mens',jtv:'',note:'',done:false};
   }));
 }
@@ -504,34 +509,42 @@ document.addEventListener('click',function(e){
 function getDoss(num){for(const s of DOSSIERS)for(const d of s.items)if(d.num===num)return d;}
 function nid(n){return n.replace('.','_');}
 
-function personPhrase(type,name,name2,party){
-  if(type==='absent')return`Personne ne comparaît pour ${party}.`;
-  if(type==='personne')return`${name||party} comparaît en personne.`;
-  if(name2&&name2.trim())return`Maître ${name2.trim()} loco Maître ${name||'…'} comparaît pour ${party}.`;
-  return`Maître ${name||'…'} comparaît pour ${party}.`;
+function personPhrase(comp,party){
+  if(comp.type==='absent')return`Personne ne comparaît pour ${party}.`;
+  if(comp.type==='personne')return`${comp.name||party} comparaît en personne.`;
+  if(comp.loco&&comp.loco.trim())return`Maître ${comp.loco.trim()} loco Maître ${comp.name||'…'} comparaît pour ${party}.`;
+  return`Maître ${comp.name||'…'} comparaît pour ${party}.`;
 }
 
 function genText(num){
   const s=ST[num],d=getDoss(num),lines=[];
   if(!d)return'';
-  lines.push(personPhrase(s.cDT,s.cDN,s.cDN2,d.dem));
-  lines.push(personPhrase(s.cFT,s.cFN,s.cFN2,d.def));
+  const dems=d.dems||[d.dem||''];
+  const defs=d.defs||[d.def||''];
+  dems.forEach((nm,i)=>{const c=s.dem[i]||{type:'absent',name:'',loco:''};lines.push(personPhrase(c,nm));});
+  defs.forEach((nm,i)=>{const c=s.def[i]||{type:'absent',name:'',loco:''};lines.push(personPhrase(c,nm));});
+  const demStr=dems.join(' et '),defStr=defs.join(' et ');
+  const demAbsent=s.dem.every(c=>c.type==='absent');
+  const defAbsent=s.def.every(c=>c.type==='absent');
+  const demComp=s.dem.find(c=>c.type!=='absent');
+  const defComp=s.def.find(c=>c.type!=='absent');
+  function nomComp(c,party){if(!c)return party;if(c.type==='personne')return c.name||party;if(c.loco&&c.loco.trim())return`Maître ${c.loco.trim()} loco Maître ${c.name||'…'}`;return`Maître ${c.name||'…'}`;}
   const rd=s.remDate?fd(s.remDate):'[date à préciser]';
   const jd=jugDate?fd(jugDate):'[date des jugements]';
   if(s.dec==='rc')lines.push(`À la demande des parties qui comparaissent, l'affaire est remise au ${rd}.`);
   else if(s.dec==='rd'){
-    const pres=s.cDT!=='absent'?d.dem:d.def,abs=s.cDT==='absent'?d.dem:d.def;
+    const pres=!demAbsent?demStr:defStr,abs=demAbsent?demStr:defStr;
     lines.push(`À la demande de la partie ${pres}, l'affaire est remise au ${rd}.`);
     if(s.remPli)lines.push(`Elle sollicite l'envoi d'un pli judiciaire à ${abs}, conformément à l'article 803 C.j.`);
   }else if(s.dec==='jd'){
-    const abs=s.cDT==='absent'?d.dem:d.def;
-    const pn=s.cDT!=='absent'?(s.cDT==='personne'?(s.cDN||d.dem):(s.cDN2&&s.cDN2.trim()?`Maître ${s.cDN2.trim()} loco Maître ${s.cDN||'…'}`:`Maître ${s.cDN||'…'}`)): (s.cFT==='personne'?(s.cFN||d.def):(s.cFN2&&s.cFN2.trim()?`Maître ${s.cFN2.trim()} loco Maître ${s.cFN||'…'}`:`Maître ${s.cFN||'…'}`));
+    const abs=demAbsent?demStr:defStr;
+    const pn=nomComp(demAbsent?defComp:demComp,demAbsent?defStr:demStr);
     lines.push(`La partie ${abs} est défaillante. ${pn} est entendu(e) et sollicite jugement par défaut. Il/Elle dépose son dossier de pièces ainsi que son état de dépens.`);
     lines.push(`Le tribunal clôt les débats et met la cause en délibéré. Un jugement sera prononcé le ${jd}.`);
   }else if(s.dec==='jc'){
     const em={conseils:'Leurs conseils sont entendus.',parties:'Les parties sont entendues.','cons-dem':'Le conseil de la demanderesse et la partie défenderesse sont entendus.','cons-def':'La partie demanderesse et le conseil de la défenderesse sont entendus.'};
     lines.push(em[s.jugEnt]||'Les parties sont entendues.');
-    const ds=s.cDT==='avocat'?`Le conseil de la demanderesse`:(s.cDN||d.dem);
+    const ds=(demComp&&demComp.type==='avocat')?`Le conseil de la demanderesse`:nomComp(demComp,demStr);
     let l=`${ds} sollicite jugement. Il/Elle dépose son dossier de pièces ainsi que son état de dépens.`;
     if(s.jugDD)l+=` Le conseil de la défenderesse dépose également son dossier de pièces.`;
     if(s.jugDC)l+=` La défenderesse conteste la demande.`;
@@ -539,12 +552,12 @@ function genText(num){
     lines.push(l);
     lines.push(`Le tribunal clôt les débats et met la cause en délibéré. Un jugement sera prononcé le ${jd}.`);
   }else if(s.dec==='vc')lines.push('Les parties sollicitent le renvoi au rôle.');
-  else if(s.dec==='vd')lines.push(`La partie ${s.cDT!=='absent'?d.dem:d.def} sollicite le renvoi au rôle.`);
+  else if(s.dec==='vd')lines.push(`La partie ${!demAbsent?demStr:defStr} sollicite le renvoi au rôle.`);
   else if(s.dec==='ea')lines.push("Les parties déposent un calendrier de mise en état amiable. Une ordonnance de confirmation des délais et de fixation de la cause pour être plaidée sera prononcée ultérieurement.");
   else if(s.dec==='et')lines.push("Les parties sollicitent la mise en état et la fixation de la cause pour plaidoiries. Une ordonnance sera prononcée dans le délai légal.");
   else if(s.dec==='ac')lines.push(`Les parties sont parvenues à un accord et sollicitent qu'il leur en soit donné acte. La cause est plaidée. Un jugement sera prononcé le ${jd}.`);
   else if(s.dec==='co')lines.push('Un PV de conciliation est rédigé ce jour.');
-  else if(s.dec==='ca')lines.push(`La conciliation n'aboutit pas car la partie ${s.cDT==='absent'?d.dem:d.def} est défaillante.`);
+  else if(s.dec==='ca')lines.push(`La conciliation n'aboutit pas car la partie ${demAbsent?demStr:defStr} est défaillante.`);
   else if(s.dec==='cd')lines.push("La conciliation n'aboutit pas car les parties ne sont pas parvenues à un accord.");
   if(s.note)lines.push(s.note);
   return lines.filter(Boolean).join('\n');
@@ -559,19 +572,26 @@ function refreshPreviews(){DOSSIERS.forEach(s=>s.items.forEach(d=>updatePreview(
 function renderCard(d){
   const s=ST[d.num],id=nid(d.num),dec=s.dec;
   const badge=s.done?`<span class="badge badge-d">✓ ${DEC_LBL[dec]||'—'}</span>`:`<span class="badge badge-p">En attente</span>`;
-  function cRow(side,type,name,name2){
+  const _dems=d.dems||[d.dem||''];
+  const _defs=d.defs||[d.def||''];
+  function cRow(side,i){
+    const parties=side==='dem'?_dems:_defs;
+    const nm=parties[i]||'?';
+    const comp=s[side][i]||{type:'absent',name:'',loco:''};
     const lbl=side==='dem'?'▲ Dem.':'▼ Déf.';
-    const nF=side==='dem'?'cDN':'cFN',n2F=side==='dem'?'cDN2':'cFN2',tF=side==='dem'?'cDT':'cFT';
-    const isAbs=type==='absent',isPers=type==='personne';
-    return`<div class="comp-row">
-      <span class="comp-lbl">${lbl}</span>
-      <label class="check-row"><input type="checkbox" ${isAbs?'checked':''} onchange="upd('${d.num}','${tF}',this.checked?'absent':'avocat')"> Absent(e)</label>
-      ${!isAbs?`<label class="check-row"><input type="checkbox" ${isPers?'checked':''} onchange="upd('${d.num}','${tF}',this.checked?'personne':'avocat')"> En personne</label>
-        <input type="text" value="${name}" placeholder="${isPers?'Nom…':'Titulaire…'}" style="flex:1;min-width:100px" oninput="upd('${d.num}','${nF}',this.value)">
-        ${!isPers?`<input type="text" value="${name2}" placeholder="Remplaçant (opt.)" style="flex:1;min-width:100px" oninput="upd('${d.num}','${n2F}',this.value)">`:''}`:
-      `<span style="font-size:.75rem;color:var(--muted);font-style:italic">Personne ne comparaît</span>`}
-    </div>`;
-  }
+    const prefix=parties.length>1?`${lbl} ${i+1}`:lbl;
+    const isAbs=comp.type==='absent',isPers=comp.type==='personne';
+    return`<div style="background:var(--cream);border:1px solid var(--cream-d);border-radius:6px;padding:8px 10px;margin-bottom:6px">
+      <div style="font-size:.72rem;font-weight:700;color:var(--navy);margin-bottom:5px">${prefix} — <em style="font-weight:400;color:var(--muted)">${nm}</em></div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center">
+        <label class="check-row"><input type="checkbox" ${isAbs?'checked':''} onchange="updComp('${d.num}','${side}',${i},'type',this.checked?'absent':'avocat')"> Absent(e)</label>
+        ${!isAbs?`
+          <label class="check-row"><input type="checkbox" ${isPers?'checked':''} onchange="updComp('${d.num}','${side}',${i},'type',this.checked?'personne':'avocat')"> En personne</label>
+          <input type="text" value="${comp.name}" placeholder="${isPers?'Nom…':'Me titulaire…'}" style="flex:1;min-width:90px" oninput="updComp('${d.num}','${side}',${i},'name',this.value)">
+          ${!isPers?`<input type="text" value="${comp.loco}" placeholder="Me remplaçant (opt.)" style="flex:1;min-width:90px" oninput="updComp('${d.num}','${side}',${i},'loco',this.value)">`:''}
+        `:`<span style="font-size:.75rem;color:var(--muted);font-style:italic">Personne ne comparaît</span>`}
+      </div>
+    </div>`;}
   const decBtns=d.conc
     ?`<button class="dbtn db-co ${dec==='co'?'act':''}" onclick="setDec('${d.num}','co')">🤝 Conciliation aboutit</button>
        <button class="dbtn db-ca ${dec==='ca'?'act':''}" onclick="setDec('${d.num}','ca')">⚠ Partie absente</button>
@@ -616,7 +636,7 @@ function renderCard(d){
     </div>
     <div class="c-body">
       <div class="sec-ttl">Comparutions</div>
-      <div class="comp-section">${cRow('dem',s.cDT,s.cDN,s.cDN2)}${cRow('def',s.cFT,s.cFN,s.cFN2)}</div>
+      <div class="comp-section">${_dems.map((_,i)=>cRow('dem',i)).join('')}${_defs.map((_,i)=>cRow('def',i)).join('')}</div>
       <div class="sec-ttl">Décision</div>
       <div class="dec-btns">${decBtns}</div>
       ${remSub}${jcSub}
@@ -649,8 +669,13 @@ function replaceCard(num,keepOpen){
 }
 function upd(num,field,value){
   ST[num][field]=value;
-  if(TEXT_FIELDS.has(field))updatePreview(num);
+  if(field==='note'||field==='jtv')updatePreview(num);
   else{replaceCard(num,true);updateProg();}
+}
+function updComp(num,side,i,prop,value){
+  ST[num][side][i][prop]=value;
+  if(prop==='name'||prop==='loco')updatePreview(num);
+  else replaceCard(num,true);
 }
 function setDec(num,dec){ST[num].dec=dec;replaceCard(num,true);updatePreview(num);}
 function toggleCard(num){
@@ -667,7 +692,12 @@ function valider(num){
 }
 function rstCard(num){
   const d=getDoss(num);
-  ST[num]={cDT:'avocat',cDN:d.avDem||'',cDN2:'',cFT:d.avDef?'avocat':'absent',cFN:d.avDef||'',cFN2:'',dec:null,remDate:null,remPli:false,jugEnt:'conseils',jugDD:false,jugDC:false,jugDT:false,jtt:'mens',jtv:'',note:'',done:false};
+  const _avDems2=(d.avDem||'').split('/').map(s=>s.trim());
+  const _avDefs2=(d.avDef||'').split('/').map(s=>s.trim());
+  ST[num]={
+    dem:(d.dems||[d.dem||'']).map((nm,i)=>({type:_avDems2[i]?'avocat':'absent',name:_avDems2[i]||'',loco:''})),
+    def:(d.defs||[d.def||'']).map((nm,i)=>({type:_avDefs2[i]?'avocat':'absent',name:_avDefs2[i]||'',loco:''})),
+    dec:null,remDate:null,remPli:false,jugEnt:'conseils',jugDD:false,jugDC:false,jugDT:false,jtt:'mens',jtv:'',note:'',done:false};
   replaceCard(num,true);updateProg();
 }
 function updateProg(){
@@ -725,9 +755,9 @@ function buildEntete(avecRep){
 function printCSS(){
   return`@page{size:A4;margin:15mm 18mm;}*{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:Aptos,Calibri,Arial,sans-serif;font-size:10pt;color:#000;background:white;}
-.hd-table{width:100%;border-collapse:collapse;margin-bottom:0;}
-.hd-logo{width:115pt;vertical-align:middle;padding:2pt 0;}
-.hd-right{text-align:right;vertical-align:middle;padding:2pt 0;}
+.hd-table{width:100%;border-collapse:collapse;}
+.hd-logo{width:115pt;vertical-align:middle;}
+.hd-right{text-align:right;vertical-align:middle;}
 .hd-trib{font-size:11pt;font-weight:bold;}
 .hd-div{font-size:11pt;font-weight:bold;}
 .hd-line{border-top:1.5pt solid #000;margin:2.5mm 0 1.5mm;}
@@ -755,10 +785,14 @@ function dossBlocFA(d){
   const txt=genText(d.num),lines=txt?txt.split('\n'):[],comp=lines.slice(0,2),dec=lines.slice(2);
   return`<div class="doss">
     <div class="doss-hd"><span class="dn">${d.num}</span><span class="dr">${d.ref}</span><span class="dt">${d.type||''}</span></div>
-    ${(()=>{const dems=d.dems||[d.dem],defs=d.defs||[d.def],avDem=d.avDem?` — <strong>${d.avDem}</strong>`:'',avDef=d.avDef?` — <strong>${d.avDef}</strong>`:'';
+    ${(()=>{const dd=d.dems||[d.dem||''],df=d.defs||[d.def||''];
     let h='<div class="parts">';
-    dems.forEach((nm,i)=>{h+=`<div><span class="pl">${i===0?'Dem)':''}</span> ${nm}${i===0?avDem:''}</div>`;});
-    defs.forEach((nm,i)=>{h+=`<div><span class="pl">${i===0?'Déf)':''}</span> ${nm}${i===0?avDef:''}</div>`;});
+    dd.forEach((nm,i)=>{const c=(ST[d.num]&&ST[d.num].dem[i])||{type:'absent',name:'',loco:''};
+      const av=c.type==='absent'?'':c.loco?` — <strong>Me ${c.loco} loco Me ${c.name}</strong>`:c.name?` — <strong>Me ${c.name}</strong>`:'';
+      h+=`<div><span class="pl">Dem)</span> ${nm}${av}${c.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});
+    df.forEach((nm,i)=>{const c=(ST[d.num]&&ST[d.num].def[i])||{type:'absent',name:'',loco:''};
+      const av=c.type==='absent'?'':c.loco?` — <strong>Me ${c.loco} loco Me ${c.name}</strong>`:c.name?` — <strong>Me ${c.name}</strong>`:'';
+      h+=`<div><span class="pl">Déf)</span> ${nm}${av}${c.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});
     return h+'</div>';})()}
     <div class="aud-txt">${comp.map(l=>`<div class="cl">${l}</div>`).join('')}${dec.map(l=>`<div class="dl">${l}</div>`).join('')}${!txt?'<div class="el">&nbsp;</div><div class="el">&nbsp;</div>':''}</div>
   </div>`;
@@ -788,10 +822,14 @@ function buildPV(){
       ${buildEntete(false)}
       <div style="margin-top:6mm">
         <div class="doss-hd"><span class="dn">${d.num}</span><span class="dr">${d.ref}</span><span class="dt">${d.type||''}</span></div>
-        ${(()=>{const dems=d.dems||[d.dem],defs=d.defs||[d.def],avDem=d.avDem?` — <strong>${d.avDem}</strong>`:'',avDef=d.avDef?` — <strong>${d.avDef}</strong>`:'';
+        ${(()=>{const dd=d.dems||[d.dem||''],df=d.defs||[d.def||''];
         let h='<div class="parts">';
-        dems.forEach((nm,i)=>{h+=`<div><span class="pl">${i===0?'Dem)':''}</span> ${nm}${i===0?avDem:''}</div>`;});
-        defs.forEach((nm,i)=>{h+=`<div><span class="pl">${i===0?'Déf)':''}</span> ${nm}${i===0?avDef:''}</div>`;});
+        dd.forEach((nm,i)=>{const c=(ST[d.num]&&ST[d.num].dem[i])||{type:'absent',name:'',loco:''};
+          const av=c.type==='absent'?'':c.loco?` — <strong>Me ${c.loco} loco Me ${c.name}</strong>`:c.name?` — <strong>Me ${c.name}</strong>`:'';
+          h+=`<div><span class="pl">Dem)</span> ${nm}${av}${c.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});
+        df.forEach((nm,i)=>{const c=(ST[d.num]&&ST[d.num].def[i])||{type:'absent',name:'',loco:''};
+          const av=c.type==='absent'?'':c.loco?` — <strong>Me ${c.loco} loco Me ${c.name}</strong>`:c.name?` — <strong>Me ${c.name}</strong>`:'';
+          h+=`<div><span class="pl">Déf)</span> ${nm}${av}${c.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});
         return h+'</div>';})()}
         <div class="aud-txt" style="margin-top:5mm">
           ${comp.map(l=>`<div class="cl">${l}</div>`).join('')}
@@ -815,10 +853,14 @@ function buildAll(){
       ${buildEntete(false)}
       <div style="margin-top:6mm">
         <div class="doss-hd"><span class="dn">${d.num}</span><span class="dr">${d.ref}</span><span class="dt">${d.type||''}</span></div>
-        ${(()=>{const dems=d.dems||[d.dem],defs=d.defs||[d.def],avDem=d.avDem?` — <strong>${d.avDem}</strong>`:'',avDef=d.avDef?` — <strong>${d.avDef}</strong>`:'';
+        ${(()=>{const dd=d.dems||[d.dem||''],df=d.defs||[d.def||''];
         let h='<div class="parts">';
-        dems.forEach((nm,i)=>{h+=`<div><span class="pl">${i===0?'Dem)':''}</span> ${nm}${i===0?avDem:''}</div>`;});
-        defs.forEach((nm,i)=>{h+=`<div><span class="pl">${i===0?'Déf)':''}</span> ${nm}${i===0?avDef:''}</div>`;});
+        dd.forEach((nm,i)=>{const c=(ST[d.num]&&ST[d.num].dem[i])||{type:'absent',name:'',loco:''};
+          const av=c.type==='absent'?'':c.loco?` — <strong>Me ${c.loco} loco Me ${c.name}</strong>`:c.name?` — <strong>Me ${c.name}</strong>`:'';
+          h+=`<div><span class="pl">Dem)</span> ${nm}${av}${c.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});
+        df.forEach((nm,i)=>{const c=(ST[d.num]&&ST[d.num].def[i])||{type:'absent',name:'',loco:''};
+          const av=c.type==='absent'?'':c.loco?` — <strong>Me ${c.loco} loco Me ${c.name}</strong>`:c.name?` — <strong>Me ${c.name}</strong>`:'';
+          h+=`<div><span class="pl">Déf)</span> ${nm}${av}${c.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});
         return h+'</div>';})()}
         <div class="aud-txt" style="margin-top:5mm">
           ${comp.map(l=>`<div class="cl">${l}</div>`).join('')}
