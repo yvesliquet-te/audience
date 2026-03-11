@@ -602,9 +602,32 @@ function updateProg(){
 
 // ════ LOGO SVG (Cours et Tribunaux belges) ════
 function logoSVG(w){
-  // Reproduction fidèle du logo : lignes bleues courbes représentant le palais de justice
-  const h=Math.round(w*0.65);
-  return`<svg width="${w}" height="${h}" viewBox="0 0 160 104" xmlns="http://www.w3.org/2000/svg">
+  const h=Math.round(w*0.62);
+  return`<svg width="${w}" height="${h}" viewBox="0 0 160 99" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4a9cc8;stop-opacity:1"/>
+      <stop offset="55%" style="stop-color:#2878aa;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#1a5a8a;stop-opacity:0.15"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#lg)" stroke-linecap="round">
+    <path d="M3,95 L55,95 Q80,94 100,82 Q120,68 155,65" stroke-width="1.1" opacity="0.40"/>
+    <path d="M3,91 L54,91 Q78,89 98,76 Q118,61 154,57" stroke-width="1.2" opacity="0.48"/>
+    <path d="M3,87 L53,87 Q76,84 96,70 Q115,54 152,48" stroke-width="1.3" opacity="0.55"/>
+    <path d="M3,83 L52,83 Q74,78 94,63 Q112,47 149,38" stroke-width="1.4" opacity="0.62"/>
+    <path d="M3,79 L51,79 Q72,72 91,56 Q108,40 144,29" stroke-width="1.5" opacity="0.68"/>
+    <path d="M3,75 L50,75 Q70,66 88,50 Q104,33 137,21" stroke-width="1.6" opacity="0.74"/>
+    <path d="M3,71 L49,71 Q67,60 85,44 Q100,27 130,15" stroke-width="1.7" opacity="0.79"/>
+    <path d="M3,67 L47,67 Q64,54 81,38 Q96,22 122,11" stroke-width="1.8" opacity="0.83"/>
+    <path d="M3,63 L45,63 Q61,48 77,33 Q91,17 113,8" stroke-width="1.9" opacity="0.87"/>
+    <path d="M3,59 L43,59 Q58,43 73,28 Q86,14 105,6" stroke-width="2.0" opacity="0.90"/>
+    <path d="M3,55 L41,55 Q55,38 69,24 Q81,11 97,4" stroke-width="2.1" opacity="0.93"/>
+    <path d="M3,51 L39,51 Q52,34 65,20 Q76,9 89,3" stroke-width="2.2" opacity="0.96"/>
+    <path d="M3,47 L37,47 Q49,30 61,17 Q71,7 82,2" stroke-width="2.4" opacity="0.98"/>
+    <path d="M3,43 L35,43 Q46,27 57,14 Q66,5 75,1" stroke-width="2.6" opacity="1.0"/>
+  </g>
+</svg>`;}" height="${h}" viewBox="0 0 160 104" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%" style="stop-color:#6ab0d4;stop-opacity:1"/>
@@ -773,3 +796,4 @@ function dlHtml(type){
 </script>
 </body>
 </html>
+
