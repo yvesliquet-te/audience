@@ -401,15 +401,26 @@ async function analyze(){
   setStatus('loading','Analyse par l\'IA en cours…');
   document.getElementById('btn3').disabled=true;
   try{
+    // Avertir si texte très long
+    if(txt.length>12000){
+      setStatus('loading','Texte long — analyse en cours (peut prendre 30s)…');
+    }
     const resp=await fetch('/api/analyze',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({content:txt})
     });
-    const data=await resp.json();
-    if(data.error)throw new Error(data.error);
+    // Lire la réponse en texte brut d'abord pour éviter crash JSON
+    const rawResp=await resp.text();
+    let data;
+    try{data=JSON.parse(rawResp);}
+    catch(e){throw new Error('Réponse invalide du serveur : '+(rawResp.slice(0,120)));}
+    if(!resp.ok||data.error)throw new Error(data.error||('Erreur HTTP '+resp.status));
+    if(!data.content)throw new Error('Réponse vide — réessayez ou réduisez la taille du texte.');
     const raw=data.content.map(i=>i.text||'').join('').replace(/```json[\s\S]*?```|```/g,'').trim();
-    const parsed=JSON.parse(raw);
+    let parsed;
+    try{parsed=JSON.parse(raw);}
+    catch(e){throw new Error('Le modèle n\'a pas renvoyé du JSON valide. Réessayez.');}
     META=parsed.meta||{};
     META.division=DIVISION; // on écrase avec la division choisie manuellement
     DOSSIERS=parsed.sections||[];
