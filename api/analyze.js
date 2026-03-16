@@ -1,4 +1,3 @@
-// v2 — claude-haiku (rapide) + prompt compact + vercel.json maxDuration:60
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -56,7 +55,7 @@ ${safeContent}`;
     try {
       data = JSON.parse(rawText);
     } catch (e) {
-      console.error('Non-JSON:', rawText.slice(0, 300));
+      console.error('Non-JSON from Anthropic:', rawText.slice(0, 300));
       return res.status(502).json({ error: "Réponse invalide de l'API. Réessayez." });
     }
 
@@ -64,11 +63,38 @@ ${safeContent}`;
       return res.status(500).json({ error: data.error.message || JSON.stringify(data.error) });
     }
 
+    // Extraire le texte brut du modèle
+    const modelText = (data.content || []).map(i => i.text || '').join('').trim();
+    console.log('Model raw output (first 500):', modelText.slice(0, 500));
+    console.log('Stop reason:', data.stop_reason);
+    console.log('Usage:', JSON.stringify(data.usage));
+
+    // Nettoyer: enlever ```json ... ``` et tout ce qui précède {
+    const cleaned = modelText
+      .replace(/^[\s\S]*?(\{)/, '$1')   // tout avant le premier {
+      .replace(/\}\s*```[\s\S]*$/, '}') // tout après le dernier }
+      .trim();
+
+    let parsed;
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch(e) {
+      console.error('JSON parse error:', e.message);
+      console.error('Cleaned text:', cleaned.slice(0, 500));
+      // Renvoyer le texte brut pour debug
+      return res.status(422).json({
+        error: 'JSON invalide: ' + e.message,
+        debug_raw: modelText.slice(0, 800),
+        debug_cleaned: cleaned.slice(0, 800),
+        stop_reason: data.stop_reason
+      });
+    }
+
     res.status(200).json(data);
 
   } catch (err) {
     if (err.name === 'AbortError') {
-      return res.status(504).json({ error: 'Délai dépassé (55s). Divisez la feuille en deux parties et analysez-les séparément.' });
+      return res.status(504).json({ error: 'Délai dépassé (55s). Divisez la feuille en deux et analysez séparément.' });
     }
     res.status(500).json({ error: err.message || 'Erreur serveur' });
   }
