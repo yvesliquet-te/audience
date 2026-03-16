@@ -1,3 +1,4 @@
+// v2 — claude-haiku (rapide) + prompt compact + vercel.json maxDuration:60
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -9,37 +10,25 @@ module.exports = async function handler(req, res) {
     const { content } = req.body;
     if (!content) return res.status(400).json({ error: 'Missing content' });
 
-    // Tronquer si trop long (~14000 chars ≈ 4000 tokens de contexte sûr)
-    const MAX = 14000;
-    const truncated = content.length > MAX;
-    const safeContent = truncated ? content.slice(0, MAX) + '\n[...tronqué]' : content;
-    if (truncated) {
-      console.warn(`Content truncated from ${content.length} to ${MAX} chars`);
-    }
+    const MAX = 18000;
+    const safeContent = content.length > MAX ? content.slice(0, MAX) + '\n[...tronqué]' : content;
 
-    const prompt =
-      "Extrais les données de cette feuille d'audience judiciaire belge et retourne UNIQUEMENT ce JSON brut, sans markdown, sans explication.\n\n" +
-      "REGLES CRITIQUES pour dem / def / avDem / avDef :\n\n" +
-      "1. Il peut y avoir PLUSIEURS demandeurs ou defendeurs. Dans ce cas :\n" +
-      '   - "dem" contient tous les demandeurs separes par " / "\n' +
-      '   - "def" contient tous les defendeurs separes par " / "\n\n' +
-      '2. "avDem" et "avDef" doivent etre alignes position par position sur "dem" et "def" :\n' +
-      '   - Un avocat par partie, separes par " / "\n' +
-      '   - Si une partie n\'a PAS d\'avocat mentionne, mettre une chaine VIDE a sa position\n' +
-      '   - Exemple : def = "SCIARRABBA BIANCA / MUTZHAGEN SRL"\n' +
-      '               avDef = " / Me. ORBAN JUDITH"\n' +
-      "3. conc = true si la reference commence par M/\n\n" +
-      "4. Inclure TOUS les dossiers sans exception.\n\n" +
-      '{"meta":{"tribunal":"...","division":"...","date":"...","heure":"...","juges":["..."]},' +
-      '"sections":[{"section":"NOM SECTION","items":[{' +
-      '"num":"1.1","ref":"A/26/00061","type":"...","conc":false,' +
-      '"dem":"NOM1 / NOM2","avDem":"Me NOM1 / (vide si absent)","def":"NOM1 / NOM2","avDef":"Me NOM1 / (vide si absent)"' +
-      '}]}]}\n\n' +
-      "FEUILLE D'AUDIENCE :\n" + safeContent;
+    const prompt = `Extrais les dossiers de cette feuille d'audience belge. JSON brut uniquement, sans markdown.
 
-    // Timeout de 55s (Vercel limite à 60s)
+Format exact:
+{"meta":{"tribunal":"","division":"","date":"","heure":"","juges":[]},"sections":[{"section":"","items":[{"num":"1.1","ref":"","type":"","conc":false,"dem":"NOM1 / NOM2","avDem":"Me X / ","def":"NOM","avDef":"Me Y"}]}]}
+
+Règles:
+- dem/def: plusieurs parties séparées par " / "
+- avDem/avDef: alignés position par position, chaîne vide si pas d'avocat
+- conc=true si ref commence par M/
+- Tous les dossiers sans exception
+
+FEUILLE:
+${safeContent}`;
+
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 55000);
+    const tid = setTimeout(() => controller.abort(), 55000);
 
     let apiResp;
     try {
@@ -51,40 +40,36 @@ module.exports = async function handler(req, res) {
           'anthropic-version': '2023-06-01'
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 16000,
-          system: "Tu es un extracteur de données JSON pour feuilles d'audience judiciaires belges. Tu réponds TOUJOURS et UNIQUEMENT avec du JSON brut valide, sans markdown, sans explication, sans refus.",
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 8000,
+          system: "Tu es un extracteur JSON pour feuilles d'audience judiciaires belges. Réponds UNIQUEMENT avec du JSON brut valide, sans markdown, sans texte autour.",
           messages: [{ role: 'user', content: prompt }]
         }),
         signal: controller.signal
       });
     } finally {
-      clearTimeout(timeout);
+      clearTimeout(tid);
     }
 
-    // Lire en texte brut d'abord
     const rawText = await apiResp.text();
     let data;
     try {
       data = JSON.parse(rawText);
     } catch (e) {
-      console.error('Anthropic non-JSON response:', rawText.slice(0, 200));
-      return res.status(502).json({ error: 'Réponse invalide de l\'API Anthropic. Réessayez.' });
+      console.error('Non-JSON:', rawText.slice(0, 300));
+      return res.status(502).json({ error: "Réponse invalide de l'API. Réessayez." });
     }
 
     if (data.error) {
-      const msg = data.error.message || JSON.stringify(data.error);
-      console.error('Anthropic error:', msg);
-      return res.status(500).json({ error: msg });
+      return res.status(500).json({ error: data.error.message || JSON.stringify(data.error) });
     }
 
     res.status(200).json(data);
 
   } catch (err) {
     if (err.name === 'AbortError') {
-      return res.status(504).json({ error: 'Délai dépassé — le texte est peut-être trop long. Essayez de le diviser en deux parties.' });
+      return res.status(504).json({ error: 'Délai dépassé (55s). Divisez la feuille en deux parties et analysez-les séparément.' });
     }
-    console.error('Handler error:', err.message);
     res.status(500).json({ error: err.message || 'Erreur serveur' });
   }
 };
