@@ -391,38 +391,33 @@ function showErr(msg){setStatus('error','⚠ '+msg);}
 
 async function analyze(){
   const txt=document.getElementById('paste-input').value.trim();
-  if(!txt){showErr('Veuillez coller le texte de la feuille d\'audience');return;}
+  if(!txt){showErr("Veuillez coller le texte de l'audience");return;}
   SIEGE={
     juge:document.getElementById('s-juge').value.trim(),
     cons1:document.getElementById('s-cons1').value.trim(),
     cons2:document.getElementById('s-cons2').value.trim(),
     gref:document.getElementById('s-gref').value.trim()
   };
-  setStatus('loading','Analyse par l\'IA en cours…');
+  setStatus('loading',"Analyse en cours"+(txt.length>12000?" (texte long…)":"…"));
   document.getElementById('btn3').disabled=true;
   try{
-    // Avertir si texte très long
-    if(txt.length>12000){
-      setStatus('loading','Texte long — analyse en cours (peut prendre 30s)…');
-    }
     const resp=await fetch('/api/analyze',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({content:txt})
     });
-    // Lire la réponse en texte brut d'abord pour éviter crash JSON
     const rawResp=await resp.text();
     let data;
     try{data=JSON.parse(rawResp);}
-    catch(e){throw new Error('Réponse invalide du serveur : '+(rawResp.slice(0,120)));}
-    if(!resp.ok||data.error)throw new Error(data.error||('Erreur HTTP '+resp.status));
-    if(!data.content)throw new Error('Réponse vide — réessayez ou réduisez la taille du texte.');
-    const raw=data.content.map(i=>i.text||'').join('').replace(/```json[\s\S]*?```|```/g,'').trim();
+    catch(e){throw new Error("Réponse invalide du serveur : "+rawResp.slice(0,150));}
+    if(!resp.ok||data.error)throw new Error(data.error||"Erreur HTTP "+resp.status);
+    if(!data.content)throw new Error("Réponse vide — réessayez.");
+    const raw=data.content.map(i=>i.text||'').join('').replace(/^[\s\S]*?(\{)/,'$1').replace(/\}[^}]*$/,'}').trim();
     let parsed;
     try{parsed=JSON.parse(raw);}
-    catch(e){throw new Error('Le modèle n\'a pas renvoyé du JSON valide. Réessayez.');}
+    catch(e){throw new Error("JSON invalide: "+raw.slice(0,200));}
     META=parsed.meta||{};
-    META.division=DIVISION; // on écrase avec la division choisie manuellement
+    META.division=DIVISION;
     DOSSIERS=parsed.sections||[];
     DOSSIERS.forEach(sec=>sec.items.forEach(d=>{
       if(typeof d.conc==='undefined')d.conc=(d.ref||'').startsWith('M/');
@@ -431,7 +426,7 @@ async function analyze(){
     }));
     launchApp();
   }catch(e){
-    showErr(e.message||'Erreur lors de l\'analyse.');
+    showErr(e.message||"Erreur inconnue");
     document.getElementById('btn3').disabled=false;
   }
 }
