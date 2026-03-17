@@ -245,6 +245,15 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
       <p>Tribunal de l'Entreprise de Liège</p>
     </div>
     <div class="up-body">
+      <div id="resume-bar" style="background:#f0f4ff;border:1px solid #c5d0f0;border-radius:8px;padding:10px 14px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <div style="font-size:.8rem;color:#3a52b0;font-weight:600">📂 Reprendre une session enregistrée</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <label style="font-size:.78rem;padding:6px 14px;border-radius:6px;border:1px solid #c5d0f0;background:white;color:#3a52b0;cursor:pointer;font-weight:600" title="Charger un fichier JSON">
+            📂 Ouvrir un fichier JSON
+            <input type="file" accept=".json" style="display:none" onchange="loadJSON(event)">
+          </label>
+        </div>
+      </div>
       <div class="steps">
         <div class="step active" id="stp1"><span class="step-n">1</span>Division</div>
         <div class="step" id="stp2"><span class="step-n">2</span>Siège</div>
