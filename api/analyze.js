@@ -9,10 +9,10 @@ module.exports = async function handler(req, res) {
     const { content } = req.body;
     if (!content) return res.status(400).json({ error: 'Missing content' });
 
-    const MAX = 18000;
+    const MAX = 22000;
     const safeContent = content.length > MAX ? content.slice(0, MAX) + '\n[...tronqué]' : content;
 
-    const prompt = `Extrais les dossiers de cette feuille d'audience judiciaire belge. Retourne UNIQUEMENT du JSON brut valide, sans markdown.
+    const prompt = `Extrais les dossiers de cette feuille d'audience judiciaire belge. Retourne UNIQUEMENT du JSON brut valide, sans markdown, sans texte autour.
 
 FORMAT:
 {"meta":{"tribunal":"","division":"","date":"","heure":"","juges":[]},"sections":[{"section":"NOM","items":[{"num":"1.1","ref":"A/26/00001","type":"","conc":false,"dem":"NOM DEM 1 / NOM DEM 2","avDem":"Me X / ","def":"NOM DEF 1 / NOM DEF 2","avDef":" / Me Y"}]}]}
@@ -23,7 +23,6 @@ RÈGLES STRICTES:
 3. Dans une feuille belge: le demandeur est indiqué en premier, le défendeur après "c/" ou "contre"
 4. avDem/avDef: UN avocat par partie, alignés position par position avec dem/def
    - Si une partie n'a pas d'avocat: mettre une chaîne VIDE à cette position
-   - Exemple: dem="DUPONT / MARTIN SA", avDem="Me ADAM / " (MARTIN SA sans avocat)
 5. conc=true si la référence commence par M/
 6. Inclure ABSOLUMENT TOUS les dossiers sans exception
 
@@ -43,8 +42,8 @@ ${safeContent}`;
           'anthropic-version': '2023-06-01'
         },
         body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 8000,
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 16000,
           system: "Tu es un extracteur JSON pour feuilles d'audience judiciaires belges. Le demandeur (dem) est la partie qui INTRODUIT l'action. Le défendeur (def) est la partie ASSIGNÉE. Réponds UNIQUEMENT avec du JSON brut valide, sans markdown, sans texte autour.",
           messages: [{ role: 'user', content: prompt }]
         }),
