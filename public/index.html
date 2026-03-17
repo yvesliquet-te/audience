@@ -1257,7 +1257,15 @@ function autoSave(){
 function saveJSON(){
   var blob=new Blob([JSON.stringify(buildSnapshot(),null,2)],{type:'application/json'});
   var url=URL.createObjectURL(blob),a=document.createElement('a');
-  a.href=url;a.download='audience_'+(META.date||'session').replace(/\s+/g,'-')+'.json';a.click();URL.revokeObjectURL(url);
+  var now=new Date();
+  var dd=String(now.getDate()).padStart(2,'0');
+  var mm=String(now.getMonth()+1).padStart(2,'0');
+  var yy=String(now.getFullYear()).slice(-2);
+  var hh=String(now.getHours()).padStart(2,'0');
+  var mn=String(now.getMinutes()).padStart(2,'0');
+  var stamp=dd+mm+yy+'_'+hh+mn;
+  var audDate=(META.date||'').replace(/\s+/g,'-').replace(/\//g,'-');
+  a.href=url;a.download='audience_'+(audDate||stamp)+'_'+stamp+'.json';a.click();URL.revokeObjectURL(url);
 }
 function loadJSON(event){
   var file=event.target.files[0];if(!file)return;
