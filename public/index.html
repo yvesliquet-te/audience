@@ -702,11 +702,18 @@ function renderCard(d){
   function cRow(side,i){
     const parties=side==='dem'?_dems:_defs,nm=parties[i]||'?';
     const comp=s[side][i]||{type:'absent',name:'',loco:''};
-    const lbl=side==='dem'?'▲ Dem.':'▼ Déf.';
-    const prefix=parties.length>1?`${lbl} ${i+1}`:lbl;
+    const curRole=comp.role||side;
     const isAbs=comp.type==='absent',isPers=comp.type==='personne';
     return`<div style="background:var(--cream);border:1px solid var(--cream-d);border-radius:6px;padding:8px 10px;margin-bottom:6px">
-      <div style="font-size:.72rem;font-weight:700;color:var(--navy);margin-bottom:5px">${prefix} — <em style="font-weight:400;color:var(--muted)">${nm}</em></div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap">
+        <select style="font-size:.7rem;font-weight:700;color:var(--navy);border:1px solid var(--cream-dd);border-radius:4px;padding:2px 5px;background:white;cursor:pointer" onchange="updPartieRole('${d.num}','${side}',${i},this.value)">
+          <option value="dem" ${curRole==='dem'?'selected':''}>▲ Dem.</option>
+          <option value="def" ${curRole==='def'?'selected':''}>▼ Déf.</option>
+          <option value="interv" ${curRole==='interv'?'selected':''}>⬡ Interv.</option>
+          <option value="autre" ${curRole==='autre'?'selected':''}>◆ Autre</option>
+        </select>
+        <input type="text" value="${nm}" placeholder="Nom de la partie…" style="flex:1;min-width:100px;font-size:.75rem;font-weight:600;color:var(--navy);border:1px solid var(--cream-dd);border-radius:4px;padding:3px 7px;background:white" oninput="updPartieName('${d.num}','${side}',${i},this.value)">
+      </div>
       <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center">
         <label class="check-row"><input type="checkbox" ${isAbs?'checked':''} onchange="updComp('${d.num}','${side}',${i},'type',this.checked?'absent':'avocat')"> Absent(e)</label>
         ${!isAbs?`
@@ -817,6 +824,19 @@ function upd(num,field,value){
   if(field==='note'||field==='jtv'){updatePreview(num);clearTimeout(upd._t);upd._t=setTimeout(autoSave,1200);}
   else{replaceCard(num,true);updateProg();autoSave();}
 }
+function updPartieRole(num,side,i,role){
+  if(ST[num]&&ST[num][side]&&ST[num][side][i])ST[num][side][i].role=role;
+  replaceCard(num,true);autoSave();
+}
+function updPartieName(num,side,i,val){
+  const d=getDoss(num);if(!d)return;
+  if(side==='dem'){if(!d.dems)d.dems=[d.dem||''];d.dems[i]=val;}
+  else{if(!d.defs)d.defs=[d.def||''];d.defs[i]=val;}
+  updatePreview(num);
+  clearTimeout(updPartieName._t);
+  updPartieName._t=setTimeout(autoSave,1000);
+}
+
 function updComp(num,side,i,prop,value){
   ST[num][side][i][prop]=value;
   if(prop==='name'||prop==='loco'){updatePreview(num);clearTimeout(updComp._t);updComp._t=setTimeout(autoSave,1200);}
@@ -926,7 +946,7 @@ function dossBlocFA(d){
   const txt=genText(d.num),lines=txt?txt.split('\n'):[],comp=lines.slice(0,2),dec=lines.slice(2);
   return`<div class="doss">
     <div class="doss-hd"><span class="dn">${d.num}</span><span class="dr">${d.ref}</span><span class="dt">${d.type||''}</span></div>
-    ${(()=>{const dd=d.dems||[d.dem||''],df=d.defs||[d.def||''];let h='<div class="parts">';dd.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].dem[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';h+=`<div><span class="pl">Dem)</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});df.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].def[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';h+=`<div><span class="pl">Déf)</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});return h+'</div>';})()}
+    ${(()=>{const dd=d.dems||[d.dem||''],df=d.defs||[d.def||''];let h='<div class="parts">';dd.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].dem[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';const _rl={'dem':'Dem)','def':'Déf)','interv':'Interv.','autre':'Autre'};h+=`<div><span class="pl">${_rl[cv.role||'dem']||'Dem)'}</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});df.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].def[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';const _rl2={'dem':'Dem)','def':'Déf)','interv':'Interv.','autre':'Autre'};h+=`<div><span class="pl">${_rl2[cv.role||'def']||'Déf)'}</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});return h+'</div>';})()}
     <div class="aud-txt">${comp.map(l=>`<div class="cl">${l}</div>`).join('')}${dec.map(l=>`<div class="dl">${l}</div>`).join('')}${!txt?'<div class="el">&nbsp;</div><div class="el">&nbsp;</div>':''}</div>
   </div>`;
 }
@@ -955,7 +975,7 @@ function buildPV(){
       ${buildEntete(false)}
       <div style="margin-top:6mm">
         <div class="doss-hd"><span class="dn">${d.num}</span><span class="dr">${d.ref}</span><span class="dt">${d.type||''}</span></div>
-        ${(()=>{const dd=d.dems||[d.dem||''],df=d.defs||[d.def||''];let h='<div class="parts">';dd.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].dem[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';h+=`<div><span class="pl">Dem)</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});df.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].def[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';h+=`<div><span class="pl">Déf)</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});return h+'</div>';})()}
+        ${(()=>{const dd=d.dems||[d.dem||''],df=d.defs||[d.def||''];let h='<div class="parts">';dd.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].dem[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';const _rl={'dem':'Dem)','def':'Déf)','interv':'Interv.','autre':'Autre'};h+=`<div><span class="pl">${_rl[cv.role||'dem']||'Dem)'}</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});df.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].def[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';const _rl2={'dem':'Dem)','def':'Déf)','interv':'Interv.','autre':'Autre'};h+=`<div><span class="pl">${_rl2[cv.role||'def']||'Déf)'}</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});return h+'</div>';})()}
         <div class="aud-txt" style="margin-top:5mm">
           ${comp.map(l=>`<div class="cl">${l}</div>`).join('')}
           ${dec.map(l=>`<div class="dl">${l}</div>`).join('')}
@@ -978,7 +998,7 @@ function buildAll(){
       ${buildEntete(false)}
       <div style="margin-top:6mm">
         <div class="doss-hd"><span class="dn">${d.num}</span><span class="dr">${d.ref}</span><span class="dt">${d.type||''}</span></div>
-        ${(()=>{const dd=d.dems||[d.dem||''],df=d.defs||[d.def||''];let h='<div class="parts">';dd.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].dem[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';h+=`<div><span class="pl">Dem)</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});df.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].def[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';h+=`<div><span class="pl">Déf)</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});return h+'</div>';})()}
+        ${(()=>{const dd=d.dems||[d.dem||''],df=d.defs||[d.def||''];let h='<div class="parts">';dd.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].dem[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';const _rl={'dem':'Dem)','def':'Déf)','interv':'Interv.','autre':'Autre'};h+=`<div><span class="pl">${_rl[cv.role||'dem']||'Dem)'}</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});df.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].def[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';const _rl2={'dem':'Dem)','def':'Déf)','interv':'Interv.','autre':'Autre'};h+=`<div><span class="pl">${_rl2[cv.role||'def']||'Déf)'}</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});return h+'</div>';})()}
         <div class="aud-txt" style="margin-top:5mm">
           ${comp.map(l=>`<div class="cl">${l}</div>`).join('')}
           ${dec.map(l=>`<div class="dl">${l}</div>`).join('')}
