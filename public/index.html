@@ -267,10 +267,20 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
 
       <!-- STEP 3 : FEUILLE -->
       <div class="step-content" id="sc3">
-        <p style="font-size:.83rem;color:var(--muted);margin-bottom:10px;">Collez le texte de la feuille d'audience :</p>
+        <p style="font-size:.83rem;color:var(--muted);margin-bottom:8px;">
+          Collez le texte de la feuille d'audience.<br>
+          <span style="font-size:.75rem">Si la feuille est longue, ajoutez-la en plusieurs extraits.</span>
+        </p>
+        <div id="setup-chunks-list" style="margin-bottom:6px"></div>
+        <div id="setup-chunks-total" style="font-size:.72rem;color:var(--muted);margin-bottom:6px"></div>
         <div class="paste-zone">
           <textarea id="paste-input" placeholder="Ctrl+A dans Word → Ctrl+C → Ctrl+V ici"></textarea>
           <div class="paste-hint">💡 Sélectionnez tout dans Word (Ctrl+A), copiez (Ctrl+C), collez ici (Ctrl+V).</div>
+        </div>
+        <div style="display:flex;justify-content:flex-start;margin:6px 0 0">
+          <button class="btn-ghost" onclick="addSetupChunk()"
+            style="font-size:.76rem;padding:5px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.25);
+            background:rgba(255,255,255,.1);color:white;cursor:pointer">+ Ajouter cet extrait</button>
         </div>
         <div class="step-btns">
           <button class="btn-prev" onclick="goStep(2)">← Retour</button>
@@ -292,7 +302,7 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
     </div>
     <div class="h-right">
       <div class="prog"><span id="prog-txt">0/0</span><div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div></div>
-      <span id="autosave-lbl" style="font-size:.68rem;color:rgba(255,255,255,.35);margin-right:2px"></span><button class="btn btn-ghost" onclick="saveJSON()" title="Sauvegarder">💾</button><button class="btn btn-ghost" onclick="document.getElementById('json-input').click()" title="Reprendre">📂</button><input type="file" id="json-input" accept=".json" style="display:none" onchange="loadJSON(event)"><button class="btn btn-gold" onclick="openExport()">⬇ Exporter</button>
+      <span id="autosave-lbl" style="font-size:.68rem;color:rgba(255,255,255,.35);margin-right:2px"></span><button class="btn btn-ghost" onclick="saveJSON()" title="Sauvegarder">💾</button><button class="btn btn-ghost" onclick="document.getElementById('json-input').click()" title="Reprendre">📂</button><input type="file" id="json-input" accept=".json" style="display:none" onchange="loadJSON(event)"><button class="btn btn-ghost" onclick="openAddModal()" title="Ajouter des dossiers">＋ Ajouter</button><button class="btn btn-gold" onclick="openExport()">⬇ Exporter</button>
       <button class="btn btn-ghost" onclick="newAud()">↩ Nouvelle audience</button>
     </div>
   </div>
@@ -309,7 +319,68 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
 
   <div id="app-body"></div>
 
-  <!-- EXPORT MODAL -->
+  
+<!-- ══ MODAL AJOUT DOSSIERS ══ -->
+<div class="add-modal-ov" id="add-modal">
+  <div class="add-modal">
+    <h2>＋ Ajouter des dossiers</h2>
+    <div class="add-tabs">
+      <button class="add-tab active" onclick="switchAddTab('manual')">✏ Encodage manuel</button>
+      <button class="add-tab" onclick="switchAddTab('paste')">📋 Copier / coller</button>
+    </div>
+
+    <!-- PANE MANUEL -->
+    <div class="add-pane active" id="add-pane-manual">
+      <div class="add-row">
+        <div class="add-field"><label>Référence *</label><input id="add-ref" placeholder="A/26/00123"></div>
+        <div class="add-field"><label>Type</label><input id="add-type" placeholder="Défaut / Contradictoire…"></div>
+      </div>
+      <div class="add-row">
+        <div class="add-field"><label>Demandeur(s) *</label><input id="add-dem" placeholder="DUPONT Jean / SA EXEMPLE"></div>
+        <div class="add-field"><label>Avocat(s) dem.</label><input id="add-avDem" placeholder="Me MARTIN / "></div>
+      </div>
+      <div class="add-row">
+        <div class="add-field"><label>Défendeur(s) *</label><input id="add-def" placeholder="MARTIN Paul"></div>
+        <div class="add-field"><label>Avocat(s) déf.</label><input id="add-avDef" placeholder="Me DUBOIS"></div>
+      </div>
+      <div class="add-row">
+        <div class="add-field"><label>Section</label>
+          <select id="add-section">
+            <option value="">— Choisir —</option>
+          </select>
+        </div>
+        <div class="add-field"><label>Conciliation ?</label>
+          <select id="add-conc"><option value="0">Non</option><option value="1">Oui (M/…)</option></select>
+        </div>
+      </div>
+      <div style="margin-top:16px;display:flex;justify-content:flex-end;gap:8px">
+        <button class="btn btn-ghost" onclick="closeAddModal()">Annuler</button>
+        <button class="btn btn-gold" onclick="addManual()">Ajouter le dossier</button>
+      </div>
+    </div>
+
+    <!-- PANE COLLER -->
+    <div class="add-pane" id="add-pane-paste">
+      <p style="font-size:.8rem;color:var(--muted);margin:0 0 10px">
+        Collez plusieurs extraits si votre feuille est trop longue. Ils seront analysés ensemble.</p>
+      <div class="add-chunks" id="add-chunks-list"></div>
+      <div class="chunks-total" id="chunks-total"></div>
+      <textarea id="add-paste-input" placeholder="Collez un extrait ici…"
+        style="width:100%;box-sizing:border-box;height:130px;padding:10px;border-radius:8px;
+        border:1px solid var(--cream-dd);font-size:.8rem;resize:vertical;font-family:'DM Sans',sans-serif;"></textarea>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:8px">
+        <button class="btn btn-ghost" onclick="addChunk()" style="flex-shrink:0">+ Ajouter cet extrait</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost" onclick="closeAddModal()">Annuler</button>
+          <button class="btn btn-gold" id="add-analyze-btn" onclick="analyzeChunks()" disabled>▶ Analyser et ajouter</button>
+        </div>
+      </div>
+      <div class="u-status" id="add-status" style="margin-top:10px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT MODAL -->
   <div class="modal-ov" id="exp-modal">
     <div class="modal">
       <h2>⬇ Exporter</h2>
@@ -390,8 +461,12 @@ function setStatus(type,msg){
 function showErr(msg){setStatus('error','⚠ '+msg);}
 
 async function analyze(){
-  const txt=document.getElementById('paste-input').value.trim();
-  if(!txt){showErr("Veuillez coller le texte de l'audience");return;}
+  // Combiner les chunks + le textarea courant
+  const curTxt=document.getElementById('paste-input').value.trim();
+  if(curTxt)setupChunks.push(curTxt);
+  if(!setupChunks.length){showErr("Veuillez coller le texte de l'audience");return;}
+  const txt=setupChunks.join('\n\n--- suite ---\n\n');
+  setupChunks=[];renderSetupChunks();
   SIEGE={
     juge:document.getElementById('s-juge').value.trim(),
     cons1:document.getElementById('s-cons1').value.trim(),
@@ -897,6 +972,171 @@ function dlHtml(type){
   a.href=url;a.download=`audience_${suffix}_${(META.date||'').replace(/\s+/g,'-')}.html`;a.click();URL.revokeObjectURL(url);
 }
 
+// ════ CHUNKS SETUP ════
+let setupChunks=[];
+function addSetupChunk(){
+  const txt=document.getElementById('paste-input').value.trim();
+  if(!txt)return;
+  setupChunks.push(txt);
+  document.getElementById('paste-input').value='';
+  renderSetupChunks();
+}
+function removeSetupChunk(i){setupChunks.splice(i,1);renderSetupChunks();}
+function renderSetupChunks(){
+  const list=document.getElementById('setup-chunks-list');
+  const tot=document.getElementById('setup-chunks-total');
+  if(!list)return;
+  list.innerHTML=setupChunks.map((ch,i)=>
+    `<div class="chunk-item" style="background:rgba(255,255,255,.08);color:white"><span style="color:rgba(255,255,255,.7)">Extrait ${i+1} — ${ch.length} car.</span>`+
+    `<button class="chunk-del" onclick="removeSetupChunk(${i})" style="color:#ffaaaa">✕</button></div>`
+  ).join('');
+  const total=setupChunks.reduce((a,s)=>a+s.length,0);
+  tot.textContent=setupChunks.length?`${setupChunks.length} extrait(s) — ${total} caractères`:'';
+}
+
+// ════ AJOUT DOSSIERS ════
+let addChunks=[];
+
+function openAddModal(){
+  // Peupler le select section
+  const sel=document.getElementById('add-section');
+  sel.innerHTML='<option value="">— Choisir —</option>';
+  DOSSIERS.forEach(sec=>{
+    const o=document.createElement('option');
+    o.value=sec.section;o.textContent=sec.section;
+    sel.appendChild(o);
+  });
+  // Ajouter option nouvelle section
+  const oNew=document.createElement('option');
+  oNew.value='__new__';oNew.textContent='+ Nouvelle section…';
+  sel.appendChild(oNew);
+  // Reset
+  addChunks=[];
+  renderChunks();
+  document.getElementById('add-paste-input').value='';
+  document.getElementById('add-status').innerHTML='';
+  document.getElementById('add-modal').classList.add('open');
+}
+function closeAddModal(){document.getElementById('add-modal').classList.remove('open');}
+function switchAddTab(tab){
+  document.querySelectorAll('.add-tab').forEach((t,i)=>t.classList.toggle('active',['manual','paste'][i]===tab));
+  document.querySelectorAll('.add-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('add-pane-'+tab).classList.add('active');
+}
+
+function addManual(){
+  const ref=document.getElementById('add-ref').value.trim();
+  const dem=document.getElementById('add-dem').value.trim();
+  const def=document.getElementById('add-def').value.trim();
+  if(!ref||!dem||!def){alert('Référence, demandeur et défendeur sont obligatoires.');return;}
+  let secName=document.getElementById('add-section').value;
+  if(secName==='__new__'){
+    secName=prompt('Nom de la nouvelle section :','');
+    if(!secName)return;
+  }
+  if(!secName)secName='Divers';
+  const avDem=document.getElementById('add-avDem').value.trim();
+  const avDef=document.getElementById('add-avDef').value.trim();
+  const conc=document.getElementById('add-conc').value==='1';
+  // Calculer le prochain num
+  const allItems=DOSSIERS.flatMap(s=>s.items);
+  const maxNum=allItems.length?Math.max(...allItems.map(d=>parseFloat(d.num)||0)):0;
+  const newNum=(Math.ceil(maxNum)+1)+'.1';
+  const d={num:newNum,ref,type:'',conc,dem,avDem,def,avDef};
+  d.dems=dem.split(/\s*\/\s*/).filter(Boolean);
+  d.defs=def.split(/\s*\/\s*/).filter(Boolean);
+  // Trouver ou créer la section
+  let sec=DOSSIERS.find(s=>s.section===secName);
+  if(!sec){sec={section:secName,items:[]};DOSSIERS.push(sec);}
+  sec.items.push(d);
+  // Initialiser ST
+  const _ad=(avDem||'').split('/').map(s=>s.trim());
+  const _af=(avDef||'').split('/').map(s=>s.trim());
+  ST[newNum]={
+    dem:d.dems.map((nm,i)=>({type:_ad[i]?'avocat':'absent',name:_ad[i]||'',loco:''})),
+    def:d.defs.map((nm,i)=>({type:_af[i]?'avocat':'absent',name:_af[i]||'',loco:''})),
+    dec:null,remDate:null,remPli:false,jugEnt:'conseils',jugDD:false,jugDC:false,jugDT:false,jtt:'mens',jtv:'',note:'',done:false
+  };
+  renderAll();autoSave();closeAddModal();
+  // Vider les champs
+  ['add-ref','add-dem','add-def','add-avDem','add-avDef'].forEach(id=>document.getElementById(id).value='');
+}
+
+function addChunk(){
+  const txt=document.getElementById('add-paste-input').value.trim();
+  if(!txt)return;
+  addChunks.push(txt);
+  document.getElementById('add-paste-input').value='';
+  renderChunks();
+}
+function removeChunk(i){addChunks.splice(i,1);renderChunks();}
+function renderChunks(){
+  const list=document.getElementById('add-chunks-list');
+  const total=document.getElementById('chunks-total');
+  const btn=document.getElementById('add-analyze-btn');
+  list.innerHTML=addChunks.map((ch,i)=>
+    `<div class="chunk-item"><span>Extrait ${i+1} — ${ch.length} caractères : ${ch.slice(0,60).replace(/</g,'&lt;')}…</span>`+
+    `<button class="chunk-del" onclick="removeChunk(${i})">✕</button></div>`
+  ).join('');
+  const tot=addChunks.reduce((a,s)=>a+s.length,0);
+  total.textContent=addChunks.length?`${addChunks.length} extrait(s) — ${tot} caractères au total`:'';
+  btn.disabled=addChunks.length===0;
+}
+
+async function analyzeChunks(){
+  // Ajouter l'extrait en cours si non vide
+  const cur=document.getElementById('add-paste-input').value.trim();
+  if(cur){addChunks.push(cur);document.getElementById('add-paste-input').value='';renderChunks();}
+  if(!addChunks.length)return;
+  const fullText=addChunks.join('\n\n--- suite ---\n\n');
+  const st=document.getElementById('add-status');
+  st.innerHTML='<span class="ld">Analyse en cours…</span>';
+  document.getElementById('add-analyze-btn').disabled=true;
+  try{
+    const resp=await fetch('/api/analyze',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({content:fullText})
+    });
+    const rawResp=await resp.text();
+    let data;
+    try{data=JSON.parse(rawResp);}catch(e){throw new Error("Réponse invalide : "+rawResp.slice(0,120));}
+    if(!resp.ok||data.error)throw new Error(data.error||"Erreur HTTP "+resp.status);
+    if(!data.content)throw new Error("Réponse vide.");
+    const raw=data.content.map(i=>i.text||'').join('').replace(/^[\s\S]*?(\{)/,'$1').replace(/\}[^}]*$/,'}').trim();
+    let parsed;
+    try{parsed=JSON.parse(raw);}catch(e){throw new Error("JSON invalide: "+raw.slice(0,150));}
+    // Ajouter les dossiers parsés aux sections existantes
+    let added=0;
+    (parsed.sections||[]).forEach(newSec=>{
+      let sec=DOSSIERS.find(s=>s.section===newSec.section);
+      if(!sec){sec={section:newSec.section,items:[]};DOSSIERS.push(sec);}
+      (newSec.items||[]).forEach(d=>{
+        // Vérifier que le num n'existe pas déjà
+        const exists=DOSSIERS.flatMap(s=>s.items).some(x=>x.num===d.num&&x.ref===d.ref);
+        if(exists)return;
+        d.dems=d.dem?d.dem.split(/\s*\/\s*/).filter(Boolean):[d.dem||''];
+        d.defs=d.def?d.def.split(/\s*\/\s*/).filter(Boolean):[d.def||''];
+        sec.items.push(d);
+        const _ad=(d.avDem||'').split('/').map(s=>s.trim());
+        const _af=(d.avDef||'').split('/').map(s=>s.trim());
+        ST[d.num]={
+          dem:d.dems.map((nm,i)=>({type:_ad[i]?'avocat':'absent',name:_ad[i]||'',loco:''})),
+          def:d.defs.map((nm,i)=>({type:_af[i]?'avocat':'absent',name:_af[i]||'',loco:''})),
+          dec:null,remDate:null,remPli:false,jugEnt:'conseils',jugDD:false,jugDC:false,jugDT:false,jtt:'mens',jtv:'',note:'',done:false
+        };
+        added++;
+      });
+    });
+    renderAll();autoSave();
+    st.innerHTML=`<span style="color:var(--green)">✓ ${added} dossier(s) ajouté(s).</span>`;
+    addChunks=[];renderChunks();
+    setTimeout(closeAddModal,1500);
+  }catch(e){
+    st.innerHTML=`<span style="color:#c0392b">⚠ ${e.message}</span>`;
+    document.getElementById('add-analyze-btn').disabled=false;
+  }
+}
+
 function applyFilter(){
   document.querySelectorAll('[data-num]').forEach(function(el){
     var num=el.getAttribute('data-num');
@@ -955,6 +1195,7 @@ function loadJSON(event){
 }
 window.addEventListener('load',function(){
   document.getElementById('exp-modal').addEventListener('click',function(e){if(e.target===this)closeExport();});
+  document.getElementById('add-modal').addEventListener('click',function(e){if(e.target===this)closeAddModal();});
   try{
     var raw=localStorage.getItem(LS_KEY);if(!raw)return;
     var snap=JSON.parse(raw);if(!snap.DOSSIERS||!snap.DOSSIERS.length||!snap.META||!snap.META.date)return;
