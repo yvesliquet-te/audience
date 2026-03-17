@@ -629,6 +629,8 @@ document.addEventListener('click',function(e){
 // TEXTE JURIDIQUE
 // ════════════════════════════════════════════
 function getDoss(num){for(const s of DOSSIERS)for(const d of s.items)if(d.num===num)return d;}
+function getSec(num){for(const s of DOSSIERS)for(const d of s.items)if(d.num===num)return s.section;return '';}
+function isPrononcer(num){return getSec(num).toLowerCase().includes('prononcer')||getSec(num).toLowerCase().includes('prononcé');}
 function nid(n){return n.replace('.','_');}
 
 function stripMe(s){return (s||'').replace(/^(Maître|Me\.?|M\.)\s*/i,'').trim();}
@@ -642,6 +644,12 @@ function personPhrase(comp,party){
 function genText(num){
   const s=ST[num],d=getDoss(num),lines=[];
   if(!d)return'';
+  // Section spéciale : Remise pour prononcer
+  if(isPrononcer(num)){
+    const dems=(d.dems||[d.dem||'']).join(' et ');
+    const defs=(d.defs||[d.def||'']).join(' et ');
+    return `${dems} / ${defs}\nDans cette affaire, une décision est prononcée ce jour.`;
+  }
   const dems=d.dems||[d.dem||''],defs=d.defs||[d.def||''];
   dems.forEach((nm,i)=>{const cp=s.dem[i]||{type:'absent',name:'',loco:''};lines.push(personPhrase(cp,nm));});
   defs.forEach((nm,i)=>{const cp=s.def[i]||{type:'absent',name:'',loco:''};lines.push(personPhrase(cp,nm));});
@@ -696,6 +704,7 @@ function refreshPreviews(){DOSSIERS.forEach(s=>s.items.forEach(d=>updatePreview(
 // ════════════════════════════════════════════
 function renderCard(d){
   const s=ST[d.num],id=nid(d.num),dec=s.dec;
+  const _isPrononcer=isPrononcer(d.num);
   const badge=s.done?`<span class="badge badge-d">✓ ${DEC_LBL[dec]||'—'}</span>`:`<span class="badge badge-p">En attente</span>`;
   const _dems=d.dems||[d.dem||''];
   const _defs=d.defs||[d.def||''];
@@ -778,6 +787,7 @@ function renderCard(d){
       ${badge}<span class="chev">▾</span>
     </div>
     <div class="c-body">
+      ${_isPrononcer?'':`
       <div class="c-section c-section-comp">
         <div class="c-section-ttl">👥 Comparutions</div>
         <div class="comp-section">${_dems.map((_,i)=>cRow('dem',i)).join('')}${_defs.map((_,i)=>cRow('def',i)).join('')}</div>
@@ -786,7 +796,7 @@ function renderCard(d){
         <div class="c-section-ttl">⚖ Décision</div>
         <div class="dec-btns">${decBtns}</div>
         ${remSub}${jcSub}
-      </div>
+      </div>`}
       <div class="c-section c-section-pv">
         <div class="c-section-ttl">📄 Procès-verbal</div>
         <div class="preview" id="pv-${id}">(aucune saisie)</div>
