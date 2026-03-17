@@ -122,7 +122,7 @@ body{background:var(--cream);color:var(--text);font-family:'DM Sans',sans-serif;
 .badge-p{background:#f0f0f0;color:#999;}
 .badge-d{background:#e0e0e0;color:#888;}
 .chev{color:var(--muted);font-size:.8rem;transition:transform .2s;flex-shrink:0;}
-.dossier-card.open{background:var(--green-active);border-color:#a8d5b5 !important;border-radius:10px !important;margin:4px 0;box-shadow:0 2px 12px rgba(42,110,71,.15);}
+.dossier-card.open{background:#e8f5e9;border:2px solid #2e7d32 !important;border-radius:10px !important;margin:4px 0;box-shadow:0 3px 16px rgba(46,125,50,.25);}
 .dossier-card.open .c-head{background:transparent;}
 .dossier-card.open .c-head:hover{background:rgba(255,255,255,.4);}
 .dossier-card.open .c-body{background:white;border-radius:0 0 8px 8px;}
@@ -227,11 +227,11 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
 /* ── CARTE OUVERTE — 3 sections ── */
 .c-section{border-radius:8px;padding:12px 14px;margin-bottom:8px;}
 .c-section-comp{background:#eef2ff;border:1.5px solid #c5d0f0;}
-.c-section-dec{background:#fff7ed;border:1.5px solid #f0d8a8;}
+.c-section-dec{background:#fff3e0;border:1.5px solid #e65100;}
 .c-section-pv{background:#edfaf0;border:1.5px solid #a8d8b0;}
 .c-section-ttl{font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;}
 .c-section-comp .c-section-ttl{color:#3a52b0;}
-.c-section-dec .c-section-ttl{color:#9a6200;}
+.c-section-dec .c-section-ttl{color:#bf360c;}
 .c-section-pv .c-section-ttl{color:#1e7a40;}
 </style>
 </head>
@@ -394,7 +394,8 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
       <div class="chunks-total" id="chunks-total"></div>
       <textarea id="add-paste-input" placeholder="Collez un extrait ici…"
         style="width:100%;box-sizing:border-box;height:130px;padding:10px;border-radius:8px;
-        border:1px solid var(--cream-dd);font-size:.8rem;resize:vertical;font-family:'DM Sans',sans-serif;"></textarea>
+        border:1px solid var(--cream-dd);font-size:.8rem;resize:vertical;font-family:'DM Sans',sans-serif;"
+        oninput="document.getElementById('add-analyze-btn').disabled=!(this.value.trim()||addChunks.length)"></textarea>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:8px">
         <button class="btn btn-ghost" onclick="addChunk()" style="flex-shrink:0">+ Ajouter cet extrait</button>
         <div style="display:flex;gap:8px">
@@ -1122,7 +1123,8 @@ function renderChunks(){
   ).join('');
   const tot=addChunks.reduce((a,s)=>a+s.length,0);
   total.textContent=addChunks.length?`${addChunks.length} extrait(s) — ${tot} caractères au total`:'';
-  btn.disabled=addChunks.length===0;
+  const _ta=document.getElementById('add-paste-input');
+  btn.disabled=!(addChunks.length||(_ta&&_ta.value.trim()));
 }
 
 async function analyzeChunks(){
