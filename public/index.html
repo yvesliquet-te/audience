@@ -390,6 +390,14 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
     <div class="add-pane" id="add-pane-paste">
       <p style="font-size:.8rem;color:var(--muted);margin:0 0 10px">
         Collez plusieurs extraits si votre feuille est trop longue. Ils seront analysés ensemble.</p>
+      <div class="add-row" style="margin-bottom:10px">
+        <div class="add-field">
+          <label>Ajouter à la section</label>
+          <select id="add-paste-section">
+            <option value="">— Sections détectées automatiquement —</option>
+          </select>
+        </div>
+      </div>
       <div class="add-chunks" id="add-chunks-list"></div>
       <div class="chunks-total" id="chunks-total"></div>
       <textarea id="add-paste-input" placeholder="Collez un extrait ici…"
@@ -623,7 +631,7 @@ document.addEventListener('click',function(e){
 function getDoss(num){for(const s of DOSSIERS)for(const d of s.items)if(d.num===num)return d;}
 function nid(n){return n.replace('.','_');}
 
-function stripMe(s){return (s||'').replace(/^(Maître|Me\.?|M\.?)\s*/i,'').trim();}
+function stripMe(s){return (s||'').replace(/^(Maître|Me\.?|M\.)\s*/i,'').trim();}
 function personPhrase(comp,party){
   if(comp.type==='absent')return`Personne ne comparaît pour ${party}.`;
   if(comp.type==='personne')return`${comp.name||party} comparaît en personne.`;
@@ -1034,17 +1042,20 @@ let addChunks=[];
 
 function openAddModal(){
   // Peupler le select section
-  const sel=document.getElementById('add-section');
-  sel.innerHTML='<option value="">— Choisir —</option>';
-  DOSSIERS.forEach(sec=>{
-    const o=document.createElement('option');
-    o.value=sec.section;o.textContent=sec.section;
-    sel.appendChild(o);
+  // Peupler les deux selects section
+  ['add-section','add-paste-section'].forEach(function(sid){
+    const sel=document.getElementById(sid);if(!sel)return;
+    const defTxt=sid==='add-paste-section'?'— Sections détectées automatiquement —':'— Choisir —';
+    sel.innerHTML='<option value="">'+defTxt+'</option>';
+    DOSSIERS.forEach(sec=>{
+      const o=document.createElement('option');
+      o.value=sec.section;o.textContent=sec.section;
+      sel.appendChild(o);
+    });
+    const oNew=document.createElement('option');
+    oNew.value='__new__';oNew.textContent='+ Nouvelle section…';
+    sel.appendChild(oNew);
   });
-  // Ajouter option nouvelle section
-  const oNew=document.createElement('option');
-  oNew.value='__new__';oNew.textContent='+ Nouvelle section…';
-  sel.appendChild(oNew);
   // Reset
   addChunks=[];
   renderChunks();
@@ -1149,11 +1160,20 @@ async function analyzeChunks(){
     const raw=data.content.map(i=>i.text||'').join('').replace(/^[\s\S]*?(\{)/,'$1').replace(/\}[^}]*$/,'}').trim();
     let parsed;
     try{parsed=JSON.parse(raw);}catch(e){throw new Error("JSON invalide: "+raw.slice(0,150));}
+    // Section cible choisie par l'utilisateur
+    const _forceSec=(document.getElementById('add-paste-section')||{}).value||'';
+    let _newSecName='';
+    if(_forceSec==='__new__'){
+      _newSecName=prompt('Nom de la nouvelle section :','');
+      if(!_newSecName)throw new Error('Section annulée.');
+    }
+    const _targetSec=_forceSec==='__new__'?_newSecName:_forceSec;
     // Ajouter les dossiers parsés aux sections existantes
     let added=0;
     (parsed.sections||[]).forEach(newSec=>{
-      let sec=DOSSIERS.find(s=>s.section===newSec.section);
-      if(!sec){sec={section:newSec.section,items:[]};DOSSIERS.push(sec);}
+      const secName=_targetSec||newSec.section;
+      let sec=DOSSIERS.find(s=>s.section===secName);
+      if(!sec){sec={section:secName,items:[]};DOSSIERS.push(sec);}
       (newSec.items||[]).forEach(d=>{
         // Vérifier que le num n'existe pas déjà
         const exists=DOSSIERS.flatMap(s=>s.items).some(x=>x.num===d.num&&x.ref===d.ref);
