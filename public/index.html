@@ -128,7 +128,7 @@ body{background:var(--cream);color:var(--text);font-family:'DM Sans',sans-serif;
 .dossier-card.open .c-body{background:white;border-radius:0 0 8px 8px;}
 .dossier-card.open .chev{transform:rotate(180deg);}
 .dec-group{display:flex;flex-direction:column;gap:4px;}
-.c-body{display:none;padding:13px 14px 16px;border-top:1px solid var(--cream-d);}
+.c-body{display:none;padding:10px 12px 12px;border-top:1px solid var(--cream-d);}
 .dossier-card.open .c-body{display:block;}
 
 .sec-ttl{font-size:.67rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600;margin-bottom:7px;}
@@ -735,13 +735,20 @@ function renderCard(d){
       ${badge}<span class="chev">▾</span>
     </div>
     <div class="c-body">
-      <div class="sec-ttl">Comparutions</div>
-      <div class="comp-section">${_dems.map((_,i)=>cRow('dem',i)).join('')}${_defs.map((_,i)=>cRow('def',i)).join('')}</div>
-      <div class="sec-ttl">Décision</div>
-      <div class="dec-btns">${decBtns}</div>
-      ${remSub}${jcSub}
-      <div class="preview" id="pv-${id}">(aucune saisie)</div>
-      <div class="note-area"><label>📝 Note libre</label><textarea oninput="upd('${d.num}','note',this.value)">${s.note}</textarea></div>
+      <div class="c-section c-section-comp">
+        <div class="c-section-ttl">👥 Comparutions</div>
+        <div class="comp-section">${_dems.map((_,i)=>cRow('dem',i)).join('')}${_defs.map((_,i)=>cRow('def',i)).join('')}</div>
+      </div>
+      <div class="c-section c-section-dec">
+        <div class="c-section-ttl">⚖ Décision</div>
+        <div class="dec-btns">${decBtns}</div>
+        ${remSub}${jcSub}
+      </div>
+      <div class="c-section c-section-pv">
+        <div class="c-section-ttl">📄 Procès-verbal</div>
+        <div class="preview" id="pv-${id}">(aucune saisie)</div>
+        <div class="note-area" style="margin-top:8px"><label style="font-size:.72rem;font-weight:600;color:#2a6e47;display:block;margin-bottom:4px">📝 Note libre</label><textarea oninput="upd('${d.num}','note',this.value)">${s.note}</textarea></div>
+      </div>
       <div class="c-foot">
         <div style="display:flex;gap:6px">
           <button class="btn-val" onclick="valider('${d.num}')">${s.done?'✓ Validé':'✓ Valider'}</button>
