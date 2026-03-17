@@ -706,7 +706,8 @@ function renderCard(d){
   const s=ST[d.num],id=nid(d.num),dec=s.dec;
   const _isPrononcer=isPrononcer(d.num);
   const badge=s.done?`<span class="badge badge-d">✓ ${DEC_LBL[dec]||'—'}</span>`:`<span class="badge badge-p">En attente</span>`;
-  const moveBtn=`<span onclick="event.stopPropagation();moveDoss('${d.num}',-1)" title="Monter" style="cursor:pointer;padding:0 3px;color:rgba(255,255,255,.5);font-size:.8rem;user-select:none">▲</span><span onclick="event.stopPropagation();moveDoss('${d.num}',1)" title="Descendre" style="cursor:pointer;padding:0 3px;color:rgba(255,255,255,.5);font-size:.8rem;user-select:none">▼</span>`;
+  const arrowStyle="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;border:1px solid #ddd;background:#f5f5f5;color:#555;font-size:.7rem;cursor:pointer;user-select:none;margin-right:1px";
+  const moveBtn=`<span onclick="event.stopPropagation();moveDoss('${d.num}',-1)" title="Monter" style="${arrowStyle}">▲</span><span onclick="event.stopPropagation();moveDoss('${d.num}',1)" title="Descendre" style="${arrowStyle}">▼</span><span onclick="event.stopPropagation();deleteDoss('${d.num}')" title="Supprimer" style="${arrowStyle.replace('#f5f5f5','#fff0f0').replace('#ddd','#ffcccc').replace('#555','#c0392b')}">✕</span>`;
   const _dems=d.dems||[d.dem||''];
   const _defs=d.defs||[d.def||''];
   function cRow(side,i){
@@ -830,6 +831,25 @@ function renum(){
   });
   Object.keys(ST).forEach(k=>delete ST[k]);
   Object.assign(ST,newST);
+}
+
+function deleteDoss(num){
+  const d=getDoss(num);
+  if(!d)return;
+  const dems=(d.dems||[d.dem||'']).join(' / ');
+  const defs=(d.defs||[d.def||'']).join(' / ');
+  if(!confirm('Supprimer le dossier '+d.ref+' ('+dems+' c/ '+defs+') ?\nCette action est irréversible.'))return;
+  for(let si=0;si<DOSSIERS.length;si++){
+    const ii=DOSSIERS[si].items.findIndex(x=>x.num===num);
+    if(ii!==-1){
+      DOSSIERS[si].items.splice(ii,1);
+      delete ST[num];
+      // Supprimer la section si vide
+      if(DOSSIERS[si].items.length===0)DOSSIERS.splice(si,1);
+      renum();renderAll();autoSave();
+      return;
+    }
+  }
 }
 
 function moveDoss(num, dir){
