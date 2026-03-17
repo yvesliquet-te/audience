@@ -706,6 +706,7 @@ function renderCard(d){
   const s=ST[d.num],id=nid(d.num),dec=s.dec;
   const _isPrononcer=isPrononcer(d.num);
   const badge=s.done?`<span class="badge badge-d">✓ ${DEC_LBL[dec]||'—'}</span>`:`<span class="badge badge-p">En attente</span>`;
+  const moveBtn=`<span onclick="event.stopPropagation();moveDoss('${d.num}',-1)" title="Monter" style="cursor:pointer;padding:0 3px;color:rgba(255,255,255,.5);font-size:.8rem;user-select:none">▲</span><span onclick="event.stopPropagation();moveDoss('${d.num}',1)" title="Descendre" style="cursor:pointer;padding:0 3px;color:rgba(255,255,255,.5);font-size:.8rem;user-select:none">▼</span>`;
   const _dems=d.dems||[d.dem||''];
   const _defs=d.defs||[d.def||''];
   function cRow(side,i){
@@ -784,7 +785,7 @@ function renderCard(d){
     <div class="c-head" onclick="toggleCard('${d.num}')">
       <span class="d-num">${d.num}</span><span class="d-ref">${d.ref}</span>
       <div class="d-parties"><div class="d-dem">▲ ${(d.dems||[d.dem]).join(' / ')}</div><div class="d-def">▼ ${(d.defs||[d.def]).join(' / ')}</div></div>
-      ${badge}<span class="chev">▾</span>
+      ${moveBtn}${badge}<span class="chev">▾</span>
     </div>
     <div class="c-body">
       ${_isPrononcer?'':`
@@ -810,6 +811,49 @@ function renderCard(d){
       </div>
     </div>
   </div>`;
+}
+
+function renum(){
+  // Renuméroter proprement section.item et mettre à jour ST
+  const newST={};
+  DOSSIERS.forEach((sec,si)=>{
+    sec.items.forEach((d,ii)=>{
+      const oldNum=d.num;
+      const newNum=(si+1)+'.'+(ii+1);
+      if(oldNum!==newNum){
+        if(ST[oldNum]){newST[newNum]=ST[oldNum];}
+        d.num=newNum;
+      } else {
+        newST[newNum]=ST[oldNum];
+      }
+    });
+  });
+  Object.keys(ST).forEach(k=>delete ST[k]);
+  Object.assign(ST,newST);
+}
+
+function moveDoss(num, dir){
+  // Trouver le dossier et le déplacer dans sa section ou vers section adjacente
+  for(let si=0;si<DOSSIERS.length;si++){
+    const sec=DOSSIERS[si];
+    const ii=sec.items.findIndex(d=>d.num===num);
+    if(ii===-1)continue;
+    const newIi=ii+dir;
+    if(newIi>=0&&newIi<sec.items.length){
+      // Swap dans la même section
+      const tmp=sec.items[ii];sec.items[ii]=sec.items[newIi];sec.items[newIi]=tmp;
+    } else if(dir===-1&&ii===0&&si>0){
+      // Monter vers la section précédente (fin)
+      const d=sec.items.splice(ii,1)[0];
+      DOSSIERS[si-1].items.push(d);
+    } else if(dir===1&&ii===sec.items.length-1&&si<DOSSIERS.length-1){
+      // Descendre vers la section suivante (début)
+      const d=sec.items.splice(ii,1)[0];
+      DOSSIERS[si+1].items.unshift(d);
+    }
+    renum();renderAll();autoSave();
+    return;
+  }
 }
 
 function renderAll(){
@@ -1141,7 +1185,7 @@ function addManual(){
     def:d.defs.map((nm,i)=>({type:_af[i]?'avocat':'absent',name:_af[i]||'',loco:''})),
     dec:null,remDate:null,remPli:false,jugEnt:'conseils',jugDD:false,jugDC:false,jugDT:false,jtt:'mens',jtv:'',note:'',done:false
   };
-  renderAll();autoSave();closeAddModal();
+  renum();renderAll();autoSave();closeAddModal();
   // Vider les champs
   ['add-ref','add-dem','add-def','add-avDem','add-avDef'].forEach(id=>document.getElementById(id).value='');
 }
@@ -1221,7 +1265,7 @@ async function analyzeChunks(){
         added++;
       });
     });
-    renderAll();autoSave();
+    renum();renderAll();autoSave();
     st.innerHTML=`<span style="color:var(--green)">✓ ${added} dossier(s) ajouté(s).</span>`;
     addChunks=[];renderChunks();
     setTimeout(closeAddModal,1500);
