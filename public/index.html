@@ -206,6 +206,33 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
 .modal-opt-row{display:flex;gap:8px;flex-wrap:wrap;}
 .modal-btns{display:flex;gap:8px;margin-top:14px;justify-content:flex-end;}
 .btn-cancel{background:var(--cream-d);border:none;padding:7px 14px;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;font-size:.8rem;}
+
+/* ── MODAL AJOUT ── */
+.add-modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:center;justify-content:center;}
+.add-modal-ov.open{display:flex;}
+.add-modal{background:white;border-radius:14px;width:min(620px,95vw);max-height:88vh;overflow-y:auto;padding:28px 28px 20px;box-shadow:0 8px 40px rgba(0,0,0,.3);}
+.add-modal h2{margin:0 0 16px;font-size:1.05rem;color:var(--navy);}
+.add-tabs{display:flex;gap:0;margin-bottom:18px;border-bottom:2px solid var(--cream-dd);}
+.add-tab{padding:8px 18px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;background:none;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-2px;transition:.15s;font-family:'DM Sans',sans-serif;}
+.add-tab.active{color:var(--navy);border-bottom-color:var(--navy);}
+.add-pane{display:none;}.add-pane.active{display:block;}
+.add-field{margin-bottom:11px;}
+.add-field label{font-size:.74rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px;}
+.add-field input,.add-field select{width:100%;box-sizing:border-box;padding:7px 10px;border-radius:6px;border:1px solid var(--cream-dd);font-size:.82rem;font-family:'DM Sans',sans-serif;color:var(--navy);}
+.add-row{display:flex;gap:10px;}.add-row .add-field{flex:1;}
+.chunk-item{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--cream);border-radius:6px;margin-bottom:4px;font-size:.75rem;}
+.chunk-item span{flex:1;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.chunk-del{background:none;border:none;color:#c0392b;cursor:pointer;font-size:.9rem;padding:0 4px;}
+.chunks-total{font-size:.72rem;color:var(--muted);margin-bottom:8px;}
+/* ── CARTE OUVERTE — 3 sections ── */
+.c-section{border-radius:8px;padding:12px 14px;margin-bottom:8px;}
+.c-section-comp{background:#eef2ff;border:1.5px solid #c5d0f0;}
+.c-section-dec{background:#fff7ed;border:1.5px solid #f0d8a8;}
+.c-section-pv{background:#edfaf0;border:1.5px solid #a8d8b0;}
+.c-section-ttl{font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;}
+.c-section-comp .c-section-ttl{color:#3a52b0;}
+.c-section-dec .c-section-ttl{color:#9a6200;}
+.c-section-pv .c-section-ttl{color:#1e7a40;}
 </style>
 </head>
 <body>
@@ -1022,13 +1049,21 @@ function openAddModal(){
   renderChunks();
   document.getElementById('add-paste-input').value='';
   document.getElementById('add-status').innerHTML='';
-  document.getElementById('add-modal').classList.add('open');
+  const _am=document.getElementById('add-modal');
+  _am.classList.add('open');
+  _am.style.display='flex';
 }
-function closeAddModal(){document.getElementById('add-modal').classList.remove('open');}
+
+function closeAddModal(){
+  const _am=document.getElementById('add-modal');
+  _am.classList.remove('open');
+  _am.style.display='none';
+}
 function switchAddTab(tab){
   document.querySelectorAll('.add-tab').forEach((t,i)=>t.classList.toggle('active',['manual','paste'][i]===tab));
-  document.querySelectorAll('.add-pane').forEach(p=>p.classList.remove('active'));
-  document.getElementById('add-pane-'+tab).classList.add('active');
+  document.querySelectorAll('.add-pane').forEach(p=>{p.classList.remove('active');p.style.display='none';});
+  const pane=document.getElementById('add-pane-'+tab);
+  pane.classList.add('active');pane.style.display='block';
 }
 
 function addManual(){
