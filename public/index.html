@@ -26,8 +26,8 @@
 body{background:var(--cream);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.5;min-height:100vh;}
 
 /* ── SETUP SCREEN ── */
-#setup-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:linear-gradient(135deg,#1a2744 0%,#243360 50%,#1a3a5a 100%);}
-.up-card{background:white;border-radius:16px;box-shadow:var(--sh-lg);width:100%;max-width:600px;overflow:hidden;}
+#setup-screen{display:flex;align-items:flex-start;justify-content:center;min-height:100vh;padding:24px;overflow-y:auto;background:linear-gradient(135deg,#1a2744 0%,#243360 50%,#1a3a5a 100%);}
+.up-card{background:white;border-radius:16px;box-shadow:var(--sh-lg);width:100%;max-width:600px;overflow:visible;}
 .up-header{background:var(--navy);padding:24px 32px;text-align:center;border-bottom:3px solid var(--gold);}
 .up-header h1{font-family:'Playfair Display',serif;font-size:1.5rem;color:white;font-weight:700;}
 .up-header p{font-size:.78rem;color:rgba(255,255,255,.5);margin-top:4px;text-transform:uppercase;letter-spacing:.08em;}
@@ -59,7 +59,7 @@ body{background:var(--cream);color:var(--text);font-family:'DM Sans',sans-serif;
 .siege-inp:focus{outline:none;border-color:var(--navy);background:white;}
 
 /* paste */
-.paste-zone textarea{width:100%;height:200px;border:1.5px solid var(--cream-dd);border-radius:var(--r);padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:.82rem;background:var(--cream);color:var(--text);resize:vertical;line-height:1.6;transition:border-color .2s;}
+.paste-zone textarea{width:100%;height:150px;border:1.5px solid var(--cream-dd);border-radius:var(--r);padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:.82rem;background:var(--cream);color:var(--text);resize:vertical;line-height:1.6;transition:border-color .2s;}
 .paste-zone textarea:focus{outline:none;border-color:var(--navy);background:white;}
 .paste-zone textarea::placeholder{color:#bbb;font-style:italic;}
 .paste-hint{font-size:.74rem;color:var(--muted);margin-top:8px;}
@@ -278,9 +278,9 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
           <div class="paste-hint">💡 Sélectionnez tout dans Word (Ctrl+A), copiez (Ctrl+C), collez ici (Ctrl+V).</div>
         </div>
         <div style="display:flex;justify-content:flex-start;margin:6px 0 0">
-          <button class="btn-ghost" onclick="addSetupChunk()"
-            style="font-size:.76rem;padding:5px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.25);
-            background:rgba(255,255,255,.1);color:white;cursor:pointer">+ Ajouter cet extrait</button>
+          <button onclick="addSetupChunk()"
+            style="font-size:.76rem;padding:6px 14px;border-radius:6px;border:1px solid rgba(255,255,255,.5);
+            background:rgba(255,255,255,.15);color:white;cursor:pointer;font-weight:600">+ Ajouter cet extrait</button>
         </div>
         <div class="step-btns">
           <button class="btn-prev" onclick="goStep(2)">← Retour</button>
