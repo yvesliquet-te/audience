@@ -118,9 +118,10 @@ body{background:var(--cream);color:var(--text);font-family:'DM Sans',sans-serif;
 .d-parties{flex:1;min-width:0;}
 .d-dem{font-size:.8rem;font-weight:600;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .d-def{font-size:.75rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.badge-enc{background:#cce5ff;color:#004085;border:1px solid #b8daff;}
 .badge{font-size:.68rem;padding:2px 8px;border-radius:10px;font-weight:600;flex-shrink:0;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.badge-p{background:#f0f0f0;color:#999;}
-.badge-d{background:#e0e0e0;color:#888;}
+.badge-p{background:#fff3cd;color:#856404;border:1px solid #ffc107;}
+.badge-d{background:#d4edda;color:#155724;border:1px solid #28a745;}
 .chev{color:var(--muted);font-size:.8rem;transition:transform .2s;flex-shrink:0;}
 .dossier-card.open{background:#e8f5e9;border:2px solid #2e7d32 !important;border-radius:10px !important;margin:4px 0;box-shadow:0 3px 16px rgba(46,125,50,.25);}
 .dossier-card.open .c-head{background:transparent;}
@@ -189,7 +190,7 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
 .mc-d.sel{background:var(--navy);color:white;font-weight:600;}
 .mc-d.tod{border:1px solid var(--gold);}
 .mc-d.emp{cursor:default;}
-.date-btn{font-size:.79rem;font-weight:500;cursor:pointer;padding:4px 8px;background:white;border:1.5px solid rgba(255,255,255,.3);border-radius:5px;display:inline-flex;align-items:center;gap:4px;color:white;}
+.date-btn{font-size:.79rem;font-weight:500;cursor:pointer;padding:4px 8px;background:white;border:1.5px solid rgba(255,255,255,.3);border-radius:5px;display:inline-flex;align-items:center;gap:4px;color:#1a2744;}
 .date-btn:hover{border-color:rgba(255,255,255,.6);}
 .popover{position:absolute;z-index:200;top:calc(100% + 4px);left:0;display:none;}
 .popover.open{display:block;}
@@ -334,24 +335,51 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
   <div class="header">
     <div class="h-title">
       <h1>⚖ Feuille d'Audience</h1>
-      <p id="h-sub">—</p>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:2px">
+        <span style="font-size:.72rem;color:rgba(255,255,255,.5)">Division</span>
+        <span id="h-div" style="font-size:.78rem;color:rgba(255,255,255,.8);font-weight:600"></span>
+        <span style="color:rgba(255,255,255,.3)">|</span>
+        <span style="font-size:.72rem;color:rgba(255,255,255,.5)">Date</span>
+        <input id="h-date" type="text" placeholder="jj/mm/aaaa"
+          style="font-size:.78rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+          border-radius:4px;padding:2px 7px;color:white;width:90px;font-family:'DM Sans',sans-serif"
+          oninput="META.date=this.value;autoSave()">
+        <span style="color:rgba(255,255,255,.3)">|</span>
+        <span style="font-size:.72rem;color:rgba(255,255,255,.5)">Début</span>
+        <input id="h-heure-debut" type="text" placeholder="9h00"
+          style="font-size:.78rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+          border-radius:4px;padding:2px 7px;color:white;width:55px;font-family:'DM Sans',sans-serif"
+          oninput="META.heureDebut=this.value;autoSave()">
+        <span style="color:rgba(255,255,255,.3)">|</span>
+        <span style="font-size:.72rem;color:rgba(255,255,255,.5)">Levée</span>
+        <input id="h-heure-fin" type="text" placeholder="12h00"
+          style="font-size:.78rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+          border-radius:4px;padding:2px 7px;color:white;width:55px;font-family:'DM Sans',sans-serif"
+          oninput="META.heureFin=this.value;autoSave()">
+        <span style="color:rgba(255,255,255,.3)">|</span>
+        <span style="font-size:.72rem;color:rgba(255,255,255,.5)">Chambre</span>
+        <input id="h-chambre" type="text" placeholder="1ère ch."
+          style="font-size:.78rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+          border-radius:4px;padding:2px 7px;color:white;width:80px;font-family:'DM Sans',sans-serif"
+          oninput="META.chambre=this.value;autoSave()">
+      </div>
     </div>
     <div class="h-right">
       <div class="prog"><span id="prog-txt">0/0</span><div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div></div>
+      <button id="btn-filter" onclick="toggleFilter()" style="font-size:.72rem;padding:4px 10px;border-radius:14px;border:1px solid rgba(255,255,255,.5);background:white;color:#1a2744;cursor:pointer;white-space:nowrap;flex-shrink:0;font-weight:600">👁 Non validés</button>
+      <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
+        <span style="font-size:.7rem;color:rgba(255,255,255,.55);white-space:nowrap">📅 Jugements</span>
+        <div class="mc-wrap" id="gc-wrap">
+          <div class="date-btn" onclick="toggleGC()"><span id="gc-lbl">Choisir</span> ▾</div>
+          <div class="popover" id="gc-pop"><div class="mini-cal" id="gc-cal"></div></div>
+        </div>
+      </div>
       <span id="autosave-lbl" style="font-size:.68rem;color:rgba(255,255,255,.35);margin-right:2px"></span><button class="btn btn-ghost" onclick="saveJSON()" title="Sauvegarder">💾</button><button class="btn btn-ghost" onclick="document.getElementById('json-input').click()" title="Reprendre">📂</button><input type="file" id="json-input" accept=".json" style="display:none" onchange="loadJSON(event)"><button class="btn btn-ghost" onclick="openAddModal()" title="Ajouter des dossiers">＋ Ajouter</button><button class="btn btn-gold" onclick="openExport()">⬇ Exporter</button>
       <button class="btn btn-ghost" onclick="newAud()">↩ Nouvelle audience</button>
     </div>
   </div>
 
-  <div style="padding:8px 16px 4px"><button id="btn-filter" onclick="toggleFilter()" style="font-size:.78rem;padding:5px 14px;border-radius:20px;border:1px solid #bbb;background:white;color:#1a2744;cursor:pointer;font-weight:500">👁 Afficher uniquement les non validés</button></div>
-  <div class="jug-global">
-    <label>📅 Date commune des jugements :</label>
-    <div class="mc-wrap" id="gc-wrap">
-      <div class="date-btn" onclick="toggleGC()"><span id="gc-lbl">Choisir une date</span> ▾</div>
-      <div class="popover" id="gc-pop"><div class="mini-cal" id="gc-cal"></div></div>
-    </div>
-    <span style="opacity:.4;font-size:.73rem">— jugements et accords</span>
-  </div>
+
 
   <div id="app-body"></div>
 
@@ -431,6 +459,11 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
       <h2>⬇ Exporter</h2>
 
       <div class="modal-opt">
+        <h4>📊 Récapitulatif encodage</h4>
+        <p>Tableau trié par code (502 / 507 / 501a / 501b) pour encodage dans votre logiciel.</p>
+        <div class="modal-opt-row"><button class="btn btn-ghost" style="color:var(--navy);border-color:var(--cream-dd);background:white" onclick="buildRecap();closeExport()">📊 Générer le récapitulatif</button></div>
+      </div>
+      <div class="modal-opt">
         <h4>📄 Feuille d'audience complète</h4>
         <p>Tous les dossiers sur une seule feuille.</p>
         <div class="modal-opt-row">
@@ -474,7 +507,7 @@ const perCal={};
 const TEXT_FIELDS=new Set(['cDN','cDN2','cFN','cFN2','note','jtv']);
 const MF=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const DF=['Lu','Ma','Me','Je','Ve','Sa','Di'];
-const DEC_LBL={rc:'Remise contradictoire',rd:'Remise par défaut',jc:'Jugement contradictoire',jd:'Jugement par défaut',vc:'Renvoi au rôle',vd:'Renvoi au rôle (déf.)',ea:'Mise en état amiable',et:'Mise en état (tribunal)',ac:'Accord',co:'Conciliation OK',ca:'Pas de conciliation',cd:'Pas de conciliation'};
+const DEC_LBL={rc:'Remise contradictoire',rd:'Remise par défaut',ro:'Remise d\'office',jc:'Jugement contradictoire',jd:'Jugement par défaut',vc:'Renvoi au rôle',vd:'Renvoi au rôle (déf.)',ea:'Mise en état amiable',et:'Mise en état (tribunal)',ac:'Accord',co:'Conciliation OK',ca:'Pas de conciliation',cd:'Pas de conciliation'};
 
 // ════════════════════════════════════════════
 // SETUP STEPS
@@ -554,7 +587,7 @@ async function analyze(){
 function launchApp(){
   jugDate=null;initST();
   try{localStorage.removeItem('audience_session_v1');}catch(e){}
-  document.getElementById('h-sub').textContent=`${META.tribunal||'Tribunal de l\'Entreprise de Liège'} — Division ${DIVISION} — ${META.date||''}`;
+  // h-sub legacy: `${META.tribunal||'Tribunal de l\'Entreprise de Liège'} — Division ${DIVISION} — ${META.date||''}`;
   document.getElementById('setup-screen').style.display='none';
   document.getElementById('main-app').style.display='block';
   renderAll();drawGC();
@@ -599,7 +632,7 @@ function buildCal(id,sel,y,m,onSel,onNav){
   const el=document.getElementById(id);if(!el)return;
   const first=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate(),off=first===0?6:first-1;
   const today=new Date();today.setHours(0,0,0,0);
-  let h=`<div class="mc-head"><button class="mc-nav" onclick="(${onNav})(-1)">◀</button><span>${MF[m]} ${y}</span><button class="mc-nav" onclick="(${onNav})(1)">▶</button></div><div class="mc-grid">`;
+  let h=`<div class="mc-head"><button class="mc-nav" onclick="event.stopPropagation();(${onNav})(-1)">◀</button><span>${MF[m]} ${y}</span><button class="mc-nav" onclick="event.stopPropagation();(${onNav})(1)">▶</button></div><div class="mc-grid">`;
   DF.forEach(d=>{h+=`<div class="mc-dh">${d}</div>`;});
   for(let i=0;i<off;i++)h+=`<div class="mc-d emp"></div>`;
   for(let d=1;d<=dim;d++){
@@ -640,6 +673,7 @@ document.addEventListener('click',function(e){
 function getDoss(num){for(const s of DOSSIERS)for(const d of s.items)if(d.num===num)return d;}
 function getSec(num){for(const s of DOSSIERS)for(const d of s.items)if(d.num===num)return s.section;return '';}
 function isPrononcer(num){return getSec(num).toLowerCase().includes('prononcer')||getSec(num).toLowerCase().includes('prononcé');}
+function isRO(num){return ST[num]&&ST[num].dec==='ro';}
 function nid(n){return n.replace('.','_');}
 
 function stripMe(s){return (s||'').replace(/^(Maître|Me\.?|M\.)\s*/i,'').trim();}
@@ -672,7 +706,8 @@ function genText(num){
     return'Maître '+(stripMe(cp.name)||'…');}
   const rd=s.remDate?fd(s.remDate):'[date à préciser]';
   const jd=jugDate?fd(jugDate):'[date des jugements]';
-  if(s.dec==='rc'){if(s.note)lines.push(s.note);lines.push(`À la demande des parties qui comparaissent, l'affaire est remise au ${rd}.`);}
+  if(s.dec==='ro'){if(s.note)lines.push(s.note);lines.push(`Personne ne comparaît. La cause est remise au ${rd}.`);}
+  else if(s.dec==='rc'){if(s.note)lines.push(s.note);lines.push(`À la demande des parties qui comparaissent, l'affaire est remise au ${rd}.`);}
   else if(s.dec==='rd'){
     const pres=!demAbsent?demStr:defStr,abs=demAbsent?demStr:defStr;
     if(s.note)lines.push(s.note);
@@ -713,8 +748,8 @@ function refreshPreviews(){DOSSIERS.forEach(s=>s.items.forEach(d=>updatePreview(
 // ════════════════════════════════════════════
 function renderCard(d){
   const s=ST[d.num],id=nid(d.num),dec=s.dec;
-  const _isPrononcer=isPrononcer(d.num);
-  const badge=s.done?`<span class="badge badge-d">✓ ${DEC_LBL[dec]||'—'}</span>`:`<span class="badge badge-p">En attente</span>`;
+  const _isPrononcer=isPrononcer(d.num)||isRO(d.num);
+  const badge=s.done?`<span class="badge badge-d">✓ ${DEC_LBL[dec]||'Validé'}</span>`:`<span class="badge badge-p ${dec?'badge-enc':''}">${dec?DEC_LBL[dec]:'En attente'}</span>`;
   const arrowStyle="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;border:1px solid #ddd;background:#f5f5f5;color:#555;font-size:.7rem;cursor:pointer;user-select:none;margin-right:1px";
   const moveBtn=`<span onclick="event.stopPropagation();moveDoss('${d.num}',-1)" title="Monter" style="${arrowStyle}">▲</span><span onclick="event.stopPropagation();moveDoss('${d.num}',1)" title="Descendre" style="${arrowStyle}">▼</span><span onclick="event.stopPropagation();deleteDoss('${d.num}')" title="Supprimer" style="${arrowStyle.replace('#f5f5f5','#fff0f0').replace('#ddd','#ffcccc').replace('#555','#c0392b')}">✕</span>`;
   const _dems=d.dems||[d.dem||''];
@@ -753,6 +788,7 @@ function renderCard(d){
         <div class="dec-group">
           <button class="dbtn db-rc ${dec==='rc'?'act':''}" onclick="setDec('${d.num}','rc')">📅 Remise contradictoire</button>
           <button class="dbtn db-rd ${dec==='rd'?'act':''}" onclick="setDec('${d.num}','rd')">📅 Remise par défaut</button>
+          <button class="dbtn db-ro ${dec==='ro'?'act':''}" onclick="setDec('${d.num}','ro')">📅 Remise d'office</button>
         </div>
         <div class="dec-group">
           <button class="dbtn db-jc ${dec==='jc'?'act':''}" onclick="setDec('${d.num}','jc')">⚖ Jugement contradictoire</button>
@@ -797,7 +833,7 @@ function renderCard(d){
       <div class="d-parties"><div class="d-dem">▲ ${(d.dems||[d.dem]).join(' / ')}</div><div class="d-def">▼ ${(d.defs||[d.def]).join(' / ')}</div></div>
       ${moveBtn}${badge}<span class="chev">▾</span>
     </div>
-    <div class="c-body">
+    <div class="c-body"${s.done?' style="pointer-events:none;opacity:.65;user-select:none"':''}>
       ${_isPrononcer?'':`
       <div class="c-section c-section-comp">
         <div class="c-section-ttl">👥 Comparutions</div>
@@ -813,11 +849,11 @@ function renderCard(d){
         <div class="preview" id="pv-${id}">(aucune saisie)</div>
         <div class="note-area" style="margin-top:8px"><label style="font-size:.72rem;font-weight:600;color:#2a6e47;display:block;margin-bottom:4px">📝 Note libre</label><textarea oninput="upd('${d.num}','note',this.value)">${s.note}</textarea></div>
       </div>
-      <div class="c-foot">
-        <div style="display:flex;gap:6px">
-          <button class="btn-val" onclick="valider('${d.num}')">${s.done?'✓ Validé':'✓ Valider'}</button>
-          <button class="btn-rst" onclick="modCard('${d.num}')">✏ Modifier</button>
-        </div>
+    </div>
+    <div class="c-foot">
+      <div style="display:flex;gap:6px">
+        <button class="btn-val" onclick="valider('${d.num}')">${s.done?'✓ Validé':'✓ Valider'}</button>
+        ${s.done?`<button class="btn-rst" onclick="modCard('${d.num}')">✏ Modifier</button>`:''}
       </div>
     </div>
   </div>`;
@@ -1040,13 +1076,62 @@ function buildFA(){
     body+=`<div class="sec-hd">${sec.section}</div>`;
     sec.items.forEach(d=>{body+=dossBlocFA(d);});
   });
+  const debutLine=META.heureDebut?`<p style="margin:0 0 6mm;font-size:10pt">L'audience débute à ${META.heureDebut}.</p>`:"<p style=\"margin:0 0 6mm;font-size:10pt\">L'audience débute à ____.</p>";
+  const clotureLine=`
+<div style="border-top:1pt solid #000;margin-top:10mm;padding-top:4mm">
+  <p style="font-size:10pt;margin:0 0 8mm">Le rôle est épuisé, l'audience est levée à ${META.heureFin||'____'}.</p>
+  <div style="display:flex;gap:30mm;margin-top:8mm">
+    <div style="flex:1;border-top:0.5pt solid #000;padding-top:2mm;font-size:9pt">Le greffier</div>
+    <div style="flex:1;border-top:0.5pt solid #000;padding-top:2mm;font-size:9pt">Le juge</div>
+  </div>
+</div>`;
   return`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Feuille d'audience — ${META.date||''}</title>
 <style>${printCSS()}</style></head><body>
 ${buildEntete(true)}
-${jugDate?`<div style="text-align:center;font-size:9pt;color:#555;margin-bottom:4mm;font-style:italic">Date des jugements : ${fd(jugDate)}</div>`:''}
+${debutLine}
 ${body}
+${clotureLine}
 <button class="print-btn no-print" onclick="window.print()">🖨 Imprimer</button>
 </body></html>`;
+}
+
+function buildRecap(){
+  const ENC={rc:'502',rd:'502',ro:'502',jc:'507',jd:'507',ac:'507',vc:'501a',vd:'501a',et:'501b',ea:null,co:null,ca:null,cd:null};
+  const rows=[];
+  DOSSIERS.flatMap(s=>s.items).forEach(d=>{
+    const s=ST[d.num];if(!s||!s.done)return;
+    const code=ENC[s.dec];if(!code)return;
+    let dateStr='';
+    if((s.dec==='rc'||s.dec==='rd'||s.dec==='ro')&&s.remDate)dateStr=fd(s.remDate);
+    else if((s.dec==='jc'||s.dec==='jd'||s.dec==='ac')&&jugDate)dateStr=fd(jugDate);
+    rows.push({num:d.num,ref:d.ref,code,dateStr,dec:s.dec});
+  });
+  if(!rows.length)return null;
+  // Trier par code
+  const order=['502','507','501a','501b'];
+  rows.sort((a,b)=>order.indexOf(a.code)-order.indexOf(b.code)||a.num.localeCompare(b.num,undefined,{numeric:true}));
+  let body='';
+  let lastCode='';
+  rows.forEach(r=>{
+    if(r.code!==lastCode){
+      body+=`<tr><td colspan="3" style="background:#e8eaf6;font-weight:700;font-size:.78rem;padding:4px 8px;color:#303f9f">${r.code}</td></tr>`;
+      lastCode=r.code;
+    }
+    body+=`<tr><td style="padding:3px 8px;font-size:.8rem">${r.num}</td><td style="padding:3px 8px;font-size:.8rem">${r.ref}</td><td style="padding:3px 8px;font-size:.8rem">${r.dateStr}</td></tr>`;
+  });
+  const html=`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+<title>Récapitulatif — ${META.date||''}</title>
+<style>body{font-family:'DM Sans',Arial,sans-serif;padding:20px}
+h2{font-size:1rem;color:#1a2744;margin-bottom:12px}
+table{border-collapse:collapse;width:100%;max-width:600px}
+td{border-bottom:1px solid #eee;vertical-align:top}
+@media print{.no-print{display:none}}
+</style></head><body>
+<h2>Récapitulatif encodage — ${META.date||''} — Division ${DIVISION}</h2>
+<table>${body}</table>
+<button class="no-print" onclick="window.print()" style="margin-top:16px;padding:8px 20px;background:#1a2744;color:white;border:none;border-radius:6px;cursor:pointer">🖨 Imprimer</button>
+</body></html>`;
+  const w=window.open('','_blank');w.document.write(html);w.document.close();
 }
 
 function buildPV(){
@@ -1314,9 +1399,10 @@ function toggleFilter(){
   FILTER_DONE=!FILTER_DONE;
   var btn=document.getElementById('btn-filter');
   if(btn){
-    btn.textContent=FILTER_DONE?'👁 Afficher tout':'👁 Afficher uniquement les non validés';
-    btn.style.background=FILTER_DONE?'#fff3cd':'white';
-    btn.style.borderColor=FILTER_DONE?'#ffc107':'#bbb';
+    btn.textContent=FILTER_DONE?'👁 Tous':'👁 Non validés';
+    btn.style.background=FILTER_DONE?'#ffc107':'white';
+    btn.style.color=FILTER_DONE?'#1a2744':'#1a2744';
+    btn.style.borderColor=FILTER_DONE?'#e0a800':'rgba(255,255,255,.5)';
   }
   applyFilter();
 }
@@ -1360,7 +1446,7 @@ function loadJSON(event){
       applySnapshot(snap);
       document.getElementById('setup-screen').style.display='none';
       document.getElementById('main-app').style.display='block';
-      document.getElementById('h-sub').textContent="Tribunal de l'Entreprise de Liège — Division "+DIVISION+" — "+(META.date||'');
+      (function(){const hd=document.getElementById('h-div');if(hd)hd.textContent=DIVISION;const hdate=document.getElementById('h-date');if(hdate)hdate.value=META.date||'';const hch=document.getElementById('h-chambre');if(hch)hch.value=META.chambre||'';})();
       renderAll();
       if(jugDate){gCalY=jugDate.getFullYear();gCalM=jugDate.getMonth();document.getElementById('gc-lbl').textContent=fd(jugDate);}
       drawGC();autoSave();
@@ -1380,7 +1466,7 @@ window.addEventListener('load',function(){
     applySnapshot(snap);
     document.getElementById('setup-screen').style.display='none';
     document.getElementById('main-app').style.display='block';
-    document.getElementById('h-sub').textContent="Tribunal de l'Entreprise de Liège — Division "+DIVISION+" — "+(META.date||'');
+    (function(){const hd=document.getElementById('h-div');if(hd)hd.textContent=DIVISION;const hdate=document.getElementById('h-date');if(hdate)hdate.value=META.date||'';const hch=document.getElementById('h-chambre');if(hch)hch.value=META.chambre||'';})();
     renderAll();
     if(jugDate){gCalY=jugDate.getFullYear();gCalM=jugDate.getMonth();document.getElementById('gc-lbl').textContent=fd(jugDate);}
     drawGC();
