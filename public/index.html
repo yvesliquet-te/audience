@@ -79,7 +79,7 @@ body{background:var(--cream);color:var(--text);font-family:'DM Sans',sans-serif;
 
 /* ── MAIN APP ── */
 #main-app{display:none;}
-.header{background:var(--navy);color:white;padding:11px 22px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--sh-md);border-bottom:3px solid var(--gold);}
+.header{background:var(--navy);color:white;padding:10px 20px;display:flex;align-items:flex-start;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--sh-md);border-bottom:3px solid var(--gold);}
 .h-title h1{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;}
 .h-title p{font-size:.68rem;opacity:.5;margin-top:1px;text-transform:uppercase;letter-spacing:.06em;}
 .h-right{display:flex;gap:7px;align-items:center;}
@@ -190,7 +190,7 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
 .mc-d.sel{background:var(--navy);color:white;font-weight:600;}
 .mc-d.tod{border:1px solid var(--gold);}
 .mc-d.emp{cursor:default;}
-.date-btn{font-size:.79rem;font-weight:500;cursor:pointer;padding:4px 8px;background:white;border:1.5px solid rgba(255,255,255,.3);border-radius:5px;display:inline-flex;align-items:center;gap:4px;color:#1a2744;}
+.date-btn{font-size:.76rem;font-weight:500;cursor:pointer;padding:3px 7px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:4px;display:inline-flex;align-items:center;gap:4px;color:white;}
 .date-btn:hover{border-color:rgba(255,255,255,.6);}
 .popover{position:absolute;z-index:200;top:calc(100% + 4px);left:0;display:none;}
 .popover.open{display:block;}
@@ -234,7 +234,68 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
 .c-section-comp .c-section-ttl{color:#3a52b0;}
 .c-section-dec .c-section-ttl{color:#bf360c;}
 .c-section-pv .c-section-ttl{color:#1e7a40;}
+
+/* ── MODE SOMBRE ── */
+body.dark{--navy:#0d1f3c;--navy-l:#122444;--cream:#1e2a3a;--cream-d:#253040;--cream-dd:#2e3d50;--muted:#8899aa;background:#111820;color:#d0dce8;}
+body.dark .dossier-card{background:#1a2535;border-color:#2a3a50;color:#d0dce8;}
+body.dark .dossier-card.open{background:#1a2e1e;border-color:#2e7d32 !important;}
+body.dark .c-section-comp{background:#1a2040;border-color:#3a4a70;}
+body.dark .c-section-dec{background:#2a1a0a;border-color:#6a3a00;}
+body.dark .c-section-pv{background:#0a2015;border-color:#1a5a2a;}
+body.dark .add-modal{background:#1a2535;color:#d0dce8;}
+body.dark .add-field input,body.dark .add-field select{background:#253040;color:#d0dce8;border-color:#3a4a60;}
+body.dark #app-body{background:#111820;}
+/* ── DRAWER ── */
+.settings-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;}
+.settings-overlay.open{display:block;}
+.settings-drawer{position:fixed;right:0;top:0;bottom:0;width:min(420px,95vw);background:white;box-shadow:-4px 0 30px rgba(0,0,0,.2);z-index:301;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease;}
+.settings-overlay.open .settings-drawer{transform:translateX(0);}
+body.dark .settings-drawer{background:#1a2535;color:#d0dce8;}
+.settings-hd{padding:16px 20px;background:var(--navy);color:white;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.settings-hd h3{margin:0;font-size:.95rem;}
+.settings-tabs{display:flex;border-bottom:2px solid var(--cream-dd);flex-shrink:0;background:white;}
+body.dark .settings-tabs{background:#1a2535;}
+.stab{flex:1;padding:9px 4px;font-size:.7rem;font-weight:600;cursor:pointer;border:none;background:none;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;font-family:'DM Sans',sans-serif;}
+.stab.active{color:var(--navy);border-bottom-color:var(--navy);}
+.settings-body{flex:1;overflow-y:auto;padding:16px 20px;}
+.stab-pane{display:none;}.stab-pane.active{display:block;}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--cream-dd);}
+.setting-row label{font-size:.82rem;font-weight:600;}
+.toggle-sw{position:relative;width:42px;height:24px;cursor:pointer;display:inline-block;}
+.toggle-sw input{opacity:0;width:0;height:0;position:absolute;}
+.toggle-sw .sl{position:absolute;inset:0;background:#ccc;border-radius:24px;transition:.3s;cursor:pointer;}
+.toggle-sw input:checked+.sl{background:var(--navy);}
+.toggle-sw .sl:before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.3s;}
+.toggle-sw input:checked+.sl:before{transform:translateX(18px);}
+/* STATS */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;}
+.stat-card{background:var(--cream);border-radius:8px;padding:10px 12px;text-align:center;}
+body.dark .stat-card{background:#253040;}
+.stat-n{font-size:1.4rem;font-weight:700;color:var(--navy);}
+body.dark .stat-n{color:#7ab0f0;}
+.stat-l{font-size:.68rem;color:var(--muted);margin-top:2px;}
+/* HISTORIQUE */
+.hist-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--cream);border-radius:8px;margin-bottom:6px;cursor:pointer;}
+.hist-item:hover{background:var(--cream-d);}
+body.dark .hist-item{background:#253040;}
+.hi-name{flex:1;font-size:.78rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hi-date{font-size:.67rem;color:var(--muted);}
+.hist-del{background:none;border:none;color:#c0392b;cursor:pointer;padding:2px 5px;font-size:.9rem;flex-shrink:0;}
+/* TEMPLATES */
+.tmpl-item{background:var(--cream);border-radius:8px;padding:10px 12px;margin-bottom:8px;}
+body.dark .tmpl-item{background:#253040;}
+.tmpl-item .tmpl-lbl{font-size:.72rem;font-weight:700;display:block;margin-bottom:4px;}
+.tmpl-item textarea{width:100%;box-sizing:border-box;min-height:52px;font-size:.77rem;border:1px solid var(--cream-dd);border-radius:5px;padding:6px 8px;resize:vertical;font-family:'DM Sans',sans-serif;}
+body.dark .tmpl-item textarea{background:#1a2535;color:#d0dce8;border-color:#3a4a60;}
+.cbtn-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+.cbtn-row input{padding:5px 8px;border:1px solid var(--cream-dd);border-radius:5px;font-size:.78rem;font-family:'DM Sans',sans-serif;}
+body.dark .cbtn-row input{background:#1a2535;color:#d0dce8;border-color:#3a4a60;}
+/* DRAG */
+.sortable-ghost{opacity:.3;background:#e8f5e9 !important;}
+.drag-handle{cursor:grab;padding:0 6px;color:#888;font-size:1.1rem;user-select:none;flex-shrink:0;font-weight:bold;line-height:1;}
+.drag-handle:active{cursor:grabbing;}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 </head>
 <body>
 
@@ -333,49 +394,66 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
 <!-- ══ MAIN APP ══ -->
 <div id="main-app">
   <div class="header">
-    <div class="h-title">
-      <h1>⚖ Feuille d'Audience</h1>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:2px">
-        <span style="font-size:.72rem;color:rgba(255,255,255,.5)">Division</span>
-        <span id="h-div" style="font-size:.78rem;color:rgba(255,255,255,.8);font-weight:600"></span>
-        <span style="color:rgba(255,255,255,.3)">|</span>
-        <span style="font-size:.72rem;color:rgba(255,255,255,.5)">Date</span>
-        <input id="h-date" type="text" placeholder="jj/mm/aaaa"
-          style="font-size:.78rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
-          border-radius:4px;padding:2px 7px;color:white;width:90px;font-family:'DM Sans',sans-serif"
-          oninput="META.date=this.value;autoSave()">
-        <span style="color:rgba(255,255,255,.3)">|</span>
-        <span style="font-size:.72rem;color:rgba(255,255,255,.5)">Début</span>
-        <input id="h-heure-debut" type="text" placeholder="9h00"
-          style="font-size:.78rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
-          border-radius:4px;padding:2px 7px;color:white;width:55px;font-family:'DM Sans',sans-serif"
-          oninput="META.heureDebut=this.value;autoSave()">
-        <span style="color:rgba(255,255,255,.3)">|</span>
-        <span style="font-size:.72rem;color:rgba(255,255,255,.5)">Levée</span>
-        <input id="h-heure-fin" type="text" placeholder="12h00"
-          style="font-size:.78rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
-          border-radius:4px;padding:2px 7px;color:white;width:55px;font-family:'DM Sans',sans-serif"
-          oninput="META.heureFin=this.value;autoSave()">
-        <span style="color:rgba(255,255,255,.3)">|</span>
-        <span style="font-size:.72rem;color:rgba(255,255,255,.5)">Chambre</span>
-        <input id="h-chambre" type="text" placeholder="1ère ch."
-          style="font-size:.78rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
-          border-radius:4px;padding:2px 7px;color:white;width:80px;font-family:'DM Sans',sans-serif"
-          oninput="META.chambre=this.value;autoSave()">
+    <!-- GAUCHE : titre + infos audience -->
+    <div style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:0">
+      <div style="display:flex;align-items:center;gap:10px">
+        <h1 style="margin:0;font-size:1rem;font-weight:700;white-space:nowrap">⚖ Feuille d'Audience</h1>
+        <span id="h-div" style="font-size:.82rem;color:var(--gold);font-weight:700"></span>
       </div>
-    </div>
-    <div class="h-right">
-      <div class="prog"><span id="prog-txt">0/0</span><div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div></div>
-      <button id="btn-filter" onclick="toggleFilter()" style="font-size:.72rem;padding:4px 10px;border-radius:14px;border:1px solid rgba(255,255,255,.5);background:white;color:#1a2744;cursor:pointer;white-space:nowrap;flex-shrink:0;font-weight:600">👁 Non validés</button>
-      <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
-        <span style="font-size:.7rem;color:rgba(255,255,255,.55);white-space:nowrap">📅 Jugements</span>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <label style="font-size:.68rem;color:rgba(255,255,255,.5)">Date</label>
+        <input id="h-date" type="text" placeholder="jj/mm/aaaa"
+          style="font-size:.76rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:4px;padding:3px 7px;color:white;font-family:'DM Sans',sans-serif;outline:none;width:84px" oninput="META.date=this.value;autoSave()">
+        <label style="font-size:.68rem;color:rgba(255,255,255,.5)">Chambre</label>
+        <input id="h-chambre" type="text" placeholder="1ère ch."
+          style="font-size:.76rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:4px;padding:3px 7px;color:white;font-family:'DM Sans',sans-serif;outline:none;width:68px" oninput="META.chambre=this.value;autoSave()">
+        <span style="color:rgba(255,255,255,.2)">│</span>
+        <label style="font-size:.68rem;color:rgba(255,255,255,.5)">Début</label>
+        <input id="h-heure-debut" type="text" placeholder="9h00"
+          style="font-size:.76rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:4px;padding:3px 7px;color:white;font-family:'DM Sans',sans-serif;outline:none;width:50px" oninput="META.heureDebut=this.value;autoSave()">
+        <label style="font-size:.68rem;color:rgba(255,255,255,.5)">Levée</label>
+        <input id="h-heure-fin" type="text" placeholder="12h00"
+          style="font-size:.76rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:4px;padding:3px 7px;color:white;font-family:'DM Sans',sans-serif;outline:none;width:50px" oninput="META.heureFin=this.value;autoSave()">
+        <span style="color:rgba(255,255,255,.2)">│</span>
+        <label style="font-size:.68rem;color:rgba(255,255,255,.5)">Prononcé</label>
         <div class="mc-wrap" id="gc-wrap">
-          <div class="date-btn" onclick="toggleGC()"><span id="gc-lbl">Choisir</span> ▾</div>
+          <div class="date-btn" onclick="toggleGC()"><span id="gc-lbl">jj/mm/aaaa</span> ▾</div>
           <div class="popover" id="gc-pop"><div class="mini-cal" id="gc-cal"></div></div>
         </div>
       </div>
-      <span id="autosave-lbl" style="font-size:.68rem;color:rgba(255,255,255,.35);margin-right:2px"></span><button class="btn btn-ghost" onclick="saveJSON()" title="Sauvegarder">💾</button><button class="btn btn-ghost" onclick="document.getElementById('json-input').click()" title="Reprendre">📂</button><input type="file" id="json-input" accept=".json" style="display:none" onchange="loadJSON(event)"><button class="btn btn-ghost" onclick="openAddModal()" title="Ajouter des dossiers">＋ Ajouter</button><button class="btn btn-gold" onclick="openExport()">⬇ Exporter</button>
-      <button class="btn btn-ghost" onclick="newAud()">↩ Nouvelle audience</button>
+    </div>
+
+    <!-- CENTRE : progression + interrupteur filtre -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;margin:0 24px;padding:0 24px;border-left:1px solid rgba(255,255,255,.15);border-right:1px solid rgba(255,255,255,.15)">
+      <div class="prog">
+        <span id="prog-txt">0/0</span>
+        <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+      </div>
+      <!-- Interrupteur toggle -->
+      <div style="display:flex;align-items:center;gap:7px">
+        <span style="font-size:.67rem;color:rgba(255,255,255,.5);white-space:nowrap">Non validés</span>
+        <div id="btn-filter" onclick="toggleFilter()"
+          style="position:relative;width:38px;height:20px;border-radius:10px;background:rgba(255,255,255,.25);cursor:pointer;transition:background .25s;flex-shrink:0"
+          title="Afficher/masquer les validés">
+          <div id="filter-knob"
+            style="position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:white;transition:transform .25s;box-shadow:0 1px 3px rgba(0,0,0,.3)"></div>
+        </div>
+        <span style="font-size:.67rem;color:rgba(255,255,255,.5);white-space:nowrap">Tous</span>
+      </div>
+    </div>
+
+    <!-- DROITE : actions -->
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
+      <span id="autosave-lbl" style="font-size:.65rem;color:rgba(255,255,255,.35);height:16px"></span>
+      <div style="display:flex;align-items:center;gap:4px">
+        <button class="btn btn-ghost" onclick="openAddModal()" title="Ajouter un dossier">＋</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('json-input').click()" title="Ouvrir JSON">📂</button>
+        <input type="file" id="json-input" accept=".json" style="display:none" onchange="loadJSON(event)">
+        <button class="btn btn-ghost" onclick="saveJSON()" title="Sauvegarder JSON">💾</button>
+        <button class="btn btn-ghost" onclick="newAud()" title="Nouvelle audience">↩</button>
+        <button class="btn btn-ghost" onclick="openSettings()" title="Paramètres">⚙</button>
+        <button class="btn btn-gold" onclick="openExport()">⬇ Exporter</button>
+      </div>
     </div>
   </div>
 
@@ -500,6 +578,7 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
 // STATE
 // ════════════════════════════════════════════
 let DOSSIERS=[], META={}, ST={}, jugDate=null, gCalY, gCalM;
+var SETTINGS={dark:false,templates:{},customBtns:[]};
 let FILTER_DONE=false;
 let SIEGE={juge:'',cons1:'',cons2:'',gref:''};
 let DIVISION='';
@@ -706,12 +785,12 @@ function genText(num){
     return'Maître '+(stripMe(cp.name)||'…');}
   const rd=s.remDate?fd(s.remDate):'[date à préciser]';
   const jd=jugDate?fd(jugDate):'[date des jugements]';
-  if(s.dec==='ro'){if(s.note)lines.push(s.note);lines.push(`Personne ne comparaît. La cause est remise au ${rd}.`);}
-  else if(s.dec==='rc'){if(s.note)lines.push(s.note);lines.push(`À la demande des parties qui comparaissent, l'affaire est remise au ${rd}.`);}
+  if(s.dec==='ro'){if(s.note)lines.push(s.note);lines.push(applyTmpl('ro',{date:rd,dem:demStr,def:defStr})||`La cause est remise d'office au ${rd}.`);}
+  else if(s.dec==='rc'){if(s.note)lines.push(s.note);lines.push(applyTmpl('rc',{date:rd,dem:demStr,def:defStr})||`À la demande des parties qui comparaissent, l'affaire est remise au ${rd}.`);}
   else if(s.dec==='rd'){
     const pres=!demAbsent?demStr:defStr,abs=demAbsent?demStr:defStr;
     if(s.note)lines.push(s.note);
-    lines.push(`À la demande de la partie ${pres}, l'affaire est remise au ${rd}.`);
+    lines.push(applyTmpl('rd',{date:rd,dem:pres,def:abs})||`À la demande de la partie ${pres}, l'affaire est remise au ${rd}.`);
     if(s.remPli)lines.push(`Elle sollicite l'envoi d'un pli judiciaire à ${abs}, conformément à l'article 803 C.j.`);
   }else if(s.dec==='jd'){
     const abs2=demAbsent?demStr:defStr,pn=nomComp(demAbsent?defComp:demComp,demAbsent?defStr:demStr);
@@ -729,8 +808,8 @@ function genText(num){
     lines.push(l);
     if(s.note)lines.push(s.note);
     lines.push(`Le tribunal clôt les débats et met la cause en délibéré. Un jugement sera prononcé le ${jd}.`);
-  }else if(s.dec==='vc'){if(s.note)lines.push(s.note);lines.push('Les parties sollicitent le renvoi au rôle.');}
-  else if(s.dec==='vd'){if(s.note)lines.push(s.note);lines.push('La partie '+(!demAbsent?demStr:defStr)+' sollicite le renvoi au rôle.');}
+  }else if(s.dec==='vc'){if(s.note)lines.push(s.note);lines.push(applyTmpl('vc',{dem:demStr,def:defStr})||'Les parties sollicitent le renvoi au rôle.');}
+  else if(s.dec==='vd'){if(s.note)lines.push(s.note);lines.push(applyTmpl('vd',{dem:!demAbsent?demStr:defStr,def:defStr})||'La partie '+(!demAbsent?demStr:defStr)+' sollicite le renvoi au rôle.');}
   else if(s.dec==='ea'){lines.push("Les parties déposent un calendrier de mise en état amiable. Une ordonnance de confirmation des délais et de fixation de la cause pour être plaidée sera prononcée ultérieurement.");if(s.note)lines.push(s.note);}
   else if(s.dec==='et'){lines.push("Les parties sollicitent la mise en état et la fixation de la cause pour plaidoiries. Une ordonnance sera prononcée dans le délai légal.");if(s.note)lines.push(s.note);}
   else if(s.dec==='ac'){lines.push(`Les parties sont parvenues à un accord et sollicitent qu'il leur en soit donné acte.`);if(s.note)lines.push(s.note);lines.push(`La cause est plaidée. Un jugement sera prononcé le ${jd}.`);}
@@ -748,10 +827,9 @@ function refreshPreviews(){DOSSIERS.forEach(s=>s.items.forEach(d=>updatePreview(
 // ════════════════════════════════════════════
 function renderCard(d){
   const s=ST[d.num],id=nid(d.num),dec=s.dec;
-  const _isPrononcer=isPrononcer(d.num)||isRO(d.num);
+  const _isPrononcer=isPrononcer(d.num);
   const badge=s.done?`<span class="badge badge-d">✓ ${DEC_LBL[dec]||'Validé'}</span>`:`<span class="badge badge-p ${dec?'badge-enc':''}">${dec?DEC_LBL[dec]:'En attente'}</span>`;
-  const arrowStyle="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;border:1px solid #ddd;background:#f5f5f5;color:#555;font-size:.7rem;cursor:pointer;user-select:none;margin-right:1px";
-  const moveBtn=`<span onclick="event.stopPropagation();moveDoss('${d.num}',-1)" title="Monter" style="${arrowStyle}">▲</span><span onclick="event.stopPropagation();moveDoss('${d.num}',1)" title="Descendre" style="${arrowStyle}">▼</span><span onclick="event.stopPropagation();deleteDoss('${d.num}')" title="Supprimer" style="${arrowStyle.replace('#f5f5f5','#fff0f0').replace('#ddd','#ffcccc').replace('#555','#c0392b')}">✕</span>`;
+  const moveBtn=`<span onclick="event.stopPropagation();deleteDoss('${d.num}')" title="Supprimer" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;border:1px solid #ffcccc;background:#fff0f0;color:#c0392b;font-size:.7rem;cursor:pointer;user-select:none;margin-right:4px">✕</span>`;
   const _dems=d.dems||[d.dem||''];
   const _defs=d.defs||[d.def||''];
   function cRow(side,i){
@@ -803,6 +881,8 @@ function renderCard(d){
           <button class="dbtn db-ea ${dec==='ea'?'act':''}" onclick="setDec('${d.num}','ea')">📝 Mise en état (amiable)</button>
           <button class="dbtn db-et ${dec==='et'?'act':''}" onclick="setDec('${d.num}','et')">📝 Mise en état (tribunal)</button>
         </div>
+
+      ${(SETTINGS&&SETTINGS.customBtns&&SETTINGS.customBtns.length)?`<div class="dec-group">${SETTINGS.customBtns.map(function(b){return '<button class="dbtn '+(dec===b.code?'act':'')+' " onclick="setDec(\'${d.num}\',\''+b.code+'\')">'+(b.emoji||'')+(b.label||'')+'</button>';}).join('')}</div>`:''}
       </div>`;
   const showRem=dec==='rc'||dec==='rd';
   const remSub=`<div class="sub-opts ${showRem?'vis':''}" id="sr-${id}">
@@ -929,14 +1009,32 @@ function renderAll(){
     html+='</div>';
   });
   document.getElementById('app-body').innerHTML=html;
-  refreshPreviews();updateProg();
+  refreshPreviews();updateProg();applyFilter();
+  setTimeout(function(){
+    addDragHandles();
+    if(typeof Sortable!=='undefined')initSortable();
+  },0);
 }
 
 function replaceCard(num,keepOpen){
   const d=getDoss(num),el=document.getElementById('card-'+nid(num));if(!el)return;
   const tmp=document.createElement('div');tmp.innerHTML=renderCard(d);
   const nc=tmp.firstChild;if(keepOpen)nc.classList.add('open');
+  if(FILTER_DONE&&ST[num]&&ST[num].done)nc.style.display='none';
   el.replaceWith(nc);updatePreview(num);
+  // Réinsérer la poignée drag & drop
+  setTimeout(function(){
+    const head=nc.querySelector('.c-head');
+    if(head&&!head.querySelector('.drag-handle')){
+      const h=document.createElement('span');
+      h.className='drag-handle';
+      h.title='Déplacer';
+      h.innerHTML='&#9776;';
+      h.style.cssText='cursor:grab;padding:2px 6px;color:#666;font-size:1rem;user-select:none;flex-shrink:0;font-weight:bold;background:rgba(0,0,0,.06);border-radius:4px;margin-right:4px';
+      h.addEventListener('click',function(e){e.stopPropagation();});
+      head.insertBefore(h,head.firstChild);
+    }
+  },0);
 }
 function upd(num,field,value){
   ST[num][field]=value;
@@ -958,13 +1056,20 @@ function updPartieName(num,side,i,val){
 
 function updComp(num,side,i,prop,value){
   ST[num][side][i][prop]=value;
+  // Marquer comme ajouté manuellement pendant l'audience
+  if(prop==='name'&&value&&value.trim())ST[num][side][i].added=true;
   if(prop==='name'||prop==='loco'){updatePreview(num);clearTimeout(updComp._t);updComp._t=setTimeout(autoSave,1200);}
   else{replaceCard(num,true);autoSave();}
 }
 function modCard(num){
   ST[num].done=false;replaceCard(num,true);updateProg();autoSave();
 }
-function setDec(num,dec){ST[num].dec=dec;replaceCard(num,true);updatePreview(num);autoSave();}
+function setDec(num,dec){
+  // Reclique sur le même bouton → annuler la décision
+  if(ST[num].dec===dec){ST[num].dec=null;}
+  else{ST[num].dec=dec;}
+  replaceCard(num,true);updatePreview(num);autoSave();
+}
 function toggleCard(num){
   const el=document.getElementById('card-'+nid(num));if(!el)return;
   const open=el.classList.contains('open');
@@ -1119,16 +1224,60 @@ function buildRecap(){
     }
     body+=`<tr><td style="padding:3px 8px;font-size:.8rem">${r.num}</td><td style="padding:3px 8px;font-size:.8rem">${r.ref}</td><td style="padding:3px 8px;font-size:.8rem">${r.dateStr}</td></tr>`;
   });
+  // Avocats titulaires nouvellement ajoutés
+  const avRows=[];
+  DOSSIERS.flatMap(s=>s.items).forEach(d=>{
+    const st=ST[d.num];if(!st)return;
+    const dems=d.dems||[d.dem||''],defs=d.defs||[d.def||''];
+    dems.forEach(function(nm,i){
+      const cp=(st.dem||[])[i]||{};
+      if(cp.type==='avocat'&&cp.name&&cp.name.trim()&&cp.added)
+        avRows.push({ref:d.ref,avocat:stripMe(cp.name),loco:cp.loco||'',partie:nm,role:'dem'});
+    });
+    defs.forEach(function(nm,i){
+      const cp=(st.def||[])[i]||{};
+      if(cp.type==='avocat'&&cp.name&&cp.name.trim()&&cp.added)
+        avRows.push({ref:d.ref,avocat:stripMe(cp.name),loco:cp.loco||'',partie:nm,role:'def'});
+    });
+  });
+  // Dédupliquer par avocat
+  const avSeen=new Set();
+  const avUniq=avRows.filter(function(r){
+    const key=r.avocat.toLowerCase();
+    if(avSeen.has(key))return false;
+    avSeen.add(key);return true;
+  });
+  let avBody='';
+  if(avUniq.length){
+    avUniq.sort((a,b)=>a.avocat.localeCompare(b.avocat,'fr'));
+    avUniq.forEach(function(r){
+      avBody+=`<tr>`
+        +`<td style="padding:3px 8px;font-size:.8rem;font-weight:600">Me ${r.avocat}</td>`
+        +`<td style="padding:3px 8px;font-size:.8rem">${r.ref}</td>`
+        +`<td style="padding:3px 8px;font-size:.8rem">${r.partie}</td>`
+        +`<td style="padding:3px 8px;font-size:.8rem;color:#666">${r.role==='dem'?'Dem.':'Déf.'}</td>`
+        +`</tr>`;
+    });
+  }
+  const avSection=avUniq.length
+    ?`<h3 style="font-size:.9rem;color:#1a2744;margin:18px 0 8px">Avocats ajoutés pendant l'audience</h3>`
+    +`<table><tr style="background:#e8f5e9">`
+    +`<th style="padding:4px 8px;font-size:.75rem;text-align:left">Avocat</th>`
+    +`<th style="padding:4px 8px;font-size:.75rem;text-align:left">Rôle</th>`
+    +`<th style="padding:4px 8px;font-size:.75rem;text-align:left">Partie</th>`
+    +`<th style="padding:4px 8px;font-size:.75rem;text-align:left">Qualité</th>`
+    +`</tr>${avBody}</table>`:'';
   const html=`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
 <title>Récapitulatif — ${META.date||''}</title>
 <style>body{font-family:'DM Sans',Arial,sans-serif;padding:20px}
-h2{font-size:1rem;color:#1a2744;margin-bottom:12px}
-table{border-collapse:collapse;width:100%;max-width:600px}
-td{border-bottom:1px solid #eee;vertical-align:top}
+h2,h3{color:#1a2744;margin-bottom:8px}h2{font-size:1rem}h3{font-size:.9rem}
+table{border-collapse:collapse;width:100%;max-width:700px;margin-bottom:8px}
+td,th{border-bottom:1px solid #eee;vertical-align:top}
 @media print{.no-print{display:none}}
 </style></head><body>
 <h2>Récapitulatif encodage — ${META.date||''} — Division ${DIVISION}</h2>
 <table>${body}</table>
+${avSection}
 <button class="no-print" onclick="window.print()" style="margin-top:16px;padding:8px 20px;background:#1a2744;color:white;border:none;border-radius:6px;cursor:pointer">🖨 Imprimer</button>
 </body></html>`;
   const w=window.open('','_blank');w.document.write(html);w.document.close();
@@ -1397,13 +1546,10 @@ function applyFilter(){
 }
 function toggleFilter(){
   FILTER_DONE=!FILTER_DONE;
-  var btn=document.getElementById('btn-filter');
-  if(btn){
-    btn.textContent=FILTER_DONE?'👁 Tous':'👁 Non validés';
-    btn.style.background=FILTER_DONE?'#ffc107':'white';
-    btn.style.color=FILTER_DONE?'#1a2744':'#1a2744';
-    btn.style.borderColor=FILTER_DONE?'#e0a800':'rgba(255,255,255,.5)';
-  }
+  var sw=document.getElementById('btn-filter');
+  var knob=document.getElementById('filter-knob');
+  if(sw)sw.style.background=FILTER_DONE?'#f0c040':'rgba(255,255,255,.25)';
+  if(knob)knob.style.transform=FILTER_DONE?'translateX(18px)':'';
   applyFilter();
 }
 var LS_KEY='audience_session_v1';
@@ -1418,6 +1564,7 @@ function applySnapshot(snap){
 function autoSave(){
   try{
     localStorage.setItem(LS_KEY,JSON.stringify(buildSnapshot()));
+    saveToHistory();
     var lbl=document.getElementById('autosave-lbl');
     if(lbl){var t=new Date();lbl.textContent='● '+String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
     lbl.style.color='rgba(180,255,180,.7)';setTimeout(function(){lbl.style.color='rgba(255,255,255,.35)';},2000);}
@@ -1434,7 +1581,7 @@ function saveJSON(){
   var mn=String(now.getMinutes()).padStart(2,'0');
   var stamp=dd+mm+yy+'_'+hh+mn;
   var audDate=(META.date||'').replace(/\s+/g,'-').replace(/\//g,'-');
-  a.href=url;a.download='audience_'+(audDate||stamp)+'_'+stamp+'.json';a.click();URL.revokeObjectURL(url);
+  a.href=url;a.download='FA_'+(audDate||'session')+'_'+stamp+'.json';a.click();URL.revokeObjectURL(url);
 }
 function loadJSON(event){
   var file=event.target.files[0];if(!file)return;
@@ -1454,8 +1601,205 @@ function loadJSON(event){
   };
   reader.readAsText(file);event.target.value='';
 }
+// ════ SETTINGS ════
+const SETTINGS_KEY='audience_settings_v1';
+const HIST_KEY='audience_history_v1';
+var sortables=[];
+
+function loadSettings(){
+  try{var s=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}');if(s.dark!==undefined)SETTINGS.dark=s.dark;if(s.templates)SETTINGS.templates=s.templates;if(s.customBtns)SETTINGS.customBtns=s.customBtns;}catch(e){}
+  if(SETTINGS.dark)applyDark(true);
+  syncCustomBtns();
+}
+function saveSettings(){try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(SETTINGS));}catch(e){}}
+
+function applyDark(on){document.body.classList.toggle('dark',on);var t=document.getElementById('dark-toggle');if(t)t.checked=on;}
+function toggleDark(on){SETTINGS.dark=on;applyDark(on);saveSettings();}
+
+function openSettings(){buildStats();buildTemplates();buildHistList();document.getElementById('settings-overlay').classList.add('open');}
+function closeSettings(){document.getElementById('settings-overlay').classList.remove('open');}
+function switchStab(tab){
+  document.querySelectorAll('.stab').forEach(function(t,i){t.classList.toggle('active',['apparence','stats','templates','historique'][i]===tab);});
+  document.querySelectorAll('.stab-pane').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('stab-'+tab).classList.add('active');
+  if(tab==='stats')buildStats();if(tab==='historique')buildHistList();if(tab==='templates')buildTemplates();
+}
+
+// STATS
+function buildStats(){
+  var el=document.getElementById('stats-content');if(!el)return;
+  var all=DOSSIERS.flatMap(function(s){return s.items;});
+  var total=all.length;if(!total){el.innerHTML='<p style="color:var(--muted);font-size:.8rem">Aucun dossier chargé.</p>';return;}
+  var done=all.filter(function(d){return ST[d.num]&&ST[d.num].done;}).length;
+  var counts={};
+  all.forEach(function(d){var dec=(ST[d.num]||{}).dec;if(dec)counts[dec]=(counts[dec]||0)+1;});
+  var html='<div class="stat-grid">';
+  html+='<div class="stat-card"><div class="stat-n">'+total+'</div><div class="stat-l">Total</div></div>';
+  html+='<div class="stat-card"><div class="stat-n">'+done+'</div><div class="stat-l">Validés</div></div>';
+  html+='<div class="stat-card"><div class="stat-n">'+(total-done)+'</div><div class="stat-l">En attente</div></div>';
+  html+='<div class="stat-card"><div class="stat-n">'+(Math.round(done/total*100)||0)+'%</div><div class="stat-l">Progression</div></div>';
+  html+='</div><div style="margin-top:12px">';
+  Object.entries(counts).sort(function(a,b){return b[1]-a[1];}).forEach(function(e){
+    var pct=Math.round(e[1]/total*100);
+    html+='<div style="margin-bottom:7px"><div style="display:flex;justify-content:space-between;font-size:.74rem;margin-bottom:2px"><span>'+(DEC_LBL[e[0]]||e[0])+'</span><span style="font-weight:700">'+e[1]+'</span></div>';
+    html+='<div style="background:var(--cream-dd);border-radius:4px;height:5px"><div style="background:var(--navy);width:'+pct+'%;height:100%;border-radius:4px"></div></div></div>';
+  });
+  el.innerHTML=html+'</div>';
+}
+
+// TEMPLATES
+var DEFAULT_TMPLS={
+  rc:"A la demande des parties qui comparaissent, l'affaire est remise au ${date}.",
+  rd:"A la demande de la partie ${dem}, l'affaire est remise au ${date}.",
+  ro:"La cause est remise d'office au ${date}.",
+  jc:"Le tribunal clot les debats et met la cause en delibere. Un jugement sera prononce le ${date}.",
+  jd:"La partie ${def} est defaillante. Un jugement sera prononce le ${date}.",
+  vc:"Les parties sollicitent le renvoi au role.",
+  vd:"La partie ${dem} sollicite le renvoi au role.",
+  ea:"Les parties deposent un calendrier de mise en etat amiable.",
+  et:"Les parties sollicitent la mise en etat et la fixation de la cause pour plaidoiries.",
+  ac:"Les parties sont parvenues a un accord. Jugement le ${date}.",
+  co:"Un PV de conciliation est redige ce jour.",
+  ca:"La conciliation n'aboutit pas — partie defaillante.",
+  cd:"La conciliation n'aboutit pas — pas d'accord."
+};
+function getTmpl(dec){return SETTINGS.templates[dec]||DEFAULT_TMPLS[dec]||'';}
+function buildTemplates(){
+  var el=document.getElementById('tmpl-list');if(!el)return;
+  var keys=Object.keys(DEFAULT_TMPLS);
+  var html='';
+  keys.forEach(function(k){
+    html+='<div class="tmpl-item">';
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">';
+    html+='<span class="tmpl-lbl">'+(DEC_LBL[k]||k)+'</span>';
+    html+='<button onclick="saveTmplById(\'tmpl-'+k+'\')"'
+      +' style="font-size:.68rem;padding:2px 8px;background:var(--navy);color:white;border:none;border-radius:4px;cursor:pointer">💾 Enregistrer</button>';
+    html+='</div>';
+    html+='<textarea id="tmpl-'+k+'" style="width:100%;box-sizing:border-box;min-height:52px;font-size:.77rem;border:1px solid var(--cream-dd);border-radius:5px;padding:6px 8px;resize:vertical;font-family:sans-serif">'+getTmpl(k)+'</textarea>';
+    html+='<div id="tmpl-ok-'+k+'" style="font-size:.68rem;color:var(--green);display:none;margin-top:2px">✓ Enregistré</div>';
+    html+='</div>';
+  });
+  el.innerHTML=html;
+  buildCustomBtnsList();
+}
+function saveTmplById(id){
+  var ta=document.getElementById(id);
+  if(!ta)return;
+  var k=id.slice(5);
+  saveTmpl(k,ta.value);
+  var ok=document.getElementById('tmpl-ok-'+k);
+  if(ok){ok.style.display='block';setTimeout(function(){ok.style.display='none';},2000);}
+}
+function saveTmpl(k,v){SETTINGS.templates[k]=v;saveSettings();}
+function applyTmpl(dec,vars){
+  var tpl=getTmpl(dec);if(!tpl)return '';
+  return tpl.replace(/\$\{date\}/g,vars.date||'').replace(/\$\{dem\}/g,vars.dem||'').replace(/\$\{def\}/g,vars.def||'');
+}
+function buildCustomBtnsList(){
+  var el=document.getElementById('custom-btns-list');if(!el)return;
+  el.innerHTML=(SETTINGS.customBtns||[]).map(function(b,i){
+    return '<div class="cbtn-row">'
+      +'<input value="'+(b.emoji||'')+'" placeholder="emoji" style="width:48px" oninput="SETTINGS.customBtns['+i+'].emoji=this.value;saveSettings();syncCustomBtns()">'
+      +'<input value="'+(b.label||'')+'" placeholder="Libellé" style="flex:1" oninput="SETTINGS.customBtns['+i+'].label=this.value;saveSettings();syncCustomBtns()">'
+      +'<input value="'+(b.code||'')+'" placeholder="code" style="width:55px" oninput="SETTINGS.customBtns['+i+'].code=this.value;saveSettings();syncCustomBtns()">'
+      +'<button class="hist-del" onclick="delCustomBtn('+i+')">✕</button></div>';
+  }).join('');
+}
+function addCustomBtn(){
+  if(!SETTINGS.customBtns)SETTINGS.customBtns=[];
+  SETTINGS.customBtns.push({emoji:'📌',label:'Nouveau',code:'cx'+(SETTINGS.customBtns.length+1)});
+  saveSettings();buildCustomBtnsList();syncCustomBtns();
+}
+function delCustomBtn(i){SETTINGS.customBtns.splice(i,1);saveSettings();buildCustomBtnsList();syncCustomBtns();}
+function syncCustomBtns(){(SETTINGS.customBtns||[]).forEach(function(b){if(b.code)DEC_LBL[b.code]=b.label;});renderAll();}
+
+// HISTORIQUE
+function saveToHistory(){
+  try{
+    var hist=JSON.parse(localStorage.getItem(HIST_KEY)||'[]');
+    var t=new Date();
+    var dd=String(t.getDate()).padStart(2,'0'),mm=String(t.getMonth()+1).padStart(2,'0'),yy=String(t.getFullYear()).slice(-2);
+    var hh=String(t.getHours()).padStart(2,'0'),mn=String(t.getMinutes()).padStart(2,'0');
+    var audDate=(META.date||'').replace(/[\/\s]/g,'-');
+    var name='FA_'+(audDate||'session')+'_'+dd+mm+yy+'_'+hh+mn;
+    var snap={name:name,ts:Date.now(),data:JSON.stringify(buildSnapshot())};
+    var existIdx=hist.findIndex(function(h){return audDate&&h.name.includes(audDate);});
+    if(existIdx!==-1)hist[existIdx]=snap;else hist.unshift(snap);
+    if(hist.length>10)hist.length=10;
+    localStorage.setItem(HIST_KEY,JSON.stringify(hist));
+  }catch(e){}
+}
+function buildHistList(){
+  var el=document.getElementById('hist-list');if(!el)return;
+  try{
+    var hist=JSON.parse(localStorage.getItem(HIST_KEY)||'[]');
+    if(!hist.length){el.innerHTML='<p style="font-size:.78rem;color:var(--muted)">Aucune session.</p>';return;}
+    el.innerHTML=hist.map(function(h,i){
+      var d=new Date(h.ts);
+      var label=d.toLocaleDateString('fr-BE')+' '+d.toLocaleTimeString('fr-BE',{hour:'2-digit',minute:'2-digit'});
+      return '<div class="hist-item" onclick="loadHistItem('+i+')">'
+        +'<div style="flex:1;min-width:0"><div class="hi-name">'+h.name+'</div><div class="hi-date">'+label+'</div></div>'
+        +'<button class="hist-del" onclick="event.stopPropagation();delHistItem('+i+')">✕</button></div>';
+    }).join('');
+  }catch(e){el.innerHTML='<p style="color:#c0392b;font-size:.78rem">Erreur.</p>';}
+}
+function loadHistItem(i){
+  try{
+    var hist=JSON.parse(localStorage.getItem(HIST_KEY)||'[]');
+    var snap=JSON.parse(hist[i].data);
+    if(!confirm('Charger "'+hist[i].name+'" ?'))return;
+    applySnapshot(snap);
+    closeSettings();
+    document.getElementById('setup-screen').style.display='none';
+    document.getElementById('main-app').style.display='block';
+    (function(){var hd=document.getElementById('h-div');if(hd)hd.textContent=DIVISION;var hdate=document.getElementById('h-date');if(hdate)hdate.value=META.date||'';var hch=document.getElementById('h-chambre');if(hch)hch.value=META.chambre||'';var hhd=document.getElementById('h-heure-debut');if(hhd)hhd.value=META.heureDebut||'';var hhf=document.getElementById('h-heure-fin');if(hhf)hhf.value=META.heureFin||'';})();
+    renderAll();if(jugDate){gCalY=jugDate.getFullYear();gCalM=jugDate.getMonth();document.getElementById('gc-lbl').textContent=fd(jugDate);}drawGC();
+  }catch(e){alert('Erreur: '+e.message);}
+}
+function delHistItem(i){
+  try{var hist=JSON.parse(localStorage.getItem(HIST_KEY)||'[]');hist.splice(i,1);localStorage.setItem(HIST_KEY,JSON.stringify(hist));buildHistList();}catch(e){}
+}
+
+// DRAG & DROP
+function initSortable(){
+  if(typeof Sortable==='undefined')return;
+  sortables.forEach(function(s){try{s.destroy();}catch(e){}});sortables=[];
+  document.querySelectorAll('.dossiers-wrap').forEach(function(el,si){
+    sortables.push(Sortable.create(el,{
+      animation:150,handle:'.drag-handle',ghostClass:'sortable-ghost',
+      onEnd:function(){
+        var newDoss=[];
+        document.querySelectorAll('.dossiers-wrap').forEach(function(wrap,wsi){
+          var items=[];
+          wrap.querySelectorAll('[data-num]').forEach(function(card){
+            var num=card.getAttribute('data-num');var d=getDoss(num);if(d)items.push(d);
+          });
+          if(items.length)newDoss.push({section:DOSSIERS[wsi]?DOSSIERS[wsi].section:('Section '+(wsi+1)),items:items});
+        });
+        DOSSIERS.length=0;newDoss.forEach(function(s){DOSSIERS.push(s);});
+        renum();renderAll();autoSave();
+      }
+    }));
+  });
+}
+function addDragHandles(){
+  document.querySelectorAll('[data-num]').forEach(function(card){
+    if(card.querySelector('.drag-handle'))return;
+    var head=card.querySelector('.c-head');
+    if(!head)return;
+    var h=document.createElement('span');
+    h.className='drag-handle';
+    h.title='Déplacer';
+    h.innerHTML='&#9776;';
+    h.style.cssText='cursor:grab;padding:2px 6px;color:#666;font-size:1rem;user-select:none;flex-shrink:0;font-weight:bold;background:rgba(0,0,0,.06);border-radius:4px;margin-right:4px';
+    h.addEventListener('click',function(e){e.stopPropagation();});
+    head.insertBefore(h,head.firstChild);
+  });
+}
+
 window.addEventListener('load',function(){
   document.getElementById('exp-modal').addEventListener('click',function(e){if(e.target===this)closeExport();});
+  loadSettings();
   document.getElementById('add-modal').addEventListener('click',function(e){if(e.target===this)closeAddModal();});
   try{
     var raw=localStorage.getItem(LS_KEY);if(!raw)return;
@@ -1473,5 +1817,41 @@ window.addEventListener('load',function(){
   }catch(e){}
 });
 </script>
+
+<!-- ══ DRAWER PARAMÈTRES ══ -->
+<div class="settings-overlay" id="settings-overlay" onclick="if(event.target===this)closeSettings()">
+  <div class="settings-drawer">
+    <div class="settings-hd"><h3>⚙ Paramètres</h3>
+      <button onclick="closeSettings()" style="background:none;border:none;color:white;font-size:1.2rem;cursor:pointer;line-height:1">✕</button>
+    </div>
+    <div class="settings-tabs">
+      <button class="stab active" onclick="switchStab('apparence')">🌙 Thème</button>
+      <button class="stab" onclick="switchStab('stats')">📊 Stats</button>
+      <button class="stab" onclick="switchStab('templates')">💬 Templates</button>
+      <button class="stab" onclick="switchStab('historique')">🕐 Historique</button>
+    </div>
+    <div class="settings-body">
+      <div class="stab-pane active" id="stab-apparence">
+        <div class="setting-row"><label>Mode sombre</label>
+          <label class="toggle-sw"><input type="checkbox" id="dark-toggle" onchange="toggleDark(this.checked)"><span class="sl"></span></label>
+        </div>
+      </div>
+      <div class="stab-pane" id="stab-stats"><div id="stats-content"><p style="color:var(--muted);font-size:.8rem">Ouvrez une session pour voir les statistiques.</p></div></div>
+      <div class="stab-pane" id="stab-templates">
+        <p style="font-size:.75rem;color:var(--muted);margin-bottom:10px">Personnalisez les phrases du PV. Variables : <code>${date}</code> <code>${dem}</code> <code>${def}</code></p>
+        <div id="tmpl-list"></div>
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--cream-dd)">
+          <p style="font-size:.78rem;font-weight:700;margin-bottom:8px">Boutons personnalisés</p>
+          <div id="custom-btns-list"></div>
+          <button onclick="addCustomBtn()" style="font-size:.75rem;padding:5px 12px;border:1px dashed var(--cream-dd);background:none;border-radius:6px;cursor:pointer;margin-top:4px">＋ Nouveau bouton</button>
+        </div>
+      </div>
+      <div class="stab-pane" id="stab-historique">
+        <p style="font-size:.75rem;color:var(--muted);margin-bottom:10px">10 dernières sessions (auto-sauvegardées).</p>
+        <div id="hist-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
