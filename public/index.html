@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -156,6 +157,8 @@ select:focus,input:focus{outline:none;border-color:var(--navy);background:white;
 .db-co{border-color:#2a8040;color:#1a6030;}.db-co.act{background:#d0f0d8;font-weight:700;}
 .db-ca{border-color:var(--red);color:var(--red);}.db-ca.act{background:var(--red-l);font-weight:700;}
 .db-cd{border-color:#aa4040;color:#882020;}.db-cd.act{background:#fde0e0;font-weight:700;}
+.db-so{border-color:#607d8b;color:#37474f;}.db-so.act{background:#eceff1;font-weight:700;}
+.db-vp{border-color:#546e7a;color:#263238;}.db-vp.act{background:#e0e7ea;font-weight:700;}
 
 .sub-opts{display:none;background:var(--cream);border-radius:var(--r);padding:11px;margin-bottom:11px;border:1px solid var(--cream-d);}
 .sub-opts.vis{display:block;}
@@ -294,11 +297,183 @@ body.dark .cbtn-row input{background:#1a2535;color:#d0dce8;border-color:#3a4a60;
 .sortable-ghost{opacity:.3;background:#e8f5e9 !important;}
 .drag-handle{cursor:grab;padding:0 6px;color:#888;font-size:1.1rem;user-select:none;flex-shrink:0;font-weight:bold;line-height:1;}
 .drag-handle:active{cursor:grabbing;}
+
+/* ── SIDEBAR ── */
+:root{--sb-w:200px;--sb-w-col:52px;}
+#sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sb-w);background:var(--navy);border-right:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;z-index:150;box-shadow:2px 0 16px rgba(0,0,0,.22);transition:width .22s cubic-bezier(.4,0,.2,1);overflow:hidden;}
+#sidebar.collapsed{width:var(--sb-w-col);}
+.sb-header{display:flex;align-items:center;gap:10px;padding:14px 12px 12px;border-bottom:1px solid rgba(255,255,255,.1);cursor:pointer;user-select:none;flex-shrink:0;}
+.sb-header:hover{background:rgba(255,255,255,.05);}
+.sb-logo{font-size:1.2rem;color:var(--gold);flex-shrink:0;width:28px;text-align:center;}
+.sb-title{font-family:'Playfair Display',serif;font-size:.88rem;color:white;font-weight:700;white-space:nowrap;overflow:hidden;transition:opacity .15s;}
+#sidebar.collapsed .sb-title{opacity:0;}
+.sb-toggle{margin-left:auto;color:rgba(255,255,255,.4);font-size:.7rem;flex-shrink:0;transition:transform .22s;}
+#sidebar.collapsed .sb-toggle{transform:rotate(180deg);}
+.sb-scroll{overflow-y:auto;flex:1;display:flex;flex-direction:column;padding:6px 0;}
+.sb-sep{flex:1;}
+.sb-section{padding:8px 0 4px 14px;font-size:.6rem;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.3);white-space:nowrap;transition:opacity .15s;}
+#sidebar.collapsed .sb-section{opacity:0;}
+.sb-btn{display:flex;align-items:center;gap:11px;padding:9px 12px;margin:1px 6px;border-radius:7px;border:none;background:none;color:rgba(255,255,255,.72);font-size:.82rem;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;width:calc(100% - 12px);text-align:left;transition:background .15s,color .15s;position:relative;}
+.sb-btn:hover{background:rgba(255,255,255,.1);color:white;}
+.sb-btn.sb-gold{color:var(--gold-l);}.sb-btn.sb-gold:hover{background:var(--gold);color:var(--navy);}
+.sb-btn.sb-danger:hover{background:rgba(139,32,32,.4);color:#ffaaaa;}
+.sb-icon{font-size:1.05rem;flex-shrink:0;width:28px;text-align:center;}
+.sb-label{white-space:nowrap;overflow:hidden;transition:opacity .15s,max-width .22s;max-width:140px;}
+#sidebar.collapsed .sb-label{opacity:0;max-width:0;}
+.sb-tip{display:none;}
+#sidebar.collapsed .sb-btn .sb-tip{display:block;position:absolute;left:calc(var(--sb-w-col) + 6px);top:50%;transform:translateY(-50%);background:#1a2744;color:white;font-size:.72rem;font-weight:600;padding:4px 10px;border-radius:5px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;box-shadow:0 2px 8px rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.12);z-index:200;}
+#sidebar.collapsed .sb-btn:hover .sb-tip{opacity:1;}
+.sb-foot{padding:8px 12px;border-top:1px solid rgba(255,255,255,.08);flex-shrink:0;}
+/* Décaler le contenu */
+body{padding-left:var(--sb-w);transition:padding-left .22s cubic-bezier(.4,0,.2,1);}
+body.sb-collapsed{padding-left:var(--sb-w-col);}
+
+/* ── SEARCH BAR ── */
+#search-bar{display:none;position:fixed;top:0;left:var(--sb-w);right:0;background:rgba(26,39,68,.97);backdrop-filter:blur(4px);padding:10px 20px;align-items:center;gap:12px;z-index:120;box-shadow:0 4px 20px rgba(0,0,0,.3);border-bottom:2px solid var(--gold);transition:left .22s cubic-bezier(.4,0,.2,1);}
+body.sb-collapsed #search-bar{left:var(--sb-w-col);}
+#search-bar.open{display:flex;}
+#search-input{flex:1;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:8px 14px;color:white;font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;}
+#search-input::placeholder{color:rgba(255,255,255,.4);}
+#search-input:focus{background:rgba(255,255,255,.15);border-color:var(--gold);}
+#search-results{position:fixed;top:55px;left:var(--sb-w);right:0;background:white;z-index:119;max-height:60vh;overflow-y:auto;box-shadow:0 8px 30px rgba(0,0,0,.2);display:none;transition:left .22s cubic-bezier(.4,0,.2,1);}
+body.sb-collapsed #search-results{left:var(--sb-w-col);}
+#search-results.open{display:block;}
+.sr-item{display:flex;align-items:center;gap:12px;padding:10px 20px;cursor:pointer;border-bottom:1px solid var(--cream-d);transition:background .1s;}
+.sr-item:hover{background:var(--cream);}
+.sr-num{font-family:'Playfair Display',serif;font-size:.8rem;font-weight:700;color:var(--navy);background:var(--cream-d);padding:2px 6px;border-radius:4px;flex-shrink:0;}
+.sr-ref{font-size:.72rem;color:var(--muted);font-style:italic;flex-shrink:0;min-width:80px;}
+.sr-parties{flex:1;min-width:0;}
+.sr-dem{font-size:.8rem;font-weight:600;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sr-avoc{font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sr-hl{background:#fff3cd;border-radius:2px;padding:0 1px;}
+.sr-none{padding:20px;text-align:center;color:var(--muted);font-size:.85rem;}
+
+/* ── SIDEBAR DROITE ── */
+:root{--sbr-w:220px;--sbr-w-col:36px;}
+#sidebar-right{position:fixed;right:0;top:0;bottom:0;width:var(--sbr-w);background:var(--navy);border-left:1px solid rgba(255,255,255,.08);display:none;flex-direction:column;z-index:150;box-shadow:-2px 0 16px rgba(0,0,0,.22);transition:width .22s cubic-bezier(.4,0,.2,1);overflow:hidden;}
+#sidebar-right.collapsed{width:var(--sbr-w-col);}
+.sbr-header{display:flex;align-items:center;gap:8px;padding:14px 10px 12px;border-bottom:1px solid rgba(255,255,255,.1);cursor:pointer;user-select:none;flex-shrink:0;}
+.sbr-header:hover{background:rgba(255,255,255,.05);}
+.sbr-toggle{color:rgba(255,255,255,.4);font-size:.7rem;flex-shrink:0;transition:transform .22s;}
+#sidebar-right.collapsed .sbr-toggle{transform:rotate(180deg);}
+.sbr-title{font-size:.78rem;font-weight:700;color:rgba(255,255,255,.7);white-space:nowrap;overflow:hidden;transition:opacity .15s;letter-spacing:.04em;}
+#sidebar-right.collapsed .sbr-title{opacity:0;}
+.sbr-scroll{overflow-y:auto;flex:1;padding:4px 0;}
+.sbr-section{padding:6px 0 3px 10px;font-size:.58rem;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.25);white-space:nowrap;overflow:hidden;transition:opacity .15s;border-top:1px solid rgba(255,255,255,.06);margin-top:4px;}
+#sidebar-right.collapsed .sbr-section{opacity:0;}
+.sbr-item{display:flex;align-items:center;gap:6px;padding:5px 8px;cursor:pointer;transition:background .12s;border-radius:5px;margin:1px 4px;}
+.sbr-item:hover{background:rgba(255,255,255,.1);}
+.sbr-item.active{background:rgba(255,255,255,.15);}
+.sbr-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.sbr-dot.done{background:#4caf50;}
+.sbr-dot.modified{background:#ff9800;}
+.sbr-dot.empty{background:#f44336;opacity:.7;}
+.sbr-num{font-size:.68rem;font-weight:700;color:rgba(255,255,255,.5);flex-shrink:0;min-width:22px;}
+.sbr-parties{flex:1;min-width:0;}
+.sbr-dem{font-size:.72rem;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;}
+.sbr-def{font-size:.65rem;color:rgba(255,255,255,.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#sidebar-right.collapsed .sbr-parties{display:none;}
+#sidebar-right.collapsed .sbr-num{display:none;}
+#sidebar-right.collapsed .sbr-item{justify-content:center;padding:6px 4px;}
+#sidebar-right.collapsed .sbr-dot{width:10px;height:10px;}
+/* Adapter le body */
+body.sbr-open{padding-right:var(--sbr-w);}
+body.sbr-open.sbr-collapsed{padding-right:var(--sbr-w-col);}
+
+/* ── AUDIENCE MODALS ── */
+.aud-modal .date-btn{color:var(--navy);background:var(--cream);border-color:var(--cream-dd);}
+.aud-modal .date-btn:hover{border-color:var(--navy);}
+.aud-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;align-items:center;justify-content:center;}
+.aud-overlay.open{display:flex;}
+.aud-modal{background:white;border-radius:12px;padding:24px;width:min(460px,94vw);box-shadow:0 8px 40px rgba(0,0,0,.25);position:relative;}
+.aud-modal h3{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--navy);margin:0 0 16px;padding-bottom:10px;border-bottom:1px solid var(--cream-dd);}
+.aud-row{display:flex;flex-direction:column;gap:3px;margin-bottom:12px;}
+.aud-row:last-child{margin-bottom:0;}
+.aud-2col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.aud-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--muted);line-height:1;}
+.aud-close:hover{color:var(--navy);}
+.aud-foot{display:flex;justify-content:flex-end;margin-top:16px;padding-top:12px;border-top:1px solid var(--cream-dd);}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 </head>
 <body>
 
+<div id="sidebar" style="display:none">
+  <div class="sb-header" onclick="toggleSidebar()">
+    <span class="sb-logo">⚖</span>
+    <span class="sb-title">Menu</span>
+    <span class="sb-toggle">◀</span>
+  </div>
+  <div class="sb-scroll">
+    <div class="sb-section">Fichier</div>
+    <button class="sb-btn" onclick="document.getElementById('sb-json-input').click()">
+      <span class="sb-icon">📂</span><span class="sb-label">Ouvrir JSON</span>
+      <span class="sb-tip">Ouvrir JSON</span>
+    </button>
+    <input type="file" id="sb-json-input" accept=".json" style="display:none" onchange="loadJSON(event)">
+    <button class="sb-btn" onclick="saveJSON()">
+      <span class="sb-icon">💾</span><span class="sb-label">Sauvegarder JSON</span>
+      <span class="sb-tip">Sauvegarder JSON</span>
+    </button>
+    <div class="sb-section">Audience</div>
+    <button class="sb-btn" onclick="openAudModal('modal-general')">
+      <span class="sb-icon">📅</span><span class="sb-label">Données générales</span>
+      <span class="sb-tip">Données générales</span>
+    </button>
+    <button class="sb-btn" onclick="openAudModal('modal-siege')">
+      <span class="sb-icon">👨‍⚖️</span><span class="sb-label">Siège</span>
+      <span class="sb-tip">Composition du siège</span>
+    </button>
+    <div class="sb-section">Dossiers</div>
+    <button class="sb-btn" onclick="openAddModal()">
+      <span class="sb-icon">＋</span><span class="sb-label">Ajouter un dossier</span>
+      <span class="sb-tip">Ajouter un dossier</span>
+    </button>
+    <button class="sb-btn" onclick="openSearch()">
+      <span class="sb-icon">🔍</span><span class="sb-label">Chercher un dossier</span>
+      <span class="sb-tip">Chercher un dossier</span>
+    </button>
+    <div class="sb-section">Exporter</div>
+    <button class="sb-btn" onclick="buildRole()">
+      <span class="sb-icon">📋</span><span class="sb-label">Feuille de rôle</span>
+      <span class="sb-tip">Feuille de rôle</span>
+    </button>
+    <button class="sb-btn" onclick="printDirect('fa')">
+      <span class="sb-icon">📄</span><span class="sb-label">Feuille d'audience</span>
+      <span class="sb-tip">Feuille d'audience</span>
+    </button>
+    <button class="sb-btn" onclick="printDirect('pv')">
+      <span class="sb-icon">📋</span><span class="sb-label">Procès-verbaux</span>
+      <span class="sb-tip">Procès-verbaux</span>
+    </button>
+    <button class="sb-btn" onclick="buildRecap()">
+      <span class="sb-icon">📊</span><span class="sb-label">Encodage</span>
+      <span class="sb-tip">Encodage</span>
+    </button>
+    <div class="sb-sep"></div>
+    <button class="sb-btn sb-danger" onclick="newAud()">
+      <span class="sb-icon">↩</span><span class="sb-label">Nouvelle audience</span>
+      <span class="sb-tip">Nouvelle audience</span>
+    </button>
+    <button class="sb-btn sb-gold" onclick="openSettings()">
+      <span class="sb-icon">⚙</span><span class="sb-label">Paramètres</span>
+      <span class="sb-tip">Paramètres</span>
+    </button>
+  </div>
+  <div class="sb-foot">
+    <span id="autosave-lbl-sb" style="font-size:.65rem;color:rgba(255,255,255,.35);display:block;white-space:nowrap;overflow:hidden"></span>
+  </div>
+</div>
+<!-- ══ SEARCH BAR ══ -->
+<div id="search-bar">
+  <span style="font-size:1rem;color:var(--gold)">🔍</span>
+  <input id="search-input" type="text"
+    placeholder="Numéro, référence, partie, avocat…"
+    oninput="doSearch(this.value)"
+    onkeydown="if(event.key==='Escape')closeSearch()">
+  <button onclick="closeSearch()" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:1.1rem;cursor:pointer;padding:4px 8px;line-height:1">✕</button>
+</div>
+<div id="search-results"></div>
 <!-- ══ SETUP SCREEN ══ -->
 <div id="setup-screen">
   <div class="up-card">
@@ -307,6 +482,7 @@ body.dark .cbtn-row input{background:#1a2535;color:#d0dce8;border-color:#3a4a60;
       <p>Tribunal de l'Entreprise de Liège</p>
     </div>
     <div class="up-body">
+      <!-- Reprendre session -->
       <div id="resume-bar" style="background:#f0f4ff;border:1px solid #c5d0f0;border-radius:8px;padding:10px 14px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:10px">
         <div style="font-size:.8rem;color:#3a52b0;font-weight:600">📂 Reprendre une session enregistrée</div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -316,114 +492,36 @@ body.dark .cbtn-row input{background:#1a2535;color:#d0dce8;border-color:#3a4a60;
           </label>
         </div>
       </div>
-      <div class="steps">
-        <div class="step active" id="stp1"><span class="step-n">1</span>Division</div>
-        <div class="step" id="stp2"><span class="step-n">2</span>Siège</div>
-        <div class="step" id="stp3"><span class="step-n">3</span>Feuille</div>
-      </div>
 
-      <!-- STEP 1 : DIVISION -->
-      <div class="step-content active" id="sc1">
-        <p style="font-size:.83rem;color:var(--muted);margin-bottom:14px;">Sélectionnez la division :</p>
-        <div class="div-grid">
-          <div class="div-btn" data-div="Liège" onclick="selDiv('Liège')"><span class="div-icon">🏛</span>Liège</div>
-          <div class="div-btn" data-div="Verviers" onclick="selDiv('Verviers')"><span class="div-icon">⚖</span>Verviers</div>
-          <div class="div-btn" data-div="Huy" onclick="selDiv('Huy')"><span class="div-icon">🏰</span>Huy</div>
-        </div>
-        <div class="step-btns">
-          <div></div>
-          <button class="btn-next" id="btn1" onclick="goStep(2)" disabled>Suivant →</button>
-        </div>
+      <!-- Import feuille -->
+      <p style="font-size:.83rem;color:var(--muted);margin-bottom:8px;">
+        Collez le texte de la feuille d'audience.<br>
+        <span style="font-size:.75rem">Si la feuille est longue, ajoutez-la en plusieurs extraits.</span>
+      </p>
+      <div id="setup-chunks-list" style="margin-bottom:6px"></div>
+      <div id="setup-chunks-total" style="font-size:.72rem;color:var(--muted);margin-bottom:6px"></div>
+      <div class="paste-zone">
+        <textarea id="paste-input" placeholder="Ctrl+A dans Word → Ctrl+C → Ctrl+V ici"></textarea>
+        <div class="paste-hint">💡 Sélectionnez tout dans Word (Ctrl+A), copiez (Ctrl+C), collez ici (Ctrl+V).</div>
       </div>
-
-      <!-- STEP 2 : SIEGE -->
-      <div class="step-content" id="sc2">
-        <p style="font-size:.83rem;color:var(--muted);margin-bottom:14px;">Membres du siège :</p>
-        <div class="siege-grid">
-          <div class="siege-row">
-            <label class="siege-lbl">👨‍⚖️ Juge professionnel (président)</label>
-            <input class="siege-inp" id="s-juge" type="text" placeholder="Ex : M. J.-F. WASINSKI">
-          </div>
-          <div class="siege-row">
-            <label class="siege-lbl">🤝 Juge consulaire 1</label>
-            <input class="siege-inp" id="s-cons1" type="text" placeholder="Ex : M. B. WYZEN">
-          </div>
-          <div class="siege-row">
-            <label class="siege-lbl">🤝 Juge consulaire 2</label>
-            <input class="siege-inp" id="s-cons2" type="text" placeholder="Ex : M. R. PICHOT">
-          </div>
-          <div class="siege-row">
-            <label class="siege-lbl">📋 Greffier</label>
-            <input class="siege-inp" id="s-gref" type="text" placeholder="Ex : M. Y. LIQUET">
-          </div>
-        </div>
-        <div class="step-btns">
-          <button class="btn-prev" onclick="goStep(1)">← Retour</button>
-          <button class="btn-next" onclick="goStep(3)">Suivant →</button>
-        </div>
+      <div style="display:flex;justify-content:flex-start;margin:6px 0 0">
+        <button onclick="addSetupChunk()"
+          style="font-size:.76rem;padding:6px 14px;border-radius:6px;border:1px solid rgba(255,255,255,.5);
+          background:rgba(255,255,255,.15);color:white;cursor:pointer;font-weight:600">+ Ajouter cet extrait</button>
       </div>
-
-      <!-- STEP 3 : FEUILLE -->
-      <div class="step-content" id="sc3">
-        <p style="font-size:.83rem;color:var(--muted);margin-bottom:8px;">
-          Collez le texte de la feuille d'audience.<br>
-          <span style="font-size:.75rem">Si la feuille est longue, ajoutez-la en plusieurs extraits.</span>
-        </p>
-        <div id="setup-chunks-list" style="margin-bottom:6px"></div>
-        <div id="setup-chunks-total" style="font-size:.72rem;color:var(--muted);margin-bottom:6px"></div>
-        <div class="paste-zone">
-          <textarea id="paste-input" placeholder="Ctrl+A dans Word → Ctrl+C → Ctrl+V ici"></textarea>
-          <div class="paste-hint">💡 Sélectionnez tout dans Word (Ctrl+A), copiez (Ctrl+C), collez ici (Ctrl+V).</div>
-        </div>
-        <div style="display:flex;justify-content:flex-start;margin:6px 0 0">
-          <button onclick="addSetupChunk()"
-            style="font-size:.76rem;padding:6px 14px;border-radius:6px;border:1px solid rgba(255,255,255,.5);
-            background:rgba(255,255,255,.15);color:white;cursor:pointer;font-weight:600">+ Ajouter cet extrait</button>
-        </div>
-        <div class="step-btns">
-          <button class="btn-prev" onclick="goStep(2)">← Retour</button>
-          <button class="btn-next" id="btn3" onclick="analyze()">▶ Analyser</button>
-        </div>
-        <div class="u-status" id="u-status"></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:12px">
+        <button class="btn-next" id="btn3" onclick="analyze()">▶ Analyser</button>
       </div>
+      <div class="u-status" id="u-status"></div>
 
     </div>
   </div>
 </div>
-
 <!-- ══ MAIN APP ══ -->
 <div id="main-app">
   <div class="header">
-    <!-- GAUCHE : titre + infos audience -->
-    <div style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:0">
-      <div style="display:flex;align-items:center;gap:10px">
-        <h1 style="margin:0;font-size:1rem;font-weight:700;white-space:nowrap">⚖ Feuille d'Audience</h1>
-        <span id="h-div" style="font-size:.82rem;color:var(--gold);font-weight:700"></span>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-        <label style="font-size:.68rem;color:rgba(255,255,255,.5)">Date</label>
-        <input id="h-date" type="text" placeholder="jj/mm/aaaa"
-          style="font-size:.76rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:4px;padding:3px 7px;color:white;font-family:'DM Sans',sans-serif;outline:none;width:84px" oninput="META.date=this.value;autoSave()">
-        <label style="font-size:.68rem;color:rgba(255,255,255,.5)">Chambre</label>
-        <input id="h-chambre" type="text" placeholder="1ère ch."
-          style="font-size:.76rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:4px;padding:3px 7px;color:white;font-family:'DM Sans',sans-serif;outline:none;width:68px" oninput="META.chambre=this.value;autoSave()">
-        <span style="color:rgba(255,255,255,.2)">│</span>
-        <label style="font-size:.68rem;color:rgba(255,255,255,.5)">Début</label>
-        <input id="h-heure-debut" type="text" placeholder="9h00"
-          style="font-size:.76rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:4px;padding:3px 7px;color:white;font-family:'DM Sans',sans-serif;outline:none;width:50px" oninput="META.heureDebut=this.value;autoSave()">
-        <label style="font-size:.68rem;color:rgba(255,255,255,.5)">Levée</label>
-        <input id="h-heure-fin" type="text" placeholder="12h00"
-          style="font-size:.76rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:4px;padding:3px 7px;color:white;font-family:'DM Sans',sans-serif;outline:none;width:50px" oninput="META.heureFin=this.value;autoSave()">
-        <span style="color:rgba(255,255,255,.2)">│</span>
-        <label style="font-size:.68rem;color:rgba(255,255,255,.5)">Prononcé</label>
-        <div class="mc-wrap" id="gc-wrap">
-          <div class="date-btn" onclick="toggleGC()"><span id="gc-lbl">jj/mm/aaaa</span> ▾</div>
-          <div class="popover" id="gc-pop"><div class="mini-cal" id="gc-cal"></div></div>
-        </div>
-      </div>
-    </div>
-
     <!-- CENTRE : progression + interrupteur filtre -->
+<!-- CENTRE : progression + interrupteur filtre -->
     <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;margin:0 24px;padding:0 24px;border-left:1px solid rgba(255,255,255,.15);border-right:1px solid rgba(255,255,255,.15)">
       <div class="prog">
         <span id="prog-txt">0/0</span>
@@ -442,19 +540,7 @@ body.dark .cbtn-row input{background:#1a2535;color:#d0dce8;border-color:#3a4a60;
       </div>
     </div>
 
-    <!-- DROITE : actions -->
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
-      <span id="autosave-lbl" style="font-size:.65rem;color:rgba(255,255,255,.35);height:16px"></span>
-      <div style="display:flex;align-items:center;gap:4px">
-        <button class="btn btn-ghost" onclick="openAddModal()" title="Ajouter un dossier">＋</button>
-        <button class="btn btn-ghost" onclick="document.getElementById('json-input').click()" title="Ouvrir JSON">📂</button>
-        <input type="file" id="json-input" accept=".json" style="display:none" onchange="loadJSON(event)">
-        <button class="btn btn-ghost" onclick="saveJSON()" title="Sauvegarder JSON">💾</button>
-        <button class="btn btn-ghost" onclick="newAud()" title="Nouvelle audience">↩</button>
-        <button class="btn btn-ghost" onclick="openSettings()" title="Paramètres">⚙</button>
-        <button class="btn btn-gold" onclick="openExport()">⬇ Exporter</button>
-      </div>
-    </div>
+    <div><span id="autosave-lbl" style="display:none"></span></div>
   </div>
 
 
@@ -586,7 +672,7 @@ const perCal={};
 const TEXT_FIELDS=new Set(['cDN','cDN2','cFN','cFN2','note','jtv']);
 const MF=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const DF=['Lu','Ma','Me','Je','Ve','Sa','Di'];
-const DEC_LBL={rc:'Remise contradictoire',rd:'Remise par défaut',ro:'Remise d\'office',jc:'Jugement contradictoire',jd:'Jugement par défaut',vc:'Renvoi au rôle',vd:'Renvoi au rôle (déf.)',ea:'Mise en état amiable',et:'Mise en état (tribunal)',ac:'Accord',co:'Conciliation OK',ca:'Pas de conciliation',cd:'Pas de conciliation'};
+const DEC_LBL={so:'Sans objet',vp:"Renvoi au rôle d'office",rc:'Remise contradictoire',rd:'Remise par défaut',ro:'Remise d\'office',jc:'Jugement contradictoire',jd:'Jugement par défaut',vc:'Renvoi au rôle',vd:'Renvoi au rôle (déf.)',ea:'Mise en état amiable',et:'Mise en état (tribunal)',ac:'Accord',co:'Conciliation OK',ca:'Pas de conciliation',cd:'Pas de conciliation'};
 
 // ════════════════════════════════════════════
 // SETUP STEPS
@@ -664,7 +750,9 @@ async function analyze(){
 }
 
 function launchApp(){
-  jugDate=null;initST();
+  jugDate=null;if(!DIVISION)DIVISION="Liège";initST();
+  var _sb=document.getElementById('sidebar');if(_sb)_sb.style.display='flex';
+  var _sbr=document.getElementById('sidebar-right');if(_sbr){_sbr.style.display='flex';document.body.classList.add('sbr-open');initSidebarRight();}
   try{localStorage.removeItem('audience_session_v1');}catch(e){}
   // h-sub legacy: `${META.tribunal||'Tribunal de l\'Entreprise de Liège'} — Division ${DIVISION} — ${META.date||''}`;
   document.getElementById('setup-screen').style.display='none';
@@ -676,6 +764,8 @@ function newAud(){
   if(!confirm('Charger une nouvelle audience ? Les données actuelles seront perdues.'))return;
   try{localStorage.removeItem('audience_session_v1');}catch(e){}
   document.getElementById('setup-screen').style.display='flex';
+  var _sb=document.getElementById('sidebar');if(_sb)_sb.style.display='none';
+  var _sbr=document.getElementById('sidebar-right');if(_sbr){_sbr.style.display='none';document.body.classList.remove('sbr-open');}
   document.getElementById('main-app').style.display='none';
   document.getElementById('u-status').className='u-status';
   document.getElementById('paste-input').value='';
@@ -696,9 +786,9 @@ function initST(){
     const _ad=(d.avDem||'').split('/').map(s=>s.trim());
     const _af=(d.avDef||'').split('/').map(s=>s.trim());
     ST[d.num]={
-      dem:(d.dems||[d.dem||'']).map((nm,i)=>({type:_ad[i]?'avocat':'absent',name:_ad[i]||'',loco:''})),
-      def:(d.defs||[d.def||'']).map((nm,i)=>({type:_af[i]?'avocat':'absent',name:_af[i]||'',loco:''})),
-      dec:null,remDate:null,remPli:false,jugEnt:'conseils',jugDD:false,jugDC:false,jugDT:false,jtt:'mens',jtv:'',note:'',done:false};
+      dem:(d.dems||[d.dem||'']).map((nm,i)=>({type:'avocat',name:_ad[i]||'',loco:''})),
+      def:(d.defs||[d.def||'']).map((nm,i)=>({type:'avocat',name:_af[i]||'',loco:''})),
+      dec:null,remDate:null,remHeure:'9h00',remPli:false,jugEnt:'conseils',jugDD:false,jugDC:false,jugDT:false,jtt:'mens',jtv:'',soCharge:'dem',note:'',done:false};
   }));
 }
 
@@ -741,6 +831,11 @@ function drawDC(num){
     `function(dir){perCal['${num}'].m+=dir;if(perCal['${num}'].m>11){perCal['${num}'].m=0;perCal['${num}'].y++;}if(perCal['${num}'].m<0){perCal['${num}'].m=11;perCal['${num}'].y--;}drawDC('${num}');}`);
 }
 document.addEventListener('click',function(e){
+  var _sb=document.getElementById('search-bar');
+  var _sr=document.getElementById('search-results');
+  if(_sb&&_sr&&!_sb.contains(e.target)&&!_sr.contains(e.target)){
+    _sr.classList.remove('open');
+  }
   const gc=document.getElementById('gc-wrap');
   if(gc&&!gc.contains(e.target)){const gp=document.getElementById('gc-pop');if(gp)gp.classList.remove('open');}
   document.querySelectorAll('.popover.open').forEach(p=>{const w=p.closest('.mc-wrap');if(w&&!w.contains(e.target))p.classList.remove('open');});
@@ -784,9 +879,10 @@ function genText(num){
     if(cp.loco&&cp.loco.trim())return'Maître '+stripMe(cp.loco)+' loco Maître '+(stripMe(cp.name)||'…');
     return'Maître '+(stripMe(cp.name)||'…');}
   const rd=s.remDate?fd(s.remDate):'[date à préciser]';
+  const rdh=s.remHeure||'9h00';
   const jd=jugDate?fd(jugDate):'[date des jugements]';
-  if(s.dec==='ro'){if(s.note)lines.push(s.note);lines.push(applyTmpl('ro',{date:rd,dem:demStr,def:defStr})||`La cause est remise d'office au ${rd}.`);}
-  else if(s.dec==='rc'){if(s.note)lines.push(s.note);lines.push(applyTmpl('rc',{date:rd,dem:demStr,def:defStr})||`À la demande des parties qui comparaissent, l'affaire est remise au ${rd}.`);}
+  if(s.dec==='ro'){if(s.note)lines.push(s.note);lines.push(applyTmpl('ro',{date:rd+' à '+rdh,dem:demStr,def:defStr})||`La cause est remise d'office au ${rd}.`);}
+  else if(s.dec==='rc'){if(s.note)lines.push(s.note);lines.push(applyTmpl('rc',{date:rd+' à '+rdh,dem:demStr,def:defStr})||`À la demande des parties qui comparaissent, l'affaire est remise au ${rd}.`);}
   else if(s.dec==='rd'){
     const pres=!demAbsent?demStr:defStr,abs=demAbsent?demStr:defStr;
     if(s.note)lines.push(s.note);
@@ -816,6 +912,24 @@ function genText(num){
   else if(s.dec==='co'){lines.push('Un PV de conciliation est rédigé ce jour.');if(s.note)lines.push(s.note);}
   else if(s.dec==='ca'){lines.push("La conciliation n'aboutit pas car la partie "+(demAbsent?demStr:defStr)+" est défaillante.");if(s.note)lines.push(s.note);}
   else if(s.dec==='cd'){lines.push("La conciliation n'aboutit pas car les parties ne sont pas parvenues à un accord.");if(s.note)lines.push(s.note);}
+  else if(s.dec==='so'){
+    const chargeStr=(s.soCharge||'dem')==='dem'?demStr:defStr;
+    if(demAbsent){
+      lines.push('La partie demanderesse déclare que la cause est devenue sans objet, elle sollicite qu\'il lui en soit donné acte.');
+      if((s.soCharge||'dem')==='dem')lines.push('Elle indique que les droits de mise au rôle restent à sa charge.');
+      else lines.push('Elle indique que les droits de mise au rôle sont à charge de la partie défenderesse qui marque son accord quant à ce.');
+    } else {
+      lines.push('Les parties déclarent que la cause est devenue sans objet.');
+      lines.push('Les droits de mise au rôle étant pris en charge par la partie '+chargeStr+'.');
+    }
+    if(s.note)lines.push(s.note);
+    lines.push('Le tribunal clôt les débats et met la cause en délibéré. Un jugement sera prononcé le '+jd+'.');
+  }
+  else if(s.dec==='vp'){
+    if(s.note)lines.push(s.note);
+    lines.push('Le tribunal renvoie le dossier au rôle.');
+  }
+  if(!s.dec&&s.note)lines.push(s.note);
   return lines.filter(Boolean).join('\n');
 }
 
@@ -825,6 +939,63 @@ function refreshPreviews(){DOSSIERS.forEach(s=>s.items.forEach(d=>updatePreview(
 // ════════════════════════════════════════════
 // RENDU
 // ════════════════════════════════════════════
+
+function buildDecBtns(d,s,dec){
+  if(d.conc){
+    return '<div style="display:flex;flex-direction:row;gap:14px;align-items:flex-start"><div class="dec-group">'
+      +'<button class="dbtn db-co '+(dec==='co'?'act':'')+'" onclick="setDec(\''+d.num+'\',\'co\')">🤝 Conciliation aboutit</button>'
+      +'<button class="dbtn db-ca '+(dec==='ca'?'act':'')+'" onclick="setDec(\''+d.num+'\',\'ca\')">⚠ Partie absente</button>'
+      +'<button class="dbtn db-cd '+(dec==='cd'?'act':'')+'" onclick="setDec(\''+d.num+'\',\'cd\')">✗ Pas d\'accord</button>'
+      +'</div></div>';
+  }
+  const allPresent=s.dem.every(function(cp){return cp.type!=='absent';})&&s.def.every(function(cp){return cp.type!=='absent';});
+  const allAbsent=s.dem.every(function(cp){return cp.type==='absent';})&&s.def.every(function(cp){return cp.type==='absent';});
+  var html='<div style="display:flex;flex-direction:row;gap:14px;align-items:flex-start">';
+  // Colonne Jugements
+  var colJug='<div class="dec-group">';
+  if(allAbsent){colJug+='';}
+  else if(allPresent){colJug+='<button class="dbtn db-jc '+(dec==='jc'?'act':'')+'" onclick="setDec(\''+d.num+'\',\'jc\')">⚖ Jugement contradictoire</button>';}
+  else{colJug+='<button class="dbtn db-jd '+(dec==='jd'?'act':'')+'" onclick="setDec(\''+d.num+'\',\'jd\')">⚖ Jugement par défaut</button>';}
+  if(!allAbsent){
+    colJug+='<button class="dbtn db-ac '+(dec==='ac'?'act':'')+'" onclick="setDec(\''+d.num+'\',\'ac\')">🤝 Accord</button>';
+    colJug+='<button class="dbtn db-so '+(dec==='so'?'act':'')+'" onclick="setDec(\''+d.num+'\',\'so\')">🚫 Sans objet</button>';
+  }
+  colJug+='</div>';
+  // Colonne Remises
+  var colRem='<div class="dec-group">';
+  if(allAbsent){
+    colRem+='<button class="dbtn db-ro '+(dec==='ro'?'act':'')+'" onclick="setDec(\''+d.num+'\',\'ro\')">📅 Remise d\'office</button>';
+  } else if(allPresent){
+    colRem+='<button class="dbtn db-rc '+(dec==='rc'?'act':'')+'" onclick="setDec(\''+d.num+'\',\'rc\')">📅 Remise contradictoire</button>';
+  } else {
+    colRem+='<button class="dbtn db-rd '+(dec==='rd'?'act':'')+'" onclick="setDec(\''+d.num+'\',\'rd\')">📅 Remise par défaut</button>';
+    colRem+='<button class="dbtn db-ro '+(dec==='ro'?'act':'')+'" onclick="setDec(\''+d.num+'\',\'ro\')">📅 Remise d\'office</button>';
+  }
+  colRem+='</div>';
+  // Colonne Mise en état
+  var colME='<div class="dec-group">';
+  if(!allAbsent){
+    if(allPresent)colME+='<button class="dbtn db-ea '+(dec==='ea'?'act':'')+'" onclick="setDec(\''+d.num+'\',\'ea\')">📝 Mise en état (amiable)</button>';
+    colME+='<button class="dbtn db-et '+(dec==='et'?'act':'')+'" onclick="setDec(\''+d.num+'\',\'et\')">📝 Mise en état (tribunal)</button>';
+  }
+  colME+='</div>';
+  // Colonne Renvoi au rôle
+  var colRole='<div class="dec-group">';
+  if(allAbsent){
+    colRole+='<button class="dbtn db-vp '+(dec==='vp'?'act':'')+'" onclick="setDec(\''+d.num+'\',\'vp\')">↩ Renvoi au rôle d\'office</button>';
+  } else if(allPresent){
+    colRole+='<button class="dbtn db-vc '+(dec==='vc'?'act':'')+'" onclick="setDec(\''+d.num+'\',\'vc\')">↩ Renvoi au rôle</button>';
+  } else {
+    colRole+='<button class="dbtn db-vd '+(dec==='vd'?'act':'')+'" onclick="setDec(\''+d.num+'\',\'vd\')">↩ Renvoi au rôle (défaut)</button>';
+  }
+  colRole+='</div>';
+  if(!allAbsent)html+=colJug;
+  html+=colRem;
+  if(!allAbsent)html+=colME;
+  html+=colRole;
+  html+='</div>';
+  return html;
+}
 function renderCard(d){
   const s=ST[d.num],id=nid(d.num),dec=s.dec;
   const _isPrononcer=isPrononcer(d.num);
@@ -856,39 +1027,22 @@ function renderCard(d){
         `:`<span style="font-size:.75rem;color:var(--muted);font-style:italic">Personne ne comparaît</span>`}
       </div>
     </div>`;}
-  const decBtns=d.conc
-    ?`<div class="dec-group">
-        <button class="dbtn db-co ${dec==='co'?'act':''}" onclick="setDec('${d.num}','co')">🤝 Conciliation aboutit</button>
-        <button class="dbtn db-ca ${dec==='ca'?'act':''}" onclick="setDec('${d.num}','ca')">⚠ Partie absente</button>
-        <button class="dbtn db-cd ${dec==='cd'?'act':''}" onclick="setDec('${d.num}','cd')">✗ Pas d'accord</button>
-      </div>`
-    :`<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start">
-        <div class="dec-group">
-          <button class="dbtn db-rc ${dec==='rc'?'act':''}" onclick="setDec('${d.num}','rc')">📅 Remise contradictoire</button>
-          <button class="dbtn db-rd ${dec==='rd'?'act':''}" onclick="setDec('${d.num}','rd')">📅 Remise par défaut</button>
-          <button class="dbtn db-ro ${dec==='ro'?'act':''}" onclick="setDec('${d.num}','ro')">📅 Remise d'office</button>
-        </div>
-        <div class="dec-group">
-          <button class="dbtn db-jc ${dec==='jc'?'act':''}" onclick="setDec('${d.num}','jc')">⚖ Jugement contradictoire</button>
-          <button class="dbtn db-jd ${dec==='jd'?'act':''}" onclick="setDec('${d.num}','jd')">⚖ Jugement par défaut</button>
-          <button class="dbtn db-ac ${dec==='ac'?'act':''}" onclick="setDec('${d.num}','ac')">🤝 Accord</button>
-        </div>
-        <div class="dec-group">
-          <button class="dbtn db-vc ${dec==='vc'?'act':''}" onclick="setDec('${d.num}','vc')">↩ Renvoi au rôle</button>
-          <button class="dbtn db-vd ${dec==='vd'?'act':''}" onclick="setDec('${d.num}','vd')">↩ Renvoi au rôle (défaut)</button>
-        </div>
-        <div class="dec-group">
-          <button class="dbtn db-ea ${dec==='ea'?'act':''}" onclick="setDec('${d.num}','ea')">📝 Mise en état (amiable)</button>
-          <button class="dbtn db-et ${dec==='et'?'act':''}" onclick="setDec('${d.num}','et')">📝 Mise en état (tribunal)</button>
-        </div>
-
-      ${(SETTINGS&&SETTINGS.customBtns&&SETTINGS.customBtns.length)?`<div class="dec-group">${SETTINGS.customBtns.map(function(b){return '<button class="dbtn '+(dec===b.code?'act':'')+' " onclick="setDec(\'${d.num}\',\''+b.code+'\')">'+(b.emoji||'')+(b.label||'')+'</button>';}).join('')}</div>`:''}
-      </div>`;
-  const showRem=dec==='rc'||dec==='rd';
+  const decBtns=buildDecBtns(d,s,dec);
+  const showRem=dec==='rc'||dec==='rd'||dec==='ro';
+  const soSub=`<div class="sub-opts ${dec==='so'?'vis':''}" id="sso-${id}">
+    <div class="sub-row"><span class="sub-lbl">Droits :</span>
+      <div class="ent-opts">
+        <button class="ent-btn ${(s.soCharge||'dem')==='dem'?'act':''}" onclick="upd('${d.num}','soCharge','dem')">À charge dem.</button>
+        <button class="ent-btn ${(s.soCharge||'dem')==='def'?'act':''}" onclick="upd('${d.num}','soCharge','def')">À charge déf.</button>
+      </div>
+    </div>
+  </div>`;
   const remSub=`<div class="sub-opts ${showRem?'vis':''}" id="sr-${id}">
     <div class="sub-row"><span class="sub-lbl">📅 Date :</span>
       <div class="mc-wrap"><div class="date-btn" style="color:var(--navy);border-color:var(--cream-dd);background:white;" onclick="toggleDC('${d.num}')"><span id="dl-${id}">${s.remDate?fd(s.remDate):'Choisir'}</span> ▾</div>
       <div class="popover" id="cp-${id}"><div class="mini-cal" id="dc-${id}"></div></div></div>
+      <span class="sub-lbl" style="margin-left:10px">🕐 Heure :</span>
+      <input type="text" value="${s.remHeure||'9h00'}" placeholder="9h00" style="width:52px;font-size:.75rem;border:1px solid var(--cream-dd);border-radius:4px;padding:2px 6px;text-align:center" oninput="upd('${d.num}','remHeure',this.value)">
     </div>
     ${dec==='rd'?`<div class="sub-row"><label class="check-row"><input type="checkbox" ${s.remPli?'checked':''} onchange="upd('${d.num}','remPli',this.checked)"> Pli judiciaire (art. 803 C.j.)</label></div>`:''}
   </div>`;
@@ -922,7 +1076,7 @@ function renderCard(d){
       <div class="c-section c-section-dec">
         <div class="c-section-ttl">⚖ Décision</div>
         <div class="dec-btns">${decBtns}</div>
-        ${remSub}${jcSub}
+        ${remSub}${jcSub}${soSub}
       </div>`}
       <div class="c-section c-section-pv">
         <div class="c-section-ttl">📄 Procès-verbal</div>
@@ -1010,6 +1164,7 @@ function renderAll(){
   });
   document.getElementById('app-body').innerHTML=html;
   refreshPreviews();updateProg();applyFilter();
+  buildSidebarRight();
   setTimeout(function(){
     addDragHandles();
     if(typeof Sortable!=='undefined')initSortable();
@@ -1038,7 +1193,7 @@ function replaceCard(num,keepOpen){
 }
 function upd(num,field,value){
   ST[num][field]=value;
-  if(field==='note'||field==='jtv'){updatePreview(num);clearTimeout(upd._t);upd._t=setTimeout(autoSave,1200);}
+  if(field==='note'||field==='jtv'){updatePreview(num);clearTimeout(upd._t);upd._t=setTimeout(function(){autoSave();updateSidebarRight();},1200);}
   else{replaceCard(num,true);updateProg();autoSave();}
 }
 function updPartieRole(num,side,i,role){
@@ -1058,17 +1213,17 @@ function updComp(num,side,i,prop,value){
   ST[num][side][i][prop]=value;
   // Marquer comme ajouté manuellement pendant l'audience
   if(prop==='name'&&value&&value.trim())ST[num][side][i].added=true;
-  if(prop==='name'||prop==='loco'){updatePreview(num);clearTimeout(updComp._t);updComp._t=setTimeout(autoSave,1200);}
+  if(prop==='name'||prop==='loco'){updatePreview(num);clearTimeout(updComp._t);updComp._t=setTimeout(function(){autoSave();updateSidebarRight();},1200);}
   else{replaceCard(num,true);autoSave();}
 }
 function modCard(num){
-  ST[num].done=false;replaceCard(num,true);updateProg();autoSave();
+  ST[num].done=false;replaceCard(num,true);updateProg();autoSave();updateSidebarRight();
 }
 function setDec(num,dec){
   // Reclique sur le même bouton → annuler la décision
   if(ST[num].dec===dec){ST[num].dec=null;}
   else{ST[num].dec=dec;}
-  replaceCard(num,true);updatePreview(num);autoSave();
+  replaceCard(num,true);updatePreview(num);autoSave();updateSidebarRight();
 }
 function toggleCard(num){
   const el=document.getElementById('card-'+nid(num));if(!el)return;
@@ -1077,7 +1232,7 @@ function toggleCard(num){
   if(!open)el.classList.add('open');
 }
 function valider(num){
-  ST[num].done=true;replaceCard(num,false);updateProg();autoSave();
+  ST[num].done=true;replaceCard(num,false);updateProg();autoSave();updateSidebarRight();
   const all=DOSSIERS.flatMap(s=>s.items.map(d=>d.num));
   const next=all.slice(all.indexOf(num)+1).find(n=>!ST[n].done);
   if(next)setTimeout(()=>{toggleCard(next);document.getElementById('card-'+nid(next))?.scrollIntoView({behavior:'smooth',block:'center'});},80);
@@ -1087,9 +1242,9 @@ function rstCard(num){
   const _ad2=(d.avDem||'').split('/').map(s=>s.trim());
   const _af2=(d.avDef||'').split('/').map(s=>s.trim());
   ST[num]={
-    dem:(d.dems||[d.dem||'']).map((nm,i)=>({type:_ad2[i]?'avocat':'absent',name:_ad2[i]||'',loco:''})),
-    def:(d.defs||[d.def||'']).map((nm,i)=>({type:_af2[i]?'avocat':'absent',name:_af2[i]||'',loco:''})),
-    dec:null,remDate:null,remPli:false,jugEnt:'conseils',jugDD:false,jugDC:false,jugDT:false,jtt:'mens',jtv:'',note:'',done:false};
+    dem:(d.dems||[d.dem||'']).map((nm,i)=>({type:'avocat',name:_ad2[i]||'',loco:''})),
+    def:(d.defs||[d.def||'']).map((nm,i)=>({type:'avocat',name:_af2[i]||'',loco:''})),
+    dec:null,remDate:null,remHeure:'9h00',remPli:false,jugEnt:'conseils',jugDD:false,jugDC:false,jugDT:false,jtt:'mens',jtv:'',soCharge:'dem',note:'',done:false};
   replaceCard(num,true);updateProg();
 }
 function updateProg(){
@@ -1122,7 +1277,7 @@ function logoSVG(w){
   +'<path d="M3,43 L35,43 Q46,27 57,14 Q66,5 75,1" stroke-width="2.6" opacity="1"/>'
   +'</g></svg>';}
 
-function buildEntete(avecRep){
+function buildEntete(avecRep,isPV){
   const annee=new Date().getFullYear();
   const rep=avecRep?'<div style="text-align:right;font-size:9pt;margin-bottom:1mm">Rép. : '+String(annee).slice(-2)+'/'+'</div>':'';
   const siegeLines=[];
@@ -1133,7 +1288,7 @@ function buildEntete(avecRep){
   return '<table class="hd-table"><tr><td class="hd-logo">'+logoSVG(110)+'</td>'
     +'<td class="hd-right">'+rep+'<div class="hd-trib">TRIBUNAL DE L’ENTREPRISE DE LIÈGE</div><div class="hd-div">DIVISION '+DIVISION.toUpperCase()+'</div></td>'
     +'</tr></table>'
-    +'<div class="hd-line"></div><div class="hd-chambre">Feuille d’audience de la 1<sup>ère</sup> chambre – '+(META.date||'')+'</div>'
+    +'<div class="hd-line"></div><div class="hd-chambre">'+(isPV?'Procès-verbal':"Feuille d'audience")+' de la 1<sup>ère</sup> chambre – '+(META.date||'')+'</div>'
     +'<div class="hd-line2"></div><div class="judges">'+siegeLines.map(l=>'<div>'+l+'</div>').join('')+'</div>'
     +'<div class="hd-spacer"></div>';}
 
@@ -1147,11 +1302,11 @@ body{font-family:Aptos,Calibri,Arial,sans-serif;font-size:10pt;color:#000;backgr
 .hd-div{font-size:11pt;font-weight:bold;}
 .hd-line{border-top:1.5pt solid #000;margin:2.5mm 0 1.5mm;}
 .hd-chambre{font-size:10.5pt;font-weight:bold;margin-bottom:1.5mm;}
-.hd-line2{border-top:1pt solid #000;margin-bottom:2mm;}
+.hd-line2{border-top:1.5pt solid #000;margin-bottom:2mm;}
 .judges{font-size:10pt;margin-bottom:1mm;}.judges div{margin-bottom:1.5pt;}
 .hd-spacer{height:4mm;}
 sup{font-size:7pt;vertical-align:super;}
-.sec-hd{font-weight:bold;font-size:10.5pt;text-transform:uppercase;letter-spacing:.05em;margin:5mm 0 2mm;border-bottom:.5pt solid #999;padding-bottom:1pt;}
+.sec-hd{font-weight:bold;font-size:10.5pt;text-transform:uppercase;letter-spacing:.05em;margin:5mm 0 2mm;border-bottom:1.5pt solid #000;padding-bottom:1pt;}
 .doss{margin-bottom:4mm;page-break-inside:avoid;}
 .doss-hd{display:flex;align-items:baseline;gap:8pt;margin-bottom:1pt;font-size:10pt;}
 .dn{font-weight:bold;min-width:28pt;}.dr{font-weight:bold;min-width:70pt;}.dt{font-size:9pt;color:#444;}
@@ -1170,7 +1325,7 @@ function dossBlocFA(d){
   const txt=genText(d.num),lines=txt?txt.split('\n'):[],comp=lines.slice(0,2),dec=lines.slice(2);
   return`<div class="doss">
     <div class="doss-hd"><span class="dn">${d.num}</span><span class="dr">${d.ref}</span><span class="dt">${d.type||''}</span></div>
-    ${(()=>{const dd=d.dems||[d.dem||''],df=d.defs||[d.def||''];let h='<div class="parts">';dd.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].dem[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';const _rl={'dem':'Dem)','def':'Déf)','interv':'Interv.','autre':'Autre'};h+=`<div><span class="pl">${_rl[cv.role||'dem']||'Dem)'}</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});df.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].def[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';const _rl2={'dem':'Dem)','def':'Déf)','interv':'Interv.','autre':'Autre'};h+=`<div><span class="pl">${_rl2[cv.role||'def']||'Déf)'}</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});return h+'</div>';})()}
+    ${(()=>{const dd=d.dems||[d.dem||''],df=d.defs||[d.def||''];let h='<div class="parts">';dd.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].dem[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name):cv.name?' — Me '+stripMe(cv.name):'';const _rl={'dem':'Dem)','def':'Déf)','interv':'Interv.','autre':'Autre'};h+=`<div><span class="pl">${_rl[cv.role||'dem']||'Dem)'}</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});df.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].def[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name):cv.name?' — Me '+stripMe(cv.name):'';const _rl2={'dem':'Dem)','def':'Déf)','interv':'Interv.','autre':'Autre'};h+=`<div><span class="pl">${_rl2[cv.role||'def']||'Déf)'}</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});return h+'</div>';})()}
     <div class="aud-txt">${comp.map(l=>`<div class="cl">${l}</div>`).join('')}${dec.map(l=>`<div class="dl">${l}</div>`).join('')}${!txt?'<div class="el">&nbsp;</div><div class="el">&nbsp;</div>':''}</div>
   </div>`;
 }
@@ -1197,11 +1352,159 @@ ${debutLine}
 ${body}
 ${clotureLine}
 <button class="print-btn no-print" onclick="window.print()">🖨 Imprimer</button>
+<!-- ══ SIDEBAR DROITE ══ -->
+<div id="sidebar-right">
+  <div class="sbr-header" onclick="toggleSidebarRight()">
+    <span class="sbr-toggle">▶</span>
+    <span class="sbr-title">Rôle</span>
+  </div>
+  <div class="sbr-scroll" id="sbr-list"></div>
+</div>
+
+<!-- ══ MODAL DONNÉES GÉNÉRALES ══ -->
+<div class="aud-overlay" id="modal-general">
+  <div class="aud-modal">
+    <button class="aud-close" onclick="closeAudModal('modal-general')">✕</button>
+    <h3>📅 Données générales</h3>
+    <div class="aud-2col">
+      <div class="aud-row">
+        <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Division</label>
+        <input id="mg-div" type="text" placeholder="Liège" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="DIVISION=this.value;autoSave()">
+      </div>
+      <div class="aud-row">
+        <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Chambre</label>
+        <input id="mg-chambre" type="text" placeholder="1ère ch." style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="META.chambre=this.value;autoSave()">
+      </div>
+    </div>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Date d'audience</label>
+      <div class="mc-wrap" style="width:100%">
+        <div class="date-btn" onclick="toggleAudCal()" style="width:100%;box-sizing:border-box"><span id="aud-cal-lbl">jj/mm/aaaa</span> ▾</div>
+        <div class="popover" id="aud-cal-pop"><div class="mini-cal" id="aud-cal-grid"></div></div>
+      </div>
+    </div>
+    <div class="aud-2col">
+      <div class="aud-row">
+        <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Heure de début</label>
+        <input id="mg-debut" type="text" placeholder="9h00" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="META.heureDebut=this.value;autoSave()">
+      </div>
+      <div class="aud-row">
+        <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Heure de levée</label>
+        <input id="mg-fin" type="text" placeholder="12h00" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="META.heureFin=this.value;autoSave()">
+      </div>
+    </div>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Date de prononcé</label>
+      <div class="mc-wrap" style="width:100%">
+        <div class="date-btn" onclick="toggleProCal()" style="width:100%;box-sizing:border-box"><span id="pro-cal-lbl">jj/mm/aaaa</span> ▾</div>
+        <div class="popover" id="pro-cal-pop"><div class="mini-cal" id="pro-cal-grid"></div></div>
+      </div>
+    </div>
+    <div class="aud-foot">
+      <button class="btn btn-navy" onclick="closeAudModal('modal-general')">✓ Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL SIÈGE ══ -->
+<div class="aud-overlay" id="modal-siege">
+  <div class="aud-modal">
+    <button class="aud-close" onclick="closeAudModal('modal-siege')">✕</button>
+    <h3>👨‍⚖️ Composition du siège</h3>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Juge / Président</label>
+      <input id="ms-juge" type="text" placeholder="Ex : M. J.-F. WASINSKI" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="SIEGE.juge=this.value;autoSave()">
+    </div>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Juge consulaire 1</label>
+      <input id="ms-cons1" type="text" placeholder="Ex : M. B. WYZEN" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="SIEGE.cons1=this.value;autoSave()">
+    </div>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Juge consulaire 2</label>
+      <input id="ms-cons2" type="text" placeholder="Ex : M. R. PICHOT" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="SIEGE.cons2=this.value;autoSave()">
+    </div>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Greffier</label>
+      <input id="ms-gref" type="text" placeholder="Ex : M. Y. LIQUET" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="SIEGE.gref=this.value;autoSave()">
+    </div>
+    <div class="aud-foot">
+      <button class="btn btn-navy" onclick="closeAudModal('modal-siege')">✓ Fermer</button>
+    </div>
+  </div>
+</div>
+
 </body></html>`;
 }
 
+
+function buildRole(){
+  var css=`@page{size:A4;margin:15mm 18mm;}*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Aptos,Calibri,Arial,sans-serif;font-size:10pt;color:#000;background:white;}
+.hd-table{width:100%;border-collapse:collapse;}
+.hd-logo{width:115pt;vertical-align:middle;}
+.hd-right{text-align:right;vertical-align:middle;}
+.hd-trib{font-size:11pt;font-weight:bold;}
+.hd-div{font-size:11pt;font-weight:bold;}
+.hd-line{border-top:1.5pt solid #000;margin:2.5mm 0 1.5mm;}
+.hd-chambre{font-size:10.5pt;font-weight:bold;margin-bottom:1.5mm;}
+.hd-line2{border-top:1.5pt solid #000;margin-bottom:2mm;}
+.judges{font-size:10pt;margin-bottom:1mm;}.judges div{margin-bottom:1.5pt;}
+.hd-spacer{height:3mm;}
+sup{font-size:7pt;vertical-align:super;}
+.sec-hd{font-weight:700;font-size:9pt;text-transform:uppercase;letter-spacing:.06em;margin:5mm 0 1.5mm;border-bottom:.5pt solid #aaa;padding-bottom:1pt;page-break-after:avoid;}
+.doss{page-break-inside:avoid;margin-bottom:3mm;padding:2.5pt 0;border-bottom:.4pt solid #ddd;}
+.doss-hd{display:flex;align-items:baseline;gap:8pt;margin-bottom:1.5pt;}
+.dn{font-weight:700;min-width:28pt;font-size:9pt;color:#555;}
+.dr{font-weight:700;min-width:70pt;font-size:9.5pt;}
+.partie-block{margin-left:36pt;}
+.role-lbl{font-size:7.5pt;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.04em;display:inline-block;min-width:24pt;}
+.partie-nm{font-size:9.5pt;}
+.av{font-style:italic;font-size:8.5pt;color:#444;}
+@media print{.no-print{display:none!important}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+.print-btn{position:fixed;bottom:20px;right:20px;background:#1a2744;color:white;border:none;padding:12px 24px;border-radius:8px;font-size:12pt;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.3);}`;
+
+  var body='';
+  DOSSIERS.forEach(function(sec){
+    if(sec.section.toLowerCase().includes('prononc'))return;
+    body+='<div class="sec-hd">'+sec.section+'</div>';
+    sec.items.forEach(function(d){
+      var st=ST[d.num]||{};
+      var dems=d.dems||[d.dem||''];
+      var defs=d.defs||[d.def||''];
+      function pLines(parties,comps){
+        return parties.map(function(nm,i){
+          var cp=(comps||[])[i]||{};
+          var av='';
+          if(cp.type==='avocat'&&cp.name&&cp.name.trim()){
+            av=cp.loco&&cp.loco.trim()
+              ?'Me '+stripMe(cp.loco)+' loco Me '+stripMe(cp.name)
+              :'Me '+stripMe(cp.name);
+          }else if(cp.type==='personne'){av='en personne';}
+          return '<div><span class="partie-nm">'+nm+'</span>'+(av?' <span class="av">— '+av+'</span>':'')+'</div>';
+        }).join('');
+      }
+      body+='<div class="doss">'
+        +'<div class="doss-hd"><span class="dn">'+d.num+'</span><span class="dr">'+d.ref+'</span></div>'
+        +'<div class="partie-block">'
+        +'<div style="margin-bottom:1pt"><span class="role-lbl">Dem.</span>'+pLines(dems,st.dem)+'</div>'
+        +'<div><span class="role-lbl">Déf.</span>'+pLines(defs,st.def)+'</div>'
+        +'</div>'
+        +'</div>';
+    });
+  });
+
+  var html='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">'
+    +'<title>Feuille de rôle — '+(META.date||'')+'</title>'
+    +'<style>'+css+'</style></head><body>'
+    +buildEntete(false)
+    +body
+    +'<button class="print-btn no-print" onclick="window.print()">🖨 Imprimer</button>'
+    +'</body></html>';
+
+  openHTMLWindow(html);
+}
 function buildRecap(){
-  const ENC={rc:'502',rd:'502',ro:'502',jc:'507',jd:'507',ac:'507',vc:'501a',vd:'501a',et:'501b',ea:null,co:null,ca:null,cd:null};
+  const ENC={rc:'502',rd:'502',ro:'502',jc:'507',jd:'507',ac:'507',so:'507',vp:'501a',vc:'501a',vd:'501a',et:'501b',ea:null,co:null,ca:null,cd:null};
   const rows=[];
   DOSSIERS.flatMap(s=>s.items).forEach(d=>{
     const s=ST[d.num];if(!s||!s.done)return;
@@ -1279,8 +1582,89 @@ td,th{border-bottom:1px solid #eee;vertical-align:top}
 <table>${body}</table>
 ${avSection}
 <button class="no-print" onclick="window.print()" style="margin-top:16px;padding:8px 20px;background:#1a2744;color:white;border:none;border-radius:6px;cursor:pointer">🖨 Imprimer</button>
+<!-- ══ SIDEBAR DROITE ══ -->
+<div id="sidebar-right">
+  <div class="sbr-header" onclick="toggleSidebarRight()">
+    <span class="sbr-toggle">▶</span>
+    <span class="sbr-title">Rôle</span>
+  </div>
+  <div class="sbr-scroll" id="sbr-list"></div>
+</div>
+
+<!-- ══ MODAL DONNÉES GÉNÉRALES ══ -->
+<div class="aud-overlay" id="modal-general">
+  <div class="aud-modal">
+    <button class="aud-close" onclick="closeAudModal('modal-general')">✕</button>
+    <h3>📅 Données générales</h3>
+    <div class="aud-2col">
+      <div class="aud-row">
+        <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Division</label>
+        <input id="mg-div" type="text" placeholder="Liège" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="DIVISION=this.value;autoSave()">
+      </div>
+      <div class="aud-row">
+        <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Chambre</label>
+        <input id="mg-chambre" type="text" placeholder="1ère ch." style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="META.chambre=this.value;autoSave()">
+      </div>
+    </div>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Date d'audience</label>
+      <div class="mc-wrap" style="width:100%">
+        <div class="date-btn" onclick="toggleAudCal()" style="width:100%;box-sizing:border-box"><span id="aud-cal-lbl">jj/mm/aaaa</span> ▾</div>
+        <div class="popover" id="aud-cal-pop"><div class="mini-cal" id="aud-cal-grid"></div></div>
+      </div>
+    </div>
+    <div class="aud-2col">
+      <div class="aud-row">
+        <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Heure de début</label>
+        <input id="mg-debut" type="text" placeholder="9h00" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="META.heureDebut=this.value;autoSave()">
+      </div>
+      <div class="aud-row">
+        <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Heure de levée</label>
+        <input id="mg-fin" type="text" placeholder="12h00" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="META.heureFin=this.value;autoSave()">
+      </div>
+    </div>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Date de prononcé</label>
+      <div class="mc-wrap" style="width:100%">
+        <div class="date-btn" onclick="toggleProCal()" style="width:100%;box-sizing:border-box"><span id="pro-cal-lbl">jj/mm/aaaa</span> ▾</div>
+        <div class="popover" id="pro-cal-pop"><div class="mini-cal" id="pro-cal-grid"></div></div>
+      </div>
+    </div>
+    <div class="aud-foot">
+      <button class="btn btn-navy" onclick="closeAudModal('modal-general')">✓ Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL SIÈGE ══ -->
+<div class="aud-overlay" id="modal-siege">
+  <div class="aud-modal">
+    <button class="aud-close" onclick="closeAudModal('modal-siege')">✕</button>
+    <h3>👨‍⚖️ Composition du siège</h3>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Juge / Président</label>
+      <input id="ms-juge" type="text" placeholder="Ex : M. J.-F. WASINSKI" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="SIEGE.juge=this.value;autoSave()">
+    </div>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Juge consulaire 1</label>
+      <input id="ms-cons1" type="text" placeholder="Ex : M. B. WYZEN" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="SIEGE.cons1=this.value;autoSave()">
+    </div>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Juge consulaire 2</label>
+      <input id="ms-cons2" type="text" placeholder="Ex : M. R. PICHOT" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="SIEGE.cons2=this.value;autoSave()">
+    </div>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Greffier</label>
+      <input id="ms-gref" type="text" placeholder="Ex : M. Y. LIQUET" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="SIEGE.gref=this.value;autoSave()">
+    </div>
+    <div class="aud-foot">
+      <button class="btn btn-navy" onclick="closeAudModal('modal-siege')">✓ Fermer</button>
+    </div>
+  </div>
+</div>
+
 </body></html>`;
-  const w=window.open('','_blank');w.document.write(html);w.document.close();
+  openHTMLWindow(html);
 }
 
 function buildPV(){
@@ -1289,10 +1673,10 @@ function buildPV(){
   const pages=dossValides.map(d=>{
     const txt=genText(d.num),lines=txt?txt.split('\n'):[],comp=lines.slice(0,2),dec=lines.slice(2);
     return`<div class="pv-page">
-      ${buildEntete(false)}
+      ${buildEntete(false,true)}
       <div style="margin-top:6mm">
         <div class="doss-hd"><span class="dn">${d.num}</span><span class="dr">${d.ref}</span><span class="dt">${d.type||''}</span></div>
-        ${(()=>{const dd=d.dems||[d.dem||''],df=d.defs||[d.def||''];let h='<div class="parts">';dd.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].dem[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';const _rl={'dem':'Dem)','def':'Déf)','interv':'Interv.','autre':'Autre'};h+=`<div><span class="pl">${_rl[cv.role||'dem']||'Dem)'}</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});df.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].def[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';const _rl2={'dem':'Dem)','def':'Déf)','interv':'Interv.','autre':'Autre'};h+=`<div><span class="pl">${_rl2[cv.role||'def']||'Déf)'}</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});return h+'</div>';})()}
+        ${(()=>{const dd=d.dems||[d.dem||''],df=d.defs||[d.def||''];let h='<div class="parts">';dd.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].dem[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name):cv.name?' — Me '+stripMe(cv.name):'';const _rl={'dem':'Dem)','def':'Déf)','interv':'Interv.','autre':'Autre'};h+=`<div><span class="pl">${_rl[cv.role||'dem']||'Dem)'}</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});df.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].def[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name):cv.name?' — Me '+stripMe(cv.name):'';const _rl2={'dem':'Dem)','def':'Déf)','interv':'Interv.','autre':'Autre'};h+=`<div><span class="pl">${_rl2[cv.role||'def']||'Déf)'}</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});return h+'</div>';})()}
         <div class="aud-txt" style="margin-top:5mm">
           ${comp.map(l=>`<div class="cl">${l}</div>`).join('')}
           ${dec.map(l=>`<div class="dl">${l}</div>`).join('')}
@@ -1304,6 +1688,87 @@ function buildPV(){
 <style>${printCSS()}</style></head><body>
 ${pages}
 <button class="print-btn no-print" onclick="window.print()">🖨 Imprimer</button>
+<!-- ══ SIDEBAR DROITE ══ -->
+<div id="sidebar-right">
+  <div class="sbr-header" onclick="toggleSidebarRight()">
+    <span class="sbr-toggle">▶</span>
+    <span class="sbr-title">Rôle</span>
+  </div>
+  <div class="sbr-scroll" id="sbr-list"></div>
+</div>
+
+<!-- ══ MODAL DONNÉES GÉNÉRALES ══ -->
+<div class="aud-overlay" id="modal-general">
+  <div class="aud-modal">
+    <button class="aud-close" onclick="closeAudModal('modal-general')">✕</button>
+    <h3>📅 Données générales</h3>
+    <div class="aud-2col">
+      <div class="aud-row">
+        <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Division</label>
+        <input id="mg-div" type="text" placeholder="Liège" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="DIVISION=this.value;autoSave()">
+      </div>
+      <div class="aud-row">
+        <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Chambre</label>
+        <input id="mg-chambre" type="text" placeholder="1ère ch." style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="META.chambre=this.value;autoSave()">
+      </div>
+    </div>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Date d'audience</label>
+      <div class="mc-wrap" style="width:100%">
+        <div class="date-btn" onclick="toggleAudCal()" style="width:100%;box-sizing:border-box"><span id="aud-cal-lbl">jj/mm/aaaa</span> ▾</div>
+        <div class="popover" id="aud-cal-pop"><div class="mini-cal" id="aud-cal-grid"></div></div>
+      </div>
+    </div>
+    <div class="aud-2col">
+      <div class="aud-row">
+        <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Heure de début</label>
+        <input id="mg-debut" type="text" placeholder="9h00" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="META.heureDebut=this.value;autoSave()">
+      </div>
+      <div class="aud-row">
+        <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Heure de levée</label>
+        <input id="mg-fin" type="text" placeholder="12h00" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="META.heureFin=this.value;autoSave()">
+      </div>
+    </div>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Date de prononcé</label>
+      <div class="mc-wrap" style="width:100%">
+        <div class="date-btn" onclick="toggleProCal()" style="width:100%;box-sizing:border-box"><span id="pro-cal-lbl">jj/mm/aaaa</span> ▾</div>
+        <div class="popover" id="pro-cal-pop"><div class="mini-cal" id="pro-cal-grid"></div></div>
+      </div>
+    </div>
+    <div class="aud-foot">
+      <button class="btn btn-navy" onclick="closeAudModal('modal-general')">✓ Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL SIÈGE ══ -->
+<div class="aud-overlay" id="modal-siege">
+  <div class="aud-modal">
+    <button class="aud-close" onclick="closeAudModal('modal-siege')">✕</button>
+    <h3>👨‍⚖️ Composition du siège</h3>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Juge / Président</label>
+      <input id="ms-juge" type="text" placeholder="Ex : M. J.-F. WASINSKI" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="SIEGE.juge=this.value;autoSave()">
+    </div>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Juge consulaire 1</label>
+      <input id="ms-cons1" type="text" placeholder="Ex : M. B. WYZEN" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="SIEGE.cons1=this.value;autoSave()">
+    </div>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Juge consulaire 2</label>
+      <input id="ms-cons2" type="text" placeholder="Ex : M. R. PICHOT" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="SIEGE.cons2=this.value;autoSave()">
+    </div>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Greffier</label>
+      <input id="ms-gref" type="text" placeholder="Ex : M. Y. LIQUET" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="SIEGE.gref=this.value;autoSave()">
+    </div>
+    <div class="aud-foot">
+      <button class="btn btn-navy" onclick="closeAudModal('modal-siege')">✓ Fermer</button>
+    </div>
+  </div>
+</div>
+
 </body></html>`;
 }
 
@@ -1312,10 +1777,10 @@ function buildAll(){
   const pvContent=DOSSIERS.flatMap(s=>s.items).filter(d=>ST[d.num]&&ST[d.num].done).map(d=>{
     const txt=genText(d.num),lines=txt?txt.split('\n'):[],comp=lines.slice(0,2),dec=lines.slice(2);
     return`<div class="pv-page">
-      ${buildEntete(false)}
+   buildEntete(false,true)alse)}
       <div style="margin-top:6mm">
         <div class="doss-hd"><span class="dn">${d.num}</span><span class="dr">${d.ref}</span><span class="dt">${d.type||''}</span></div>
-        ${(()=>{const dd=d.dems||[d.dem||''],df=d.defs||[d.def||''];let h='<div class="parts">';dd.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].dem[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';const _rl={'dem':'Dem)','def':'Déf)','interv':'Interv.','autre':'Autre'};h+=`<div><span class="pl">${_rl[cv.role||'dem']||'Dem)'}</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});df.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].def[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — <strong>Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name)+'</strong>':cv.name?' — <strong>Me '+stripMe(cv.name)+'</strong>':'';const _rl2={'dem':'Dem)','def':'Déf)','interv':'Interv.','autre':'Autre'};h+=`<div><span class="pl">${_rl2[cv.role||'def']||'Déf)'}</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});return h+'</div>';})()}
+        ${(()=>{const dd=d.dems||[d.dem||''],df=d.defs||[d.def||''];let h='<div class="parts">';dd.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].dem[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name):cv.name?' — Me '+stripMe(cv.name):'';const _rl={'dem':'Dem)','def':'Déf)','interv':'Interv.','autre':'Autre'};h+=`<div><span class="pl">${_rl[cv.role||'dem']||'Dem)'}</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});df.forEach((nm,i)=>{const cv=(ST[d.num]&&ST[d.num].def[i])||{type:'absent',name:'',loco:''};const av=cv.type==='absent'?'':cv.loco?' — Me '+stripMe(cv.loco)+' loco Me '+stripMe(cv.name):cv.name?' — Me '+stripMe(cv.name):'';const _rl2={'dem':'Dem)','def':'Déf)','interv':'Interv.','autre':'Autre'};h+=`<div><span class="pl">${_rl2[cv.role||'def']||'Déf)'}</span> ${nm}${av}${cv.type==='absent'?' — <em>absent(e)</em>':''}</div>`;});return h+'</div>';})()}
         <div class="aud-txt" style="margin-top:5mm">
           ${comp.map(l=>`<div class="cl">${l}</div>`).join('')}
           ${dec.map(l=>`<div class="dl">${l}</div>`).join('')}
@@ -1342,7 +1807,16 @@ function getHTML(type){
 
 function printDirect(type){
   const html=getHTML(type);if(!html)return;
-  const win=window.open('','_blank');win.document.write(html);win.document.close();win.focus();
+  openHTMLWindow(html);
+}
+function openHTMLWindow(html){
+  var blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.target='_blank';a.rel='noopener';
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){URL.revokeObjectURL(url);},5000);
 }
 function dlHtml(type){
   const html=getHTML(type);if(!html)return;
@@ -1444,9 +1918,9 @@ function addManual(){
   const _ad=(avDem||'').split('/').map(s=>s.trim());
   const _af=(avDef||'').split('/').map(s=>s.trim());
   ST[newNum]={
-    dem:d.dems.map((nm,i)=>({type:_ad[i]?'avocat':'absent',name:_ad[i]||'',loco:''})),
-    def:d.defs.map((nm,i)=>({type:_af[i]?'avocat':'absent',name:_af[i]||'',loco:''})),
-    dec:null,remDate:null,remPli:false,jugEnt:'conseils',jugDD:false,jugDC:false,jugDT:false,jtt:'mens',jtv:'',note:'',done:false
+    dem:d.dems.map((nm,i)=>({type:'avocat',name:_ad[i]||'',loco:''})),
+    def:d.defs.map((nm,i)=>({type:'avocat',name:_af[i]||'',loco:''})),
+    dec:null,remDate:null,remHeure:'9h00',remPli:false,jugEnt:'conseils',jugDD:false,jugDC:false,jugDT:false,jtt:'mens',jtv:'',note:'',done:false
   };
   renum();renderAll();autoSave();closeAddModal();
   // Vider les champs
@@ -1521,9 +1995,9 @@ async function analyzeChunks(){
         const _ad=(d.avDem||'').split('/').map(s=>s.trim());
         const _af=(d.avDef||'').split('/').map(s=>s.trim());
         ST[d.num]={
-          dem:d.dems.map((nm,i)=>({type:_ad[i]?'avocat':'absent',name:_ad[i]||'',loco:''})),
-          def:d.defs.map((nm,i)=>({type:_af[i]?'avocat':'absent',name:_af[i]||'',loco:''})),
-          dec:null,remDate:null,remPli:false,jugEnt:'conseils',jugDD:false,jugDC:false,jugDT:false,jtt:'mens',jtv:'',note:'',done:false
+          dem:d.dems.map((nm,i)=>({type:'avocat',name:_ad[i]||'',loco:''})),
+          def:d.defs.map((nm,i)=>({type:'avocat',name:_af[i]||'',loco:''})),
+          dec:null,remDate:null,remHeure:'9h00',remPli:false,jugEnt:'conseils',jugDD:false,jugDC:false,jugDT:false,jtt:'mens',jtv:'',note:'',done:false
         };
         added++;
       });
@@ -1538,6 +2012,240 @@ async function analyzeChunks(){
   }
 }
 
+
+function toggleSidebar(){
+  var sb=document.getElementById('sidebar');
+  var col=sb.classList.toggle('collapsed');
+  document.body.classList.toggle('sb-collapsed',col);
+  try{localStorage.setItem('sb_col',col?'1':'0');}catch(e){}
+}
+function initSidebar(){
+  try{if(localStorage.getItem('sb_col')==='1'){
+    document.getElementById('sidebar').classList.add('collapsed');
+    document.body.classList.add('sb-collapsed');
+  }}catch(e){}
+}
+
+
+
+// ── Calendrier date audience ──
+function toggleAudCal(){
+  var p=document.getElementById('aud-cal-pop');
+  if(!p)return;
+  p.classList.toggle('open');
+  if(p.classList.contains('open')){
+    var n=new Date();
+    if(!audCalY){audCalY=n.getFullYear();audCalM=n.getMonth();}
+    drawAudCal();
+  }
+}
+function drawAudCal(){
+  buildCal('aud-cal-grid',audDate,audCalY,audCalM,
+    `function(y,m,d){audDate=new Date(y,m,d);document.getElementById('aud-cal-lbl').textContent=fd(audDate);META.date=fd(audDate);document.getElementById('aud-cal-pop').classList.remove('open');autoSave();}`,
+    `function(dir){audCalM+=dir;if(audCalM>11){audCalM=0;audCalY++;}if(audCalM<0){audCalM=11;audCalY--;}drawAudCal();}`);
+}
+
+// ── Calendrier date prononcé ──
+function toggleProCal(){
+  var p=document.getElementById('pro-cal-pop');
+  if(!p)return;
+  p.classList.toggle('open');
+  if(p.classList.contains('open')){
+    if(!proCalY){var n=new Date();proCalY=jugDate?jugDate.getFullYear():n.getFullYear();proCalM=jugDate?jugDate.getMonth():n.getMonth();}
+    drawProCal();
+  }
+}
+function drawProCal(){
+  buildCal('pro-cal-grid',jugDate,proCalY,proCalM,
+    `function(y,m,d){jugDate=new Date(y,m,d);document.getElementById('pro-cal-lbl').textContent=fd(jugDate);var l=document.getElementById('gc-lbl');if(l)l.textContent=fd(jugDate);document.getElementById('pro-cal-pop').classList.remove('open');refreshPreviews();autoSave();}`,
+    `function(dir){proCalM+=dir;if(proCalM>11){proCalM=0;proCalY++;}if(proCalM<0){proCalM=11;proCalY--;}drawProCal();}`);
+}
+function openAudModal(id){
+  // Remplir les champs avec les valeurs courantes
+  if(id==='modal-general'){
+    var e=function(i){return document.getElementById(i);};
+    if(e('mg-div'))e('mg-div').value=DIVISION||'';
+    if(e('mg-chambre'))e('mg-chambre').value=META.chambre||'';
+    if(e('mg-debut'))e('mg-debut').value=META.heureDebut||'';
+    if(e('mg-fin'))e('mg-fin').value=META.heureFin||'';
+    // Date audience
+    var audLbl=document.getElementById('aud-cal-lbl');
+    if(audLbl)audLbl.textContent=META.date&&META.date.trim()?META.date:'jj/mm/aaaa';
+    if(META.date&&META.date.match(/\d{2}\/\d{2}\/\d{4}/)){
+      var dp=META.date.split('/');audDate=new Date(+dp[2],+dp[1]-1,+dp[0]);audCalY=audDate.getFullYear();audCalM=audDate.getMonth();
+    } else {var n2=new Date();audCalY=n2.getFullYear();audCalM=n2.getMonth();}
+    // Date prononcé
+    var proLbl=document.getElementById('pro-cal-lbl');
+    if(proLbl)proLbl.textContent=jugDate?fd(jugDate):'jj/mm/aaaa';
+    if(jugDate){proCalY=jugDate.getFullYear();proCalM=jugDate.getMonth();}
+    else{var n3=new Date();proCalY=n3.getFullYear();proCalM=n3.getMonth();}
+  } else if(id==='modal-siege'){
+    var e2=function(i){return document.getElementById(i);};
+    if(e2('ms-juge'))e2('ms-juge').value=SIEGE.juge||'';
+    if(e2('ms-cons1'))e2('ms-cons1').value=SIEGE.cons1||'';
+    if(e2('ms-cons2'))e2('ms-cons2').value=SIEGE.cons2||'';
+    if(e2('ms-gref'))e2('ms-gref').value=SIEGE.gref||'';
+  }
+  var el=document.getElementById(id);
+  if(el)el.classList.add('open');
+}
+function closeAudModal(id){
+  var el=document.getElementById(id);
+  if(el)el.classList.remove('open');
+}
+// Fermer si clic sur l'overlay
+document.addEventListener('click',function(e){
+  ['modal-general','modal-siege'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el&&el.classList.contains('open')&&e.target===el)el.classList.remove('open');
+  });
+});
+function openSearch(){
+  var bar=document.getElementById('search-bar');
+  if(!bar)return;
+  bar.classList.add('open');
+  setTimeout(function(){
+    var inp=document.getElementById('search-input');
+    if(inp)inp.focus();
+  },50);
+}
+function closeSearch(){
+  var bar=document.getElementById('search-bar');
+  var res=document.getElementById('search-results');
+  var inp=document.getElementById('search-input');
+  if(bar)bar.classList.remove('open');
+  if(res)res.classList.remove('open');
+  if(inp)inp.value='';
+}
+function srHL(text,q){
+  if(!text||!q)return text||'';
+  var esc=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  return String(text).replace(new RegExp('('+esc+')','gi'),'<span class="sr-hl">$1</span>');
+}
+function doSearch(q){
+  var res=document.getElementById('search-results');
+  if(!res)return;
+  q=(q||'').trim();
+  if(q.length<1){res.classList.remove('open');return;}
+  var ql=q.toLowerCase();
+  var hits=[];
+  DOSSIERS.forEach(function(sec){
+    sec.items.forEach(function(d){
+      var st=ST[d.num]||{};
+      var dems=(d.dems||[d.dem||'']).join(' ');
+      var defs=(d.defs||[d.def||'']).join(' ');
+      var avD=(st.dem||[]).map(function(cp){return (cp.name||'')+' '+(cp.loco||'');}).join(' ');
+      var avF=(st.def||[]).map(function(cp){return (cp.name||'')+' '+(cp.loco||'');}).join(' ');
+      var hay=(d.num+' '+d.ref+' '+dems+' '+defs+' '+avD+' '+avF).toLowerCase();
+      if(hay.indexOf(ql)!==-1){
+        hits.push({d:d,dems:dems,defs:defs,av:(avD+' '+avF).trim()});
+      }
+    });
+  });
+  if(!hits.length){
+    res.innerHTML='<div class="sr-none">Aucun résultat pour « <b>'+q+'</b> »</div>';
+    res.classList.add('open');
+    return;
+  }
+  res.innerHTML=hits.map(function(h){
+    var d=h.d;
+    var avTxt=h.av?'<div class="sr-avoc">'+srHL(h.av,q)+'</div>':'';
+    return '<div class="sr-item" onclick="jumpTo(\''+d.num+'\')">'
+      +'<span class="sr-num">'+srHL(d.num,q)+'</span>'
+      +'<span class="sr-ref">'+srHL(d.ref,q)+'</span>'
+      +'<div class="sr-parties">'
+      +'<div class="sr-dem">'+srHL(h.dems,q)+' / '+srHL(h.defs,q)+'</div>'
+      +avTxt
+      +'</div>'
+      +'</div>';
+  }).join('');
+  res.classList.add('open');
+}
+function jumpTo(num){
+  closeSearch();
+  // Forcer l'affichage si filtré
+  var card=document.getElementById('card-'+nid(num));
+  if(!card)return;
+  card.style.display='';
+  // Fermer les cartes ouvertes et ouvrir celle-ci
+  document.querySelectorAll('.dossier-card.open').forEach(function(el){el.classList.remove('open');});
+  card.classList.add('open');
+  setTimeout(function(){
+    card.scrollIntoView({behavior:'smooth',block:'center'});
+  },60);
+}
+
+function toggleSidebarRight(){
+  var sb=document.getElementById('sidebar-right');
+  var col=sb.classList.toggle('collapsed');
+  document.body.classList.toggle('sbr-collapsed',col);
+  try{localStorage.setItem('sbr_col',col?'1':'0');}catch(e){}
+}
+function initSidebarRight(){
+  try{if(localStorage.getItem('sbr_col')==='1'){
+    document.getElementById('sidebar-right').classList.add('collapsed');
+    document.body.classList.add('sbr-collapsed');
+  }}catch(e){}
+}
+function getDotClass(num){
+  var st=ST[num];
+  if(!st)return 'empty';
+  if(st.done)return 'done';
+  // Modifié = décision sélectionnée OU nom ajouté OU note non vide
+  var hasDec=!!st.dec;
+  var hasNote=!!(st.note&&st.note.trim());
+  var hasName=(st.dem||[]).some(function(cp){return cp.added||( cp.name&&cp.name.trim());})
+    ||(st.def||[]).some(function(cp){return cp.added||(cp.name&&cp.name.trim());});
+  if(hasDec||hasNote||hasName)return 'modified';
+  return 'empty';
+}
+function buildSidebarRight(){
+  var el=document.getElementById('sbr-list');
+  if(!el||!DOSSIERS||!DOSSIERS.length){if(el)el.innerHTML='';return;}
+  var html='';
+  DOSSIERS.forEach(function(sec){
+    html+='<div class="sbr-section">'+sec.section+'</div>';
+    sec.items.forEach(function(d){
+      var dotCls=getDotClass(d.num);
+      var dem=(d.dems||[d.dem||'']).join(' / ');
+      var def=(d.defs||[d.def||'']).join(' / ');
+      html+='<div class="sbr-item" id="sbr-'+d.num.replace('.','_')+'" onclick="sbrJumpTo(\''+d.num+'\')">'
+        +'<span class="sbr-dot '+dotCls+'"></span>'
+        +'<span class="sbr-num">'+d.num+'</span>'
+        +'<div class="sbr-parties">'
+        +'<div class="sbr-dem">'+dem+'</div>'
+        +'<div class="sbr-def">'+def+'</div>'
+        +'</div>'
+        +'</div>';
+    });
+  });
+  el.innerHTML=html;
+}
+function sbrJumpTo(num){
+  // Ouvrir la carte et scroller
+  document.querySelectorAll('.dossier-card.open').forEach(function(el){el.classList.remove('open');});
+  var card=document.getElementById('card-'+nid(num));
+  if(!card){return;}
+  if(FILTER_DONE&&ST[num]&&ST[num].done)card.style.display='';
+  card.classList.add('open');
+  setTimeout(function(){card.scrollIntoView({behavior:'smooth',block:'center'});},60);
+  // Highlight item actif
+  document.querySelectorAll('.sbr-item').forEach(function(el){el.classList.remove('active');});
+  var item=document.getElementById('sbr-'+num.replace('.','_'));
+  if(item)item.classList.add('active');
+}
+function updateSidebarRight(){
+  // Mettre à jour les dots sans reconstruire tout
+  if(!DOSSIERS||!DOSSIERS.length)return;
+  DOSSIERS.forEach(function(sec){
+    sec.items.forEach(function(d){
+      var item=document.getElementById('sbr-'+d.num.replace('.','_'));
+      if(!item)return;
+      var dot=item.querySelector('.sbr-dot');
+      if(dot){dot.className='sbr-dot '+getDotClass(d.num);}
+    });
+  });
+}
 function applyFilter(){
   document.querySelectorAll('[data-num]').forEach(function(el){
     var num=el.getAttribute('data-num');
@@ -1558,7 +2266,7 @@ function applySnapshot(snap){
   DIVISION=snap.DIVISION||'';META=snap.META||{};SIEGE=snap.SIEGE||{juge:'',cons1:'',cons2:'',gref:''};
   DOSSIERS=snap.DOSSIERS||[];
   jugDate=snap.jugDate?new Date(snap.jugDate):null;
-  Object.keys(snap.ST||{}).forEach(function(k){ST[k]=snap.ST[k];if(ST[k].remDate)ST[k].remDate=new Date(ST[k].remDate);});
+  Object.keys(snap.ST||{}).forEach(function(k){ST[k]=snap.ST[k];if(ST[k].remDate)ST[k].remDate=new Date(ST[k].remDate);if(!ST[k].soCharge)ST[k].soCharge='dem';if(!ST[k].remHeure)ST[k].remHeure='9h00';});
   Object.assign(perCal,snap.perCal||{});
 }
 function autoSave(){
@@ -1568,6 +2276,8 @@ function autoSave(){
     var lbl=document.getElementById('autosave-lbl');
     if(lbl){var t=new Date();lbl.textContent='● '+String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
     lbl.style.color='rgba(180,255,180,.7)';setTimeout(function(){lbl.style.color='rgba(255,255,255,.35)';},2000);}
+    var lbl2=document.getElementById('autosave-lbl-sb');
+    if(lbl2){var t2=new Date();lbl2.textContent='● '+String(t2.getHours()).padStart(2,'0')+':'+String(t2.getMinutes()).padStart(2,'0');}
   }catch(e){}
 }
 function saveJSON(){
@@ -1593,7 +2303,9 @@ function loadJSON(event){
       applySnapshot(snap);
       document.getElementById('setup-screen').style.display='none';
       document.getElementById('main-app').style.display='block';
-      (function(){const hd=document.getElementById('h-div');if(hd)hd.textContent=DIVISION;const hdate=document.getElementById('h-date');if(hdate)hdate.value=META.date||'';const hch=document.getElementById('h-chambre');if(hch)hch.value=META.chambre||'';})();
+  var _sb=document.getElementById('sidebar');if(_sb)_sb.style.display='flex';
+  var _sbr=document.getElementById('sidebar-right');if(_sbr){_sbr.style.display='flex';document.body.classList.add('sbr-open');initSidebarRight();}
+      /* header inputs moved to modals */
       renderAll();
       if(jugDate){gCalY=jugDate.getFullYear();gCalM=jugDate.getMonth();document.getElementById('gc-lbl').textContent=fd(jugDate);}
       drawGC();autoSave();
@@ -1610,6 +2322,7 @@ function loadSettings(){
   try{var s=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}');if(s.dark!==undefined)SETTINGS.dark=s.dark;if(s.templates)SETTINGS.templates=s.templates;if(s.customBtns)SETTINGS.customBtns=s.customBtns;}catch(e){}
   if(SETTINGS.dark)applyDark(true);
   syncCustomBtns();
+  initSidebar();
 }
 function saveSettings(){try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(SETTINGS));}catch(e){}}
 
@@ -1752,7 +2465,7 @@ function loadHistItem(i){
     closeSettings();
     document.getElementById('setup-screen').style.display='none';
     document.getElementById('main-app').style.display='block';
-    (function(){var hd=document.getElementById('h-div');if(hd)hd.textContent=DIVISION;var hdate=document.getElementById('h-date');if(hdate)hdate.value=META.date||'';var hch=document.getElementById('h-chambre');if(hch)hch.value=META.chambre||'';var hhd=document.getElementById('h-heure-debut');if(hhd)hhd.value=META.heureDebut||'';var hhf=document.getElementById('h-heure-fin');if(hhf)hhf.value=META.heureFin||'';})();
+    /* header inputs moved to modals */
     renderAll();if(jugDate){gCalY=jugDate.getFullYear();gCalM=jugDate.getMonth();document.getElementById('gc-lbl').textContent=fd(jugDate);}drawGC();
   }catch(e){alert('Erreur: '+e.message);}
 }
@@ -1810,7 +2523,9 @@ window.addEventListener('load',function(){
     applySnapshot(snap);
     document.getElementById('setup-screen').style.display='none';
     document.getElementById('main-app').style.display='block';
-    (function(){const hd=document.getElementById('h-div');if(hd)hd.textContent=DIVISION;const hdate=document.getElementById('h-date');if(hdate)hdate.value=META.date||'';const hch=document.getElementById('h-chambre');if(hch)hch.value=META.chambre||'';})();
+  var _sb=document.getElementById('sidebar');if(_sb)_sb.style.display='flex';
+  var _sbr=document.getElementById('sidebar-right');if(_sbr){_sbr.style.display='flex';document.body.classList.add('sbr-open');initSidebarRight();}
+    /* header inputs moved to modals */
     renderAll();
     if(jugDate){gCalY=jugDate.getFullYear();gCalM=jugDate.getMonth();document.getElementById('gc-lbl').textContent=fd(jugDate);}
     drawGC();
@@ -1853,5 +2568,86 @@ window.addEventListener('load',function(){
     </div>
   </div>
 </div>
+<!-- ══ SIDEBAR DROITE ══ -->
+<div id="sidebar-right">
+  <div class="sbr-header" onclick="toggleSidebarRight()">
+    <span class="sbr-toggle">▶</span>
+    <span class="sbr-title">Rôle</span>
+  </div>
+  <div class="sbr-scroll" id="sbr-list"></div>
+</div>
+
+<!-- ══ MODAL DONNÉES GÉNÉRALES ══ -->
+<div class="aud-overlay" id="modal-general">
+  <div class="aud-modal">
+    <button class="aud-close" onclick="closeAudModal('modal-general')">✕</button>
+    <h3>📅 Données générales</h3>
+    <div class="aud-2col">
+      <div class="aud-row">
+        <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Division</label>
+        <input id="mg-div" type="text" placeholder="Liège" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="DIVISION=this.value;autoSave()">
+      </div>
+      <div class="aud-row">
+        <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Chambre</label>
+        <input id="mg-chambre" type="text" placeholder="1ère ch." style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="META.chambre=this.value;autoSave()">
+      </div>
+    </div>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Date d'audience</label>
+      <div class="mc-wrap" style="width:100%">
+        <div class="date-btn" onclick="toggleAudCal()" style="width:100%;box-sizing:border-box"><span id="aud-cal-lbl">jj/mm/aaaa</span> ▾</div>
+        <div class="popover" id="aud-cal-pop"><div class="mini-cal" id="aud-cal-grid"></div></div>
+      </div>
+    </div>
+    <div class="aud-2col">
+      <div class="aud-row">
+        <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Heure de début</label>
+        <input id="mg-debut" type="text" placeholder="9h00" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="META.heureDebut=this.value;autoSave()">
+      </div>
+      <div class="aud-row">
+        <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Heure de levée</label>
+        <input id="mg-fin" type="text" placeholder="12h00" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="META.heureFin=this.value;autoSave()">
+      </div>
+    </div>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Date de prononcé</label>
+      <div class="mc-wrap" style="width:100%">
+        <div class="date-btn" onclick="toggleProCal()" style="width:100%;box-sizing:border-box"><span id="pro-cal-lbl">jj/mm/aaaa</span> ▾</div>
+        <div class="popover" id="pro-cal-pop"><div class="mini-cal" id="pro-cal-grid"></div></div>
+      </div>
+    </div>
+    <div class="aud-foot">
+      <button class="btn btn-navy" onclick="closeAudModal('modal-general')">✓ Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL SIÈGE ══ -->
+<div class="aud-overlay" id="modal-siege">
+  <div class="aud-modal">
+    <button class="aud-close" onclick="closeAudModal('modal-siege')">✕</button>
+    <h3>👨‍⚖️ Composition du siège</h3>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Juge / Président</label>
+      <input id="ms-juge" type="text" placeholder="Ex : M. J.-F. WASINSKI" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="SIEGE.juge=this.value;autoSave()">
+    </div>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Juge consulaire 1</label>
+      <input id="ms-cons1" type="text" placeholder="Ex : M. B. WYZEN" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="SIEGE.cons1=this.value;autoSave()">
+    </div>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Juge consulaire 2</label>
+      <input id="ms-cons2" type="text" placeholder="Ex : M. R. PICHOT" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="SIEGE.cons2=this.value;autoSave()">
+    </div>
+    <div class="aud-row">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Greffier</label>
+      <input id="ms-gref" type="text" placeholder="Ex : M. Y. LIQUET" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="SIEGE.gref=this.value;autoSave()">
+    </div>
+    <div class="aud-foot">
+      <button class="btn btn-navy" onclick="closeAudModal('modal-siege')">✓ Fermer</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
