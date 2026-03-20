@@ -711,12 +711,8 @@ async function analyze(){
   if(!setupChunks.length){showErr("Veuillez coller le texte de l'audience");return;}
   const txt=setupChunks.join('\n\n--- suite ---\n\n');
   setupChunks=[];renderSetupChunks();
-  SIEGE={
-    juge:document.getElementById('s-juge').value.trim(),
-    cons1:document.getElementById('s-cons1').value.trim(),
-    cons2:document.getElementById('s-cons2').value.trim(),
-    gref:document.getElementById('s-gref').value.trim()
-  };
+  // SIEGE rempli via modal sidebar - on garde les valeurs existantes
+  // (plus d'étape siège dans le setup)
   setStatus('loading',"Analyse en cours"+(txt.length>12000?" (texte long…)":"…"));
   document.getElementById('btn3').disabled=true;
   try{
