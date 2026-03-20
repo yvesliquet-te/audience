@@ -1192,6 +1192,7 @@ function replaceCard(num,keepOpen){
 }
 function upd(num,field,value){
   ST[num][field]=value;
+  ST[num].modified=true;
   if(field==='note'||field==='jtv'){updatePreview(num);clearTimeout(upd._t);upd._t=setTimeout(function(){autoSave();updateSidebarRight();},1200);}
   else{replaceCard(num,true);updateProg();autoSave();}
 }
@@ -1210,8 +1211,9 @@ function updPartieName(num,side,i,val){
 
 function updComp(num,side,i,prop,value){
   ST[num][side][i][prop]=value;
-  // Marquer comme ajouté manuellement pendant l'audience
+  // Marquer comme modifié manuellement
   if(prop==='name'&&value&&value.trim())ST[num][side][i].added=true;
+  if(prop==='loco'||prop==='type')ST[num].modified=true;
   if(prop==='name'||prop==='loco'){updatePreview(num);clearTimeout(updComp._t);updComp._t=setTimeout(function(){autoSave();updateSidebarRight();},1200);}
   else{replaceCard(num,true);autoSave();}
 }
@@ -1221,7 +1223,7 @@ function modCard(num){
 function setDec(num,dec){
   // Reclique sur le même bouton → annuler la décision
   if(ST[num].dec===dec){ST[num].dec=null;}
-  else{ST[num].dec=dec;}
+  else{ST[num].dec=dec;ST[num].modified=true;}
   replaceCard(num,true);updatePreview(num);autoSave();updateSidebarRight();
 }
 function toggleCard(num){
@@ -2190,12 +2192,8 @@ function getDotClass(num){
   var st=ST[num];
   if(!st)return 'empty';
   if(st.done)return 'done';
-  // Modifié = décision sélectionnée OU nom ajouté OU note non vide
-  var hasDec=!!st.dec;
-  var hasNote=!!(st.note&&st.note.trim());
-  var hasName=(st.dem||[]).some(function(cp){return cp.added||( cp.name&&cp.name.trim());})
-    ||(st.def||[]).some(function(cp){return cp.added||(cp.name&&cp.name.trim());});
-  if(hasDec||hasNote||hasName)return 'modified';
+  // Orange = modifié manuellement après génération
+  if(st.modified)return 'modified';
   return 'empty';
 }
 function buildSidebarRight(){
