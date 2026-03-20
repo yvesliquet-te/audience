@@ -1210,6 +1210,7 @@ function updPartieName(num,side,i,val){
 
 function updComp(num,side,i,prop,value){
   ST[num][side][i][prop]=value;
+  ST[num].modified=true;
   // Marquer comme ajouté manuellement pendant l'audience
   if(prop==='name'&&value&&value.trim())ST[num][side][i].added=true;
   if(prop==='name'||prop==='loco'){updatePreview(num);clearTimeout(updComp._t);updComp._t=setTimeout(autoSave,1200);}
@@ -1422,7 +1423,19 @@ function buildRecap(){
     +`<th style="padding:4px 8px;font-size:.75rem;text-align:left">Partie</th>`
     +`<th style="padding:4px 8px;font-size:.75rem;text-align:left">Qualité</th>`
     +`</tr>${avBody}</table>`:'';
-  const html=`</body></html>`;
+  const html=`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+<title>Récapitulatif — ${META.date||''}</title>
+<style>body{font-family:'DM Sans',Arial,sans-serif;padding:20px}
+h2,h3{color:#1a2744;margin-bottom:8px}h2{font-size:1rem}h3{font-size:.9rem}
+table{border-collapse:collapse;width:100%;max-width:700px;margin-bottom:8px}
+td,th{border-bottom:1px solid #eee;vertical-align:top}
+@media print{.no-print{display:none}}
+</style></head><body class="on-setup">
+<h2>Récapitulatif encodage — ${META.date||''} — Division ${DIVISION}</h2>
+<table>${body}</table>
+${avSection}
+<button class="no-print" onclick="window.print()" style="margin-top:16px;padding:8px 20px;background:#1a2744;color:white;border:none;border-radius:6px;cursor:pointer">🖨 Imprimer</button>
+</body></html>`;
   const w=window.open('','_blank');w.document.write(html);w.document.close();
 }
 
