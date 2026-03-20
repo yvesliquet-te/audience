@@ -326,6 +326,7 @@ body.dark .cbtn-row input{background:#1a2535;color:#d0dce8;border-color:#3a4a60;
 .sb-foot{padding:8px 12px;border-top:1px solid rgba(255,255,255,.08);flex-shrink:0;}
 /* Décaler le contenu */
 body{padding-left:var(--sb-w);transition:padding-left .22s cubic-bezier(.4,0,.2,1);}
+body.on-setup{padding-left:0!important;padding-right:0!important;}
 body.sb-collapsed{padding-left:var(--sb-w-col);}
 
 /* ── SEARCH BAR ── */
@@ -396,7 +397,7 @@ body.sbr-open.sbr-collapsed{padding-right:var(--sbr-w-col);}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 </head>
-<body>
+<body class="on-setup">
 
 <div id="sidebar" style="display:none">
   <div class="sb-header" onclick="toggleSidebar()">
@@ -751,6 +752,7 @@ async function analyze(){
 
 function launchApp(){
   jugDate=null;if(!DIVISION)DIVISION="Liège";initST();
+  document.body.classList.remove('on-setup');
   var _sb=document.getElementById('sidebar');if(_sb)_sb.style.display='flex';
   var _sbr=document.getElementById('sidebar-right');if(_sbr){_sbr.style.display='flex';document.body.classList.add('sbr-open');initSidebarRight();}
   try{localStorage.removeItem('audience_session_v1');}catch(e){}
@@ -764,6 +766,7 @@ function newAud(){
   if(!confirm('Charger une nouvelle audience ? Les données actuelles seront perdues.'))return;
   try{localStorage.removeItem('audience_session_v1');}catch(e){}
   document.getElementById('setup-screen').style.display='flex';
+  document.body.classList.add('on-setup');
   var _sb=document.getElementById('sidebar');if(_sb)_sb.style.display='none';
   var _sbr=document.getElementById('sidebar-right');if(_sbr){_sbr.style.display='none';document.body.classList.remove('sbr-open');}
   document.getElementById('main-app').style.display='none';
@@ -1346,7 +1349,7 @@ function buildFA(){
   </div>
 </div>`;
   return`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Feuille d'audience — ${META.date||''}</title>
-<style>${printCSS()}</style></head><body>
+<style>${printCSS()}</style></head><body class="on-setup">
 ${buildEntete(true)}
 ${debutLine}
 ${body}
@@ -1577,7 +1580,7 @@ h2,h3{color:#1a2744;margin-bottom:8px}h2{font-size:1rem}h3{font-size:.9rem}
 table{border-collapse:collapse;width:100%;max-width:700px;margin-bottom:8px}
 td,th{border-bottom:1px solid #eee;vertical-align:top}
 @media print{.no-print{display:none}}
-</style></head><body>
+</style></head><body class="on-setup">
 <h2>Récapitulatif encodage — ${META.date||''} — Division ${DIVISION}</h2>
 <table>${body}</table>
 ${avSection}
@@ -1685,7 +1688,7 @@ function buildPV(){
     </div>`;
   }).join('');
   return`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>PV — ${META.date||''}</title>
-<style>${printCSS()}</style></head><body>
+<style>${printCSS()}</style></head><body class="on-setup">
 ${pages}
 <button class="print-btn no-print" onclick="window.print()">🖨 Imprimer</button>
 <!-- ══ SIDEBAR DROITE ══ -->
@@ -2303,6 +2306,7 @@ function loadJSON(event){
       applySnapshot(snap);
       document.getElementById('setup-screen').style.display='none';
       document.getElementById('main-app').style.display='block';
+  document.body.classList.remove('on-setup');
   var _sb=document.getElementById('sidebar');if(_sb)_sb.style.display='flex';
   var _sbr=document.getElementById('sidebar-right');if(_sbr){_sbr.style.display='flex';document.body.classList.add('sbr-open');initSidebarRight();}
       /* header inputs moved to modals */
@@ -2523,6 +2527,7 @@ window.addEventListener('load',function(){
     applySnapshot(snap);
     document.getElementById('setup-screen').style.display='none';
     document.getElementById('main-app').style.display='block';
+  document.body.classList.remove('on-setup');
   var _sb=document.getElementById('sidebar');if(_sb)_sb.style.display='flex';
   var _sbr=document.getElementById('sidebar-right');if(_sbr){_sbr.style.display='flex';document.body.classList.add('sbr-open');initSidebarRight();}
     /* header inputs moved to modals */
