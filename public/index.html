@@ -485,13 +485,10 @@ body.on-setup{padding-left:0!important;padding-right:0!important;}
       <p>Tribunal de l'Entreprise de Liège</p>
     </div>
     <div class="up-body">
-      <div id="resume-bar" style="background:#f0f4ff;border:1px solid #c5d0f0;border-radius:8px;padding:10px 14px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:10px">
-        <div style="font-size:.8rem;color:#3a52b0;font-weight:600">📂 Reprendre une session enregistrée</div>
-        <label style="font-size:.78rem;padding:6px 14px;border-radius:6px;border:1px solid #c5d0f0;background:white;color:#3a52b0;cursor:pointer;font-weight:600">
-          📂 Ouvrir un fichier JSON
-          <input type="file" accept=".json" style="display:none" onchange="loadJSON(event)">
-        </label>
-      </div>
+      <label style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:10px 18px;margin-bottom:16px;border-radius:8px;border:2px solid #c5d0f0;background:#f0f4ff;color:#1a2744;cursor:pointer;font-weight:700;font-size:.85rem;box-sizing:border-box;box-shadow:0 2px 8px rgba(26,39,68,.1)">
+        📂 Ouvrir un fichier JSON
+        <input type="file" accept=".json" style="display:none" onchange="loadJSON(event)">
+      </label>
       <p style="font-size:.83rem;color:var(--muted);margin-bottom:8px;">Collez le texte de la feuille d'audience.<br><span style="font-size:.75rem">Si la feuille est longue, ajoutez-la en plusieurs extraits.</span></p>
       <div id="setup-chunks-list" style="margin-bottom:6px"></div>
       <div id="setup-chunks-total" style="font-size:.72rem;color:var(--muted);margin-bottom:6px"></div>
@@ -499,9 +496,9 @@ body.on-setup{padding-left:0!important;padding-right:0!important;}
         <textarea id="paste-input" placeholder="Ctrl+A dans Word → Ctrl+C → Ctrl+V ici"></textarea>
         <div class="paste-hint">💡 Sélectionnez tout dans Word (Ctrl+A), copiez (Ctrl+C), collez ici (Ctrl+V).</div>
       </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-        <button onclick="addSetupChunk()" style="font-size:.76rem;padding:6px 14px;border-radius:6px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);color:white;cursor:pointer;font-weight:600">+ Ajouter cet extrait</button>
-        <button class="btn-next" id="btn3" onclick="analyze()">▶ Analyser</button>
+      <div style="display:flex;gap:10px;align-items:stretch;margin-top:10px">
+        <button onclick="addSetupChunk()" style="flex:1;font-size:.88rem;padding:11px 14px;border-radius:var(--r);border:2px solid var(--gold);background:var(--gold);color:var(--navy);cursor:pointer;font-weight:700;font-family:'DM Sans',sans-serif">+ Ajouter cet extrait</button>
+        <button id="btn3" onclick="analyze()" style="flex:1;font-size:.88rem;padding:11px 14px;border-radius:var(--r);border:2px solid var(--navy);background:var(--navy);color:white;cursor:pointer;font-weight:700;font-family:'DM Sans',sans-serif">▶ Analyser</button>
       </div>
       <div class="u-status" id="u-status"></div>
     </div>
