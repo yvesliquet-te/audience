@@ -409,6 +409,22 @@ body.on-setup{padding-left:0!important;padding-right:0!important;}
 .sec-drag-handle{color:var(--muted);font-size:1rem;flex-shrink:0;}
 .sec-reorder-name{flex:1;font-size:.82rem;font-weight:600;color:var(--navy);}
 .sec-reorder-count{font-size:.72rem;color:var(--muted);flex-shrink:0;}
+
+.hist-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:310;align-items:center;justify-content:center;}
+.hist-overlay.open{display:flex;}
+.hist-modal{background:white;border-radius:12px;width:min(480px,95vw);max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.3);overflow:hidden;}
+.hist-modal-hd{background:var(--navy);color:white;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.hist-modal-hd h3{margin:0;font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;}
+.hist-modal-close{background:none;border:none;color:rgba(255,255,255,.6);font-size:1.2rem;cursor:pointer;line-height:1;}
+.hist-modal-close:hover{color:white;}
+.hist-modal-body{overflow-y:auto;flex:1;padding:12px 16px;}
+.hist-lieu{font-size:.63rem;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);font-weight:700;padding:10px 0 4px;border-top:1px solid var(--cream-dd);margin-top:6px;}
+.hist-lieu:first-child{border-top:none;margin-top:0;padding-top:4px;}
+.hist-row{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--cream);}
+.hist-load{flex:1;min-width:0;font-size:.80rem;font-weight:600;color:var(--navy);background:none;border:none;cursor:pointer;text-align:left;padding:4px 8px;border-radius:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hist-load:hover{background:var(--cream);color:var(--navy);}
+.hist-del-btn{flex-shrink:0;background:none;border:1px solid #ffcccc;color:#c0392b;border-radius:4px;cursor:pointer;padding:3px 7px;font-size:.72rem;}
+.hist-del-btn:hover{background:#fff0f0;}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 </head>
@@ -430,6 +446,10 @@ body.on-setup{padding-left:0!important;padding-right:0!important;}
     <button class="sb-btn" onclick="saveJSON()">
       <span class="sb-icon">💾</span><span class="sb-label">Sauvegarder JSON</span>
       <span class="sb-tip">Sauvegarder JSON</span>
+    </button>
+    <button class="sb-btn" onclick="openHistModal()">
+      <span class="sb-icon">🕐</span><span class="sb-label">Historique</span>
+      <span class="sb-tip">Sessions sauvegardées</span>
     </button>
     <div class="sb-section">Audience</div>
     <button class="sb-btn" onclick="openAudModal('modal-general')">
@@ -1362,6 +1382,17 @@ ${debutLine}
 ${body}
 ${clotureLine}
 <button class="print-btn no-print" onclick="window.print()">🖨 Imprimer</button>
+<div class="hist-overlay" id="hist-overlay" onclick="if(event.target===this)closeHistModal()">
+  <div class="hist-modal">
+    <div class="hist-modal-hd">
+      <h3>🕐 Sessions sauvegardées</h3>
+      <button class="hist-modal-close" onclick="closeHistModal()">✕</button>
+    </div>
+    <div class="hist-modal-body" id="hist-modal-body">
+    </div>
+  </div>
+</div>
+
 </body></html>`;
 }
 
@@ -1445,6 +1476,17 @@ td,th{border-bottom:1px solid #eee;vertical-align:top}
 <table>${body}</table>
 ${avSection}
 <button class="no-print" onclick="window.print()" style="margin-top:16px;padding:8px 20px;background:#1a2744;color:white;border:none;border-radius:6px;cursor:pointer">🖨 Imprimer</button>
+<div class="hist-overlay" id="hist-overlay" onclick="if(event.target===this)closeHistModal()">
+  <div class="hist-modal">
+    <div class="hist-modal-hd">
+      <h3>🕐 Sessions sauvegardées</h3>
+      <button class="hist-modal-close" onclick="closeHistModal()">✕</button>
+    </div>
+    <div class="hist-modal-body" id="hist-modal-body">
+    </div>
+  </div>
+</div>
+
 </body></html>`;
   const w=window.open('','_blank');w.document.write(html);w.document.close();
 }
@@ -1470,6 +1512,17 @@ function buildPV(){
 <style>${printCSS()}</style></head><body class="on-setup">
 ${pages}
 <button class="print-btn no-print" onclick="window.print()">🖨 Imprimer</button>
+<div class="hist-overlay" id="hist-overlay" onclick="if(event.target===this)closeHistModal()">
+  <div class="hist-modal">
+    <div class="hist-modal-hd">
+      <h3>🕐 Sessions sauvegardées</h3>
+      <button class="hist-modal-close" onclick="closeHistModal()">✕</button>
+    </div>
+    <div class="hist-modal-body" id="hist-modal-body">
+    </div>
+  </div>
+</div>
+
 </body></html>`;
 }
 
@@ -1712,6 +1765,7 @@ function toggleSidebar(){
   try{localStorage.setItem('sb_col',col?'1':'0');}catch(e){}
 }
 function initSidebar(){
+  buildHistSidebar();
   try{if(localStorage.getItem('sb_col')==='1'){
     document.getElementById('sidebar').classList.add('collapsed');
     document.body.classList.add('sb-collapsed');
@@ -2190,6 +2244,8 @@ function saveJSON(){
   var url=URL.createObjectURL(blob),a=document.createElement('a');
   var name=fmtAudName(DIVISION,META.date,new Date());
   a.href=url;a.download=name+'.json';a.click();URL.revokeObjectURL(url);
+  saveToHistory();
+  buildHistSidebar();
 }
 function loadJSON(event){
   var file=event.target.files[0];if(!file)return;
@@ -2489,6 +2545,48 @@ function saveToHistory(){
     localStorage.setItem(HIST_KEY,JSON.stringify(hist));
   }catch(e){}
 }
+
+function buildHistSidebar(){
+  // L'historique est maintenant dans un modal — rien à afficher dans la sidebar
+}
+function openHistModal(){
+  var body=document.getElementById('hist-modal-body');
+  if(!body)return;
+  try{
+    var hist=JSON.parse(localStorage.getItem(HIST_KEY)||'[]');
+    if(!hist.length){
+      body.innerHTML='<p style="font-size:.82rem;color:var(--muted);padding:12px 0">Aucune session sauvegardée.</p>';
+    }else{
+      // Trier: lieu alpha puis date desc
+      var sorted=hist.slice().sort(function(a,b){
+        var da=(a.division||'').toLowerCase(),db=(b.division||'').toLowerCase();
+        if(da<db)return -1;if(da>db)return 1;
+        function parseAud(d){if(!d)return 0;var p=d.split('/');if(p.length===3)return new Date(+p[2],+p[1]-1,+p[0]).getTime();return 0;}
+        var diff=parseAud(b.audDate)-parseAud(a.audDate);
+        return diff!==0?diff:(b.ts||0)-(a.ts||0);
+      });
+      var html='';var lastLieu='';
+      sorted.forEach(function(h){
+        var i=hist.indexOf(h);
+        var lieu=h.division||'(sans lieu)';
+        if(lieu!==lastLieu){
+          html+='<div class="hist-lieu">'+lieu+'</div>';
+          lastLieu=lieu;
+        }
+        html+='<div class="hist-row">'
+          +'<button class="hist-load" onclick="loadHistItem('+i+');closeHistModal()" title="'+h.name+'">'+h.name+'</button>'
+          +'<button class="hist-del-btn" onclick="delHistItem('+i+');openHistModal()" title="Supprimer">✕</button>'
+          +'</div>';
+      });
+      body.innerHTML=html;
+    }
+  }catch(e){body.innerHTML='<p style="color:#c0392b">Erreur.</p>';}
+  document.getElementById('hist-overlay').classList.add('open');
+}
+function closeHistModal(){
+  var el=document.getElementById('hist-overlay');
+  if(el)el.classList.remove('open');
+}
 function buildHistList(){
   var el=document.getElementById('hist-list');if(!el)return;
   try{
@@ -2618,8 +2716,7 @@ window.addEventListener('load',function(){
       <button class="stab" onclick="switchStab('stats')">📊 Stats</button>
       <button class="stab" onclick="switchStab('templates')">💬 Templates</button>
       <button class="stab" onclick="switchStab('encodage')">🔢 Encodage</button>
-            <button class="stab" onclick="switchStab('historique')">🕐 Historique</button>
-    </div>
+            </div>
     <div class="settings-body">
       <div class="stab-pane active" id="stab-apparence">
         <div class="setting-row"><label>Mode sombre</label>
@@ -2665,10 +2762,7 @@ window.addEventListener('load',function(){
 
       
 
-      <div class="stab-pane" id="stab-historique">
-        <p style="font-size:.75rem;color:var(--muted);margin-bottom:10px">15 dernières sessions, groupées par lieu et triées par date. Cliquez ✕ pour supprimer.</p>
-        <div id="hist-list"></div>
-      </div>
+      
     </div>
   </div>
 </div>
@@ -2757,6 +2851,17 @@ window.addEventListener('load',function(){
     <div class="aud-row"><label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Juge consulaire 2</label><input id="ms-cons2" type="text" placeholder="Ex : M. R. PICHOT" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="SIEGE.cons2=this.value;autoSave()"></div>
     <div class="aud-row"><label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Greffier</label><input id="ms-gref" type="text" placeholder="Ex : M. Y. LIQUET" style="width:100%;font-size:.82rem;background:var(--cream);border:1px solid var(--cream-dd);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy)" oninput="SIEGE.gref=this.value;autoSave()"></div>
     <div class="aud-foot"><button class="btn btn-navy" onclick="closeAudModal('modal-siege')">✓ Fermer</button></div>
+  </div>
+</div>
+
+<div class="hist-overlay" id="hist-overlay" onclick="if(event.target===this)closeHistModal()">
+  <div class="hist-modal">
+    <div class="hist-modal-hd">
+      <h3>🕐 Sessions sauvegardées</h3>
+      <button class="hist-modal-close" onclick="closeHistModal()">✕</button>
+    </div>
+    <div class="hist-modal-body" id="hist-modal-body">
+    </div>
   </div>
 </div>
 
