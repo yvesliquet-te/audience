@@ -399,6 +399,16 @@ body.on-setup{padding-left:0!important;padding-right:0!important;}
 .aud-2col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .aud-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--muted);}
 .aud-foot{display:flex;justify-content:flex-end;margin-top:16px;padding-top:12px;border-top:1px solid var(--cream-dd);}
+
+/* ── SECTION REORDER ── */
+.sec-reorder-list{display:flex;flex-direction:column;gap:6px;margin-top:8px;}
+.sec-reorder-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--cream);border:1.5px solid var(--cream-dd);border-radius:7px;cursor:grab;user-select:none;transition:box-shadow .15s,opacity .15s,background .15s;}
+.sec-reorder-item:active{cursor:grabbing;}
+.sec-reorder-item.drag-over{box-shadow:0 0 0 2px var(--navy);background:var(--cream-d);}
+.sec-reorder-item.dragging{opacity:.4;}
+.sec-drag-handle{color:var(--muted);font-size:1rem;flex-shrink:0;}
+.sec-reorder-name{flex:1;font-size:.82rem;font-weight:600;color:var(--navy);}
+.sec-reorder-count{font-size:.72rem;color:var(--muted);flex-shrink:0;}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 </head>
@@ -1288,7 +1298,7 @@ function buildEntete(avecRep){
   return '<table class="hd-table"><tr><td class="hd-logo">'+logoSVG(110)+'</td>'
     +'<td class="hd-right">'+rep+'<div class="hd-trib">TRIBUNAL DE L’ENTREPRISE DE LIÈGE</div><div class="hd-div">DIVISION '+DIVISION.toUpperCase()+'</div></td>'
     +'</tr></table>'
-    +'<div class="hd-line"></div><div class="hd-chambre">Feuille d’audience de la 1<sup>ère</sup> chambre – '+(META.date||'')+'</div>'
+    +'<div class="hd-line"></div><div class="hd-chambre">Feuille d’audience — '+(META.chambre||'1ère ch.')+' – '+(META.date||'')+'</div>'
     +'<div class="hd-line2"></div><div class="judges">'+siegeLines.map(l=>'<div>'+l+'</div>').join('')+'</div>'
     +'<div class="hd-spacer"></div>';}
 
@@ -1844,6 +1854,55 @@ function updateSidebarRight(){
 }
 
 var audCalY,audCalM,audDate=null,proCalY,proCalM;
+
+function buildSecReorder(){
+  var el=document.getElementById('sec-reorder-list');if(!el)return;
+  if(!DOSSIERS||!DOSSIERS.length){el.innerHTML='<p style="font-size:.75rem;color:var(--muted);font-style:italic">Aucune section (audience non chargée)</p>';return;}
+  var html='';
+  DOSSIERS.forEach(function(sec,i){
+    html+='<div class="sec-reorder-item" draggable="true" data-idx="'+i+'" '
+      +'ondragstart="secDragStart(event,'+i+')" '
+      +'ondragover="secDragOver(event)" '
+      +'ondrop="secDrop(event,'+i+')" '
+      +'ondragend="secDragEnd(event)">'
+      +'<span class="sec-drag-handle">⠿</span>'
+      +'<span class="sec-reorder-name">'+sec.section+'</span>'
+      +'<span class="sec-reorder-count">'+sec.items.length+' dossier'+(sec.items.length>1?'s':'')+'</span>'
+      +'</div>';
+  });
+  el.innerHTML=html;
+}
+var _secDragIdx=null;
+function secDragStart(e,idx){
+  _secDragIdx=idx;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed='move';
+  e.stopPropagation();
+}
+function secDragOver(e){
+  e.preventDefault();
+  e.stopPropagation();
+  e.dataTransfer.dropEffect='move';
+  document.querySelectorAll('.sec-reorder-item').forEach(function(el){el.classList.remove('drag-over');});
+  e.currentTarget.classList.add('drag-over');
+}
+function secDrop(e,targetIdx){
+  e.preventDefault();
+  e.stopPropagation();
+  if(_secDragIdx===null||_secDragIdx===targetIdx)return;
+  var moved=DOSSIERS.splice(_secDragIdx,1)[0];
+  DOSSIERS.splice(targetIdx,0,moved);
+  _secDragIdx=null;
+  buildSecReorder();
+  renderAll();
+  autoSave();
+}
+function secDragEnd(e){
+  _secDragIdx=null;
+  document.querySelectorAll('.sec-reorder-item').forEach(function(el){
+    el.classList.remove('dragging','drag-over');
+  });
+}
 function openAudModal(id){
   if(id==='modal-general'){
     var e=function(i){return document.getElementById(i);};
@@ -1865,6 +1924,7 @@ function openAudModal(id){
     if(e2('ms-cons2'))e2('ms-cons2').value=SIEGE.cons2||'';
     if(e2('ms-gref'))e2('ms-gref').value=SIEGE.gref||'';
   }
+  if(id==='modal-general')buildSecReorder();
   var el=document.getElementById(id);if(el)el.classList.add('open');
 }
 function closeAudModal(id){var el=document.getElementById(id);if(el)el.classList.remove('open');}
@@ -1936,6 +1996,55 @@ function buildRole(){
 }
 
 var audCalY,audCalM,audDate=null,proCalY,proCalM;
+
+function buildSecReorder(){
+  var el=document.getElementById('sec-reorder-list');if(!el)return;
+  if(!DOSSIERS||!DOSSIERS.length){el.innerHTML='<p style="font-size:.75rem;color:var(--muted);font-style:italic">Aucune section (audience non chargée)</p>';return;}
+  var html='';
+  DOSSIERS.forEach(function(sec,i){
+    html+='<div class="sec-reorder-item" draggable="true" data-idx="'+i+'" '
+      +'ondragstart="secDragStart(event,'+i+')" '
+      +'ondragover="secDragOver(event)" '
+      +'ondrop="secDrop(event,'+i+')" '
+      +'ondragend="secDragEnd(event)">'
+      +'<span class="sec-drag-handle">⠿</span>'
+      +'<span class="sec-reorder-name">'+sec.section+'</span>'
+      +'<span class="sec-reorder-count">'+sec.items.length+' dossier'+(sec.items.length>1?'s':'')+'</span>'
+      +'</div>';
+  });
+  el.innerHTML=html;
+}
+var _secDragIdx=null;
+function secDragStart(e,idx){
+  _secDragIdx=idx;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed='move';
+  e.stopPropagation();
+}
+function secDragOver(e){
+  e.preventDefault();
+  e.stopPropagation();
+  e.dataTransfer.dropEffect='move';
+  document.querySelectorAll('.sec-reorder-item').forEach(function(el){el.classList.remove('drag-over');});
+  e.currentTarget.classList.add('drag-over');
+}
+function secDrop(e,targetIdx){
+  e.preventDefault();
+  e.stopPropagation();
+  if(_secDragIdx===null||_secDragIdx===targetIdx)return;
+  var moved=DOSSIERS.splice(_secDragIdx,1)[0];
+  DOSSIERS.splice(targetIdx,0,moved);
+  _secDragIdx=null;
+  buildSecReorder();
+  renderAll();
+  autoSave();
+}
+function secDragEnd(e){
+  _secDragIdx=null;
+  document.querySelectorAll('.sec-reorder-item').forEach(function(el){
+    el.classList.remove('dragging','drag-over');
+  });
+}
 function openAudModal(id){
   if(id==='modal-general'){
     var e=function(i){return document.getElementById(i);};
@@ -2361,10 +2470,14 @@ function saveToHistory(){
     var hh=String(t.getHours()).padStart(2,'0'),mn=String(t.getMinutes()).padStart(2,'0');
     var audDate=(META.date||'').replace(/[\/\s]/g,'-');
     var name='FA_'+(audDate||'session')+'_'+dd+mm+yy+'_'+hh+mn;
-    var snap={name:name,ts:Date.now(),data:JSON.stringify(buildSnapshot())};
+    var snap={name:name,ts:Date.now(),
+      division:DIVISION||'',
+      audDate:META.date||'',
+      chambre:META.chambre||'',
+      data:JSON.stringify(buildSnapshot())};
     var existIdx=hist.findIndex(function(h){return audDate&&h.name.includes(audDate);});
     if(existIdx!==-1)hist[existIdx]=snap;else hist.unshift(snap);
-    if(hist.length>10)hist.length=10;
+    if(hist.length>20)hist.length=20;
     localStorage.setItem(HIST_KEY,JSON.stringify(hist));
   }catch(e){}
 }
@@ -2373,13 +2486,47 @@ function buildHistList(){
   try{
     var hist=JSON.parse(localStorage.getItem(HIST_KEY)||'[]');
     if(!hist.length){el.innerHTML='<p style="font-size:.78rem;color:var(--muted)">Aucune session.</p>';return;}
-    el.innerHTML=hist.map(function(h,i){
-      var d=new Date(h.ts);
-      var label=d.toLocaleDateString('fr-BE')+' '+d.toLocaleTimeString('fr-BE',{hour:'2-digit',minute:'2-digit'});
-      return '<div class="hist-item" onclick="loadHistItem('+i+')">'
-        +'<div style="flex:1;min-width:0"><div class="hi-name">'+h.name+'</div><div class="hi-date">'+label+'</div></div>'
-        +'<button class="hist-del" onclick="event.stopPropagation();delHistItem('+i+')">✕</button></div>';
-    }).join('');
+    // Trier par division puis par date d'audience (desc)
+    var sorted=hist.slice().sort(function(a,b){
+      var da=(a.division||'').toLowerCase(),db=(b.division||'').toLowerCase();
+      if(da<db)return -1;if(da>db)return 1;
+      // Même division: trier par date audience desc (JJ/MM/AAAA → AAAA-MM-JJ)
+      function parseAud(d){
+        if(!d)return 0;
+        var p=d.split('/');if(p.length===3)return new Date(p[2],p[1]-1,p[0]).getTime();
+        return 0;
+      }
+      var ta=parseAud(a.audDate),tb=parseAud(b.audDate);
+      return tb-ta;
+    });
+    // Grouper par division
+    var groups={};
+    sorted.forEach(function(h,i){
+      // Retrouver l'index original pour loadHistItem/delHistItem
+      var origIdx=hist.indexOf(h);
+      var div=h.division||'(sans division)';
+      if(!groups[div])groups[div]=[];
+      groups[div].push({h:h,i:origIdx});
+    });
+    var html='';
+    Object.keys(groups).sort().forEach(function(div){
+      html+='<div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);font-weight:700;padding:8px 6px 4px;margin-top:4px">'
+        +div+'</div>';
+      groups[div].forEach(function(entry){
+        var h=entry.h,i=entry.i;
+        var d=new Date(h.ts);
+        var saveLabel=d.toLocaleDateString('fr-BE')+' '+d.toLocaleTimeString('fr-BE',{hour:'2-digit',minute:'2-digit'});
+        var audLabel=h.audDate?(h.audDate+(h.chambre?' — '+h.chambre:'')):'session';
+        html+='<div class="hist-item" onclick="loadHistItem('+i+')">';
+        html+='<div style="flex:1;min-width:0">';
+        html+='<div class="hi-name">📅 '+audLabel+'</div>';
+        html+='<div class="hi-date">Sauvegardé le '+saveLabel+'</div>';
+        html+='</div>';
+        html+='<button class="hist-del" onclick="event.stopPropagation();delHistItem('+i+')">✕</button>';
+        html+='</div>';
+      });
+    });
+    el.innerHTML=html;
   }catch(e){el.innerHTML='<p style="color:#c0392b;font-size:.78rem">Erreur.</p>';}
 }
 function loadHistItem(i){
@@ -2519,7 +2666,7 @@ window.addEventListener('load',function(){
       
 
       <div class="stab-pane" id="stab-historique">
-        <p style="font-size:.75rem;color:var(--muted);margin-bottom:10px">10 dernières sessions (auto-sauvegardées).</p>
+        <p style="font-size:.75rem;color:var(--muted);margin-bottom:10px">20 dernières sessions, groupées par division et triées par date d'audience.</p>
         <div id="hist-list"></div>
       </div>
     </div>
@@ -2535,7 +2682,7 @@ window.addEventListener('load',function(){
 
 <!-- ══ MODALS AUDIENCE ══ -->
 <div class="aud-overlay" id="modal-general">
-  <div class="aud-modal">
+  <div class="aud-modal" ondragover="event.preventDefault()" ondrop="event.preventDefault()">
     <button class="aud-close" onclick="closeAudModal('modal-general')">✕</button>
     <h3>📅 Données générales</h3>
     <div class="aud-2col">
@@ -2553,6 +2700,10 @@ window.addEventListener('load',function(){
     <div class="aud-row"><label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Date de prononcé</label>
       <div class="mc-wrap" style="width:100%"><div class="date-btn" onclick="toggleProCal()" style="width:100%;box-sizing:border-box"><span id="pro-cal-lbl">jj/mm/aaaa</span> ▾</div>
       <div class="popover" id="pro-cal-pop"><div class="mini-cal" id="pro-cal-grid"></div></div></div>
+    </div>
+    <div class="aud-row" style="margin-top:14px">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Ordre des sections</label>
+      <div id="sec-reorder-list" class="sec-reorder-list"></div>
     </div>
     <div class="aud-foot"><button class="btn btn-navy" onclick="closeAudModal('modal-general')">✓ Fermer</button></div>
   </div>
@@ -2571,7 +2722,7 @@ window.addEventListener('load',function(){
 
 <!-- ══ MODALS AUDIENCE ══ -->
 <div class="aud-overlay" id="modal-general">
-  <div class="aud-modal">
+  <div class="aud-modal" ondragover="event.preventDefault()" ondrop="event.preventDefault()">
     <button class="aud-close" onclick="closeAudModal('modal-general')">✕</button>
     <h3>📅 Données générales</h3>
     <div class="aud-2col">
@@ -2589,6 +2740,10 @@ window.addEventListener('load',function(){
     <div class="aud-row"><label style="font-size:.72rem;font-weight:600;color:var(--muted);margin-bottom:3px;display:block">Date de prononcé</label>
       <div class="mc-wrap" style="width:100%"><div class="date-btn" onclick="toggleProCal()" style="width:100%;box-sizing:border-box"><span id="pro-cal-lbl">jj/mm/aaaa</span> ▾</div>
       <div class="popover" id="pro-cal-pop"><div class="mini-cal" id="pro-cal-grid"></div></div></div>
+    </div>
+    <div class="aud-row" style="margin-top:14px">
+      <label style="font-size:.72rem;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Ordre des sections</label>
+      <div id="sec-reorder-list" class="sec-reorder-list"></div>
     </div>
     <div class="aud-foot"><button class="btn btn-navy" onclick="closeAudModal('modal-general')">✓ Fermer</button></div>
   </div>
