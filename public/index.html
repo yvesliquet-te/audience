@@ -425,6 +425,19 @@ body.on-setup{padding-left:0!important;padding-right:0!important;}
 .hist-load:hover{background:var(--cream);color:var(--navy);}
 .hist-del-btn{flex-shrink:0;background:none;border:1px solid #ffcccc;color:#c0392b;border-radius:4px;cursor:pointer;padding:3px 7px;font-size:.72rem;}
 .hist-del-btn:hover{background:#fff0f0;}
+
+.sec-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:310;align-items:center;justify-content:center;}
+.sec-modal-overlay.open{display:flex;}
+.sec-modal{background:white;border-radius:12px;width:min(420px,94vw);box-shadow:0 8px 40px rgba(0,0,0,.25);overflow:hidden;}
+.sec-modal-hd{background:var(--navy);color:white;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;}
+.sec-modal-hd h3{margin:0;font-family:'Playfair Display',serif;font-size:.95rem;font-weight:700;}
+.sec-modal-body{padding:16px;}
+.sec-list-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--cream);border:1px solid var(--cream-dd);border-radius:7px;margin-bottom:6px;}
+.sec-list-name{flex:1;font-size:.82rem;font-weight:600;color:var(--navy);}
+.sec-list-count{font-size:.72rem;color:var(--muted);flex-shrink:0;}
+.sec-ud-btn{width:28px;height:28px;border:1px solid var(--cream-dd);background:white;border-radius:5px;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;color:var(--navy);flex-shrink:0;transition:background .15s;}
+.sec-ud-btn:hover:not(:disabled){background:var(--navy);color:white;}
+.sec-ud-btn:disabled{opacity:.25;cursor:default;}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 </head>
@@ -457,6 +470,9 @@ body.on-setup{padding-left:0!important;padding-right:0!important;}
     </button>
     <button class="sb-btn" onclick="openAudModal('modal-siege')">
       <span class="sb-icon">⚖️</span><span class="sb-label">Siège</span><span class="sb-tip">Composition du siège</span>
+    </button>
+    <button class="sb-btn" onclick="openSecModal()">
+      <span class="sb-icon">↕</span><span class="sb-label">Ordre des sections</span><span class="sb-tip">Réorganiser les sections</span>
     </button>
     <div class="sb-section">Dossiers</div>
     <button class="sb-btn" onclick="openAddModal()">
@@ -1395,6 +1411,16 @@ ${clotureLine}
   </div>
 </div>
 
+<div class="sec-modal-overlay" id="sec-modal-overlay" onclick="if(event.target===this)closeSecModal()">
+  <div class="sec-modal">
+    <div class="sec-modal-hd">
+      <h3>↕ Ordre des sections</h3>
+      <button onclick="closeSecModal()" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:1.1rem;cursor:pointer">✕</button>
+    </div>
+    <div class="sec-modal-body" id="sec-modal-body"></div>
+  </div>
+</div>
+
 </body></html>`;
 }
 
@@ -1489,6 +1515,16 @@ ${avSection}
   </div>
 </div>
 
+<div class="sec-modal-overlay" id="sec-modal-overlay" onclick="if(event.target===this)closeSecModal()">
+  <div class="sec-modal">
+    <div class="sec-modal-hd">
+      <h3>↕ Ordre des sections</h3>
+      <button onclick="closeSecModal()" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:1.1rem;cursor:pointer">✕</button>
+    </div>
+    <div class="sec-modal-body" id="sec-modal-body"></div>
+  </div>
+</div>
+
 </body></html>`;
   const w=window.open('','_blank');w.document.write(html);w.document.close();
 }
@@ -1522,6 +1558,16 @@ ${pages}
     </div>
     <div class="hist-modal-body" id="hist-modal-body">
     </div>
+  </div>
+</div>
+
+<div class="sec-modal-overlay" id="sec-modal-overlay" onclick="if(event.target===this)closeSecModal()">
+  <div class="sec-modal">
+    <div class="sec-modal-hd">
+      <h3>↕ Ordre des sections</h3>
+      <button onclick="closeSecModal()" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:1.1rem;cursor:pointer">✕</button>
+    </div>
+    <div class="sec-modal-body" id="sec-modal-body"></div>
   </div>
 </div>
 
@@ -1949,8 +1995,10 @@ function secDrop(e,targetIdx){
   var moved=DOSSIERS.splice(_secDragIdx,1)[0];
   DOSSIERS.splice(targetIdx,0,moved);
   _secDragIdx=null;
+  renum();
   buildSecReorder();
   renderAll();
+  updateSidebarRight();
   autoSave();
 }
 function secDragEnd(e){
@@ -1958,6 +2006,41 @@ function secDragEnd(e){
   document.querySelectorAll('.sec-reorder-item').forEach(function(el){
     el.classList.remove('dragging','drag-over');
   });
+}
+
+function openSecModal(){
+  buildSecList();
+  document.getElementById('sec-modal-overlay').classList.add('open');
+}
+function closeSecModal(){
+  document.getElementById('sec-modal-overlay').classList.remove('open');
+}
+function buildSecList(){
+  var body=document.getElementById('sec-modal-body');if(!body)return;
+  if(!DOSSIERS||!DOSSIERS.length){
+    body.innerHTML='<p style="font-size:.82rem;color:var(--muted)">Aucune section chargée.</p>';return;
+  }
+  var n=DOSSIERS.length;
+  var html='';
+  DOSSIERS.forEach(function(sec,i){
+    html+='<div class="sec-list-item">'
+      +'<span class="sec-list-name">'+sec.section+'</span>'
+      +'<span class="sec-list-count">'+sec.items.length+' dossier'+(sec.items.length>1?'s':'')+'</span>'
+      +'<button class="sec-ud-btn" onclick="secMoveUpDown('+i+',-1)" '+(i===0?'disabled':'')+'title="Monter">↑</button>'
+      +'<button class="sec-ud-btn" onclick="secMoveUpDown('+i+',1)" '+(i===n-1?'disabled':'')+'title="Descendre">↓</button>'
+      +'</div>';
+  });
+  body.innerHTML=html;
+}
+function secMoveUpDown(idx,dir){
+  var newIdx=idx+dir;
+  if(newIdx<0||newIdx>=DOSSIERS.length)return;
+  var tmp=DOSSIERS[idx];DOSSIERS[idx]=DOSSIERS[newIdx];DOSSIERS[newIdx]=tmp;
+  renum();
+  buildSecList();
+  renderAll();
+  updateSidebarRight();
+  autoSave();
 }
 function openAudModal(id){
   if(id==='modal-general'){
@@ -2091,8 +2174,10 @@ function secDrop(e,targetIdx){
   var moved=DOSSIERS.splice(_secDragIdx,1)[0];
   DOSSIERS.splice(targetIdx,0,moved);
   _secDragIdx=null;
+  renum();
   buildSecReorder();
   renderAll();
+  updateSidebarRight();
   autoSave();
 }
 function secDragEnd(e){
@@ -2100,6 +2185,41 @@ function secDragEnd(e){
   document.querySelectorAll('.sec-reorder-item').forEach(function(el){
     el.classList.remove('dragging','drag-over');
   });
+}
+
+function openSecModal(){
+  buildSecList();
+  document.getElementById('sec-modal-overlay').classList.add('open');
+}
+function closeSecModal(){
+  document.getElementById('sec-modal-overlay').classList.remove('open');
+}
+function buildSecList(){
+  var body=document.getElementById('sec-modal-body');if(!body)return;
+  if(!DOSSIERS||!DOSSIERS.length){
+    body.innerHTML='<p style="font-size:.82rem;color:var(--muted)">Aucune section chargée.</p>';return;
+  }
+  var n=DOSSIERS.length;
+  var html='';
+  DOSSIERS.forEach(function(sec,i){
+    html+='<div class="sec-list-item">'
+      +'<span class="sec-list-name">'+sec.section+'</span>'
+      +'<span class="sec-list-count">'+sec.items.length+' dossier'+(sec.items.length>1?'s':'')+'</span>'
+      +'<button class="sec-ud-btn" onclick="secMoveUpDown('+i+',-1)" '+(i===0?'disabled':'')+'title="Monter">↑</button>'
+      +'<button class="sec-ud-btn" onclick="secMoveUpDown('+i+',1)" '+(i===n-1?'disabled':'')+'title="Descendre">↓</button>'
+      +'</div>';
+  });
+  body.innerHTML=html;
+}
+function secMoveUpDown(idx,dir){
+  var newIdx=idx+dir;
+  if(newIdx<0||newIdx>=DOSSIERS.length)return;
+  var tmp=DOSSIERS[idx];DOSSIERS[idx]=DOSSIERS[newIdx];DOSSIERS[newIdx]=tmp;
+  renum();
+  buildSecList();
+  renderAll();
+  updateSidebarRight();
+  autoSave();
 }
 function openAudModal(id){
   if(id==='modal-general'){
@@ -2798,10 +2918,6 @@ window.addEventListener('load',function(){
       <div class="mc-wrap" style="width:100%"><div class="date-btn" onclick="toggleProCal()" style="width:100%;box-sizing:border-box"><span id="pro-cal-lbl">jj/mm/aaaa</span> ▾</div>
       <div class="popover" id="pro-cal-pop"><div class="mini-cal" id="pro-cal-grid"></div></div></div>
     </div>
-    <div class="aud-row" style="margin-top:14px">
-      <label style="font-size:.72rem;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Ordre des sections</label>
-      <div id="sec-reorder-list" class="sec-reorder-list"></div>
-    </div>
     <div class="aud-foot"><button class="btn btn-navy" onclick="closeAudModal('modal-general')">✓ Fermer</button></div>
   </div>
 </div>
@@ -2838,10 +2954,6 @@ window.addEventListener('load',function(){
       <div class="mc-wrap" style="width:100%"><div class="date-btn" onclick="toggleProCal()" style="width:100%;box-sizing:border-box"><span id="pro-cal-lbl">jj/mm/aaaa</span> ▾</div>
       <div class="popover" id="pro-cal-pop"><div class="mini-cal" id="pro-cal-grid"></div></div></div>
     </div>
-    <div class="aud-row" style="margin-top:14px">
-      <label style="font-size:.72rem;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Ordre des sections</label>
-      <div id="sec-reorder-list" class="sec-reorder-list"></div>
-    </div>
     <div class="aud-foot"><button class="btn btn-navy" onclick="closeAudModal('modal-general')">✓ Fermer</button></div>
   </div>
 </div>
@@ -2865,6 +2977,16 @@ window.addEventListener('load',function(){
     </div>
     <div class="hist-modal-body" id="hist-modal-body">
     </div>
+  </div>
+</div>
+
+<div class="sec-modal-overlay" id="sec-modal-overlay" onclick="if(event.target===this)closeSecModal()">
+  <div class="sec-modal">
+    <div class="sec-modal-hd">
+      <h3>↕ Ordre des sections</h3>
+      <button onclick="closeSecModal()" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:1.1rem;cursor:pointer">✕</button>
+    </div>
+    <div class="sec-modal-body" id="sec-modal-body"></div>
   </div>
 </div>
 
