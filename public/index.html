@@ -865,10 +865,12 @@ function nid(n){return n.replace('.','_');}
 
 function stripMe(s){return (s||'').replace(/^(Maître|Me\.?|M\.)\s*/i,'').trim();}
 function personPhrase(comp,party){
+  if(!party||!party.trim()||party==='?')return '';
   if(comp.type==='absent')return`Personne ne comparaît pour ${party}.`;
   if(comp.type==='personne')return`${comp.name||party} comparaît en personne.`;
   if(comp.loco&&comp.loco.trim())return`Maître ${stripMe(comp.loco)} loco Maître ${stripMe(comp.name)||'…'} comparaît pour ${party}.`;
-  return`Maître ${stripMe(comp.name)||'…'} comparaît pour ${party}.`;
+  if(!comp.name||!comp.name.trim())return'';
+  return`Maître ${stripMe(comp.name)} comparaît pour ${party}.`;
 }
 
 function genText(num){
@@ -882,8 +884,8 @@ function genText(num){
     return `${dems} / ${defs}\n${prTxt}`;
   }
   const dems=d.dems||[d.dem||''],defs=d.defs||[d.def||''];
-  dems.forEach((nm,i)=>{const cp=s.dem[i]||{type:'absent',name:'',loco:''};lines.push(personPhrase(cp,nm));});
-  defs.forEach((nm,i)=>{const cp=s.def[i]||{type:'absent',name:'',loco:''};lines.push(personPhrase(cp,nm));});
+  dems.forEach((nm,i)=>{if(!nm||!nm.trim()||nm==='?')return;const cp=s.dem[i]||{type:'absent',name:'',loco:''};const ph=personPhrase(cp,nm);if(ph)lines.push(ph);});
+  defs.forEach((nm,i)=>{if(!nm||!nm.trim()||nm==='?')return;const cp=s.def[i]||{type:'absent',name:'',loco:''};const ph=personPhrase(cp,nm);if(ph)lines.push(ph);});
   const demStr=dems.join(' et '),defStr=defs.join(' et ');
   const demAbsent=s.dem.every(cp=>cp.type==='absent');
   const demComp=s.dem.find(cp=>cp.type!=='absent'),defComp=s.def.find(cp=>cp.type!=='absent');
@@ -2225,8 +2227,9 @@ function autoSave(){
 }
 
 var _MOIS=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
-function fmtAudName(division,audDate,saveDate){
+function fmtAudName(division,chambre,audDate,saveDate){
   var lieu=(division||'Session').replace(/[/\\:*?"<>|]/g,'');
+  var ch=(chambre||'').replace(/[/\\:*?"<>|]/g,'').trim();
   var datePart='';
   if(audDate&&audDate.match(/\d{2}\/\d{2}\/\d{4}/)){
     var p=audDate.split('/');
@@ -2237,12 +2240,12 @@ function fmtAudName(division,audDate,saveDate){
   var hh=String(saveDate.getHours()).padStart(2,'0');
   var mn=String(saveDate.getMinutes()).padStart(2,'0');
   var timePart=hh+mn;
-  return (lieu+(datePart?' - '+datePart:'')+(timePart?' - '+timePart:'')).trim();
+  return (lieu+(ch?' - '+ch:'')+(datePart?' - '+datePart:'')+(timePart?' - '+timePart:'')).trim();
 }
 function saveJSON(){
   var blob=new Blob([JSON.stringify(buildSnapshot(),null,2)],{type:'application/json'});
   var url=URL.createObjectURL(blob),a=document.createElement('a');
-  var name=fmtAudName(DIVISION,META.date,new Date());
+  var name=fmtAudName(DIVISION,META.chambre,META.date,new Date());
   a.href=url;a.download=name+'.json';a.click();URL.revokeObjectURL(url);
   saveToHistory();
   buildHistSidebar();
@@ -2531,15 +2534,15 @@ function saveToHistory(){
   try{
     var hist=JSON.parse(localStorage.getItem(HIST_KEY)||'[]');
     var t=new Date();
-    var name=fmtAudName(DIVISION,META.date,t);
+    var name=fmtAudName(DIVISION,META.chambre,META.date,t);
     var snap={name:name,ts:Date.now(),
       division:DIVISION||'',
       audDate:META.date||'',
       chambre:META.chambre||'',
       data:JSON.stringify(buildSnapshot())};
     // Remplacer si même division+date, sinon ajouter
-    var key=(DIVISION||'')+'|'+(META.date||'');
-    var existIdx=hist.findIndex(function(h){return ((h.division||'')+'|'+(h.audDate||''))===key;});
+    var key=(DIVISION||'')+'|'+(META.chambre||'')+'|'+(META.date||'');
+    var existIdx=hist.findIndex(function(h){return ((h.division||'')+'|'+(h.chambre||'')+'|'+(h.audDate||''))===key;});
     if(existIdx!==-1)hist[existIdx]=snap;else hist.unshift(snap);
     if(hist.length>15)hist.length=15;
     localStorage.setItem(HIST_KEY,JSON.stringify(hist));
