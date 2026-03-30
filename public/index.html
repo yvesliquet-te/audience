@@ -2169,18 +2169,27 @@ function autoSave(){
     if(lbl2){var t2=new Date();lbl2.textContent='● '+String(t2.getHours()).padStart(2,'0')+':'+String(t2.getMinutes()).padStart(2,'0');}
   }catch(e){}
 }
+
+var _MOIS=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+function fmtAudName(division,audDate,saveDate){
+  var lieu=(division||'Session').replace(/[/\\:*?"<>|]/g,'');
+  var datePart='';
+  if(audDate&&audDate.match(/\d{2}\/\d{2}\/\d{4}/)){
+    var p=audDate.split('/');
+    datePart=parseInt(p[0],10)+' '+_MOIS[parseInt(p[1],10)-1]+' '+p[2];
+  } else if(audDate){
+    datePart=audDate.replace(/[/\\:*?"<>|]/g,'-');
+  }
+  var hh=String(saveDate.getHours()).padStart(2,'0');
+  var mn=String(saveDate.getMinutes()).padStart(2,'0');
+  var timePart=hh+mn;
+  return (lieu+(datePart?' - '+datePart:'')+(timePart?' - '+timePart:'')).trim();
+}
 function saveJSON(){
   var blob=new Blob([JSON.stringify(buildSnapshot(),null,2)],{type:'application/json'});
   var url=URL.createObjectURL(blob),a=document.createElement('a');
-  var now=new Date();
-  var dd=String(now.getDate()).padStart(2,'0');
-  var mm=String(now.getMonth()+1).padStart(2,'0');
-  var yy=String(now.getFullYear()).slice(-2);
-  var hh=String(now.getHours()).padStart(2,'0');
-  var mn=String(now.getMinutes()).padStart(2,'0');
-  var stamp=dd+mm+yy+'_'+hh+mn;
-  var audDate=(META.date||'').replace(/\s+/g,'-').replace(/\//g,'-');
-  a.href=url;a.download='FA_'+(audDate||'session')+'_'+stamp+'.json';a.click();URL.revokeObjectURL(url);
+  var name=fmtAudName(DIVISION,META.date,new Date());
+  a.href=url;a.download=name+'.json';a.click();URL.revokeObjectURL(url);
 }
 function loadJSON(event){
   var file=event.target.files[0];if(!file)return;
@@ -2466,18 +2475,17 @@ function saveToHistory(){
   try{
     var hist=JSON.parse(localStorage.getItem(HIST_KEY)||'[]');
     var t=new Date();
-    var dd=String(t.getDate()).padStart(2,'0'),mm=String(t.getMonth()+1).padStart(2,'0'),yy=String(t.getFullYear()).slice(-2);
-    var hh=String(t.getHours()).padStart(2,'0'),mn=String(t.getMinutes()).padStart(2,'0');
-    var audDate=(META.date||'').replace(/[\/\s]/g,'-');
-    var name='FA_'+(audDate||'session')+'_'+dd+mm+yy+'_'+hh+mn;
+    var name=fmtAudName(DIVISION,META.date,t);
     var snap={name:name,ts:Date.now(),
       division:DIVISION||'',
       audDate:META.date||'',
       chambre:META.chambre||'',
       data:JSON.stringify(buildSnapshot())};
-    var existIdx=hist.findIndex(function(h){return audDate&&h.name.includes(audDate);});
+    // Remplacer si même division+date, sinon ajouter
+    var key=(DIVISION||'')+'|'+(META.date||'');
+    var existIdx=hist.findIndex(function(h){return ((h.division||'')+'|'+(h.audDate||''))===key;});
     if(existIdx!==-1)hist[existIdx]=snap;else hist.unshift(snap);
-    if(hist.length>20)hist.length=20;
+    if(hist.length>15)hist.length=15;
     localStorage.setItem(HIST_KEY,JSON.stringify(hist));
   }catch(e){}
 }
@@ -2486,42 +2494,34 @@ function buildHistList(){
   try{
     var hist=JSON.parse(localStorage.getItem(HIST_KEY)||'[]');
     if(!hist.length){el.innerHTML='<p style="font-size:.78rem;color:var(--muted)">Aucune session.</p>';return;}
-    // Trier par division puis par date d'audience (desc)
+    // Trier: lieu (alpha) puis date audience (desc) puis heure save (desc)
     var sorted=hist.slice().sort(function(a,b){
       var da=(a.division||'').toLowerCase(),db=(b.division||'').toLowerCase();
       if(da<db)return -1;if(da>db)return 1;
-      // Même division: trier par date audience desc (JJ/MM/AAAA → AAAA-MM-JJ)
       function parseAud(d){
         if(!d)return 0;
-        var p=d.split('/');if(p.length===3)return new Date(p[2],p[1]-1,p[0]).getTime();
+        var p=d.split('/');if(p.length===3)return new Date(+p[2],+p[1]-1,+p[0]).getTime();
         return 0;
       }
-      var ta=parseAud(a.audDate),tb=parseAud(b.audDate);
-      return tb-ta;
+      var diff=parseAud(b.audDate)-parseAud(a.audDate);
+      return diff!==0?diff:(b.ts||0)-(a.ts||0);
     });
-    // Grouper par division
+    // Grouper par lieu
     var groups={};
-    sorted.forEach(function(h,i){
-      // Retrouver l'index original pour loadHistItem/delHistItem
+    sorted.forEach(function(h){
       var origIdx=hist.indexOf(h);
-      var div=h.division||'(sans division)';
-      if(!groups[div])groups[div]=[];
-      groups[div].push({h:h,i:origIdx});
+      var lieu=h.division||'(sans lieu)';
+      if(!groups[lieu])groups[lieu]=[];
+      groups[lieu].push({h:h,i:origIdx});
     });
     var html='';
-    Object.keys(groups).sort().forEach(function(div){
+    Object.keys(groups).sort().forEach(function(lieu){
       html+='<div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);font-weight:700;padding:8px 6px 4px;margin-top:4px">'
-        +div+'</div>';
-      groups[div].forEach(function(entry){
+        +lieu+'</div>';
+      groups[lieu].forEach(function(entry){
         var h=entry.h,i=entry.i;
-        var d=new Date(h.ts);
-        var saveLabel=d.toLocaleDateString('fr-BE')+' '+d.toLocaleTimeString('fr-BE',{hour:'2-digit',minute:'2-digit'});
-        var audLabel=h.audDate?(h.audDate+(h.chambre?' — '+h.chambre:'')):'session';
-        html+='<div class="hist-item" onclick="loadHistItem('+i+')">';
-        html+='<div style="flex:1;min-width:0">';
-        html+='<div class="hi-name">📅 '+audLabel+'</div>';
-        html+='<div class="hi-date">Sauvegardé le '+saveLabel+'</div>';
-        html+='</div>';
+        html+='<div class="hist-item" onclick="loadHistItem('+i+')" style="justify-content:space-between">';
+        html+='<span class="hi-name" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+h.name+'</span>';
         html+='<button class="hist-del" onclick="event.stopPropagation();delHistItem('+i+')">✕</button>';
         html+='</div>';
       });
@@ -2666,7 +2666,7 @@ window.addEventListener('load',function(){
       
 
       <div class="stab-pane" id="stab-historique">
-        <p style="font-size:.75rem;color:var(--muted);margin-bottom:10px">20 dernières sessions, groupées par division et triées par date d'audience.</p>
+        <p style="font-size:.75rem;color:var(--muted);margin-bottom:10px">15 dernières sessions, groupées par lieu et triées par date. Cliquez ✕ pour supprimer.</p>
         <div id="hist-list"></div>
       </div>
     </div>
