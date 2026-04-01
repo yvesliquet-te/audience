@@ -1400,27 +1400,6 @@ ${debutLine}
 ${body}
 ${clotureLine}
 <button class="print-btn no-print" onclick="window.print()">🖨 Imprimer</button>
-<div class="hist-overlay" id="hist-overlay" onclick="if(event.target===this)closeHistModal()">
-  <div class="hist-modal">
-    <div class="hist-modal-hd">
-      <h3>🕐 Sessions sauvegardées</h3>
-      <button class="hist-modal-close" onclick="closeHistModal()">✕</button>
-    </div>
-    <div class="hist-modal-body" id="hist-modal-body">
-    </div>
-  </div>
-</div>
-
-<div class="sec-modal-overlay" id="sec-modal-overlay" onclick="if(event.target===this)closeSecModal()">
-  <div class="sec-modal">
-    <div class="sec-modal-hd">
-      <h3>↕ Ordre des sections</h3>
-      <button onclick="closeSecModal()" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:1.1rem;cursor:pointer">✕</button>
-    </div>
-    <div class="sec-modal-body" id="sec-modal-body"></div>
-  </div>
-</div>
-
 </body></html>`;
 }
 
@@ -1504,27 +1483,6 @@ td,th{border-bottom:1px solid #eee;vertical-align:top}
 <table>${body}</table>
 ${avSection}
 <button class="no-print" onclick="window.print()" style="margin-top:16px;padding:8px 20px;background:#1a2744;color:white;border:none;border-radius:6px;cursor:pointer">🖨 Imprimer</button>
-<div class="hist-overlay" id="hist-overlay" onclick="if(event.target===this)closeHistModal()">
-  <div class="hist-modal">
-    <div class="hist-modal-hd">
-      <h3>🕐 Sessions sauvegardées</h3>
-      <button class="hist-modal-close" onclick="closeHistModal()">✕</button>
-    </div>
-    <div class="hist-modal-body" id="hist-modal-body">
-    </div>
-  </div>
-</div>
-
-<div class="sec-modal-overlay" id="sec-modal-overlay" onclick="if(event.target===this)closeSecModal()">
-  <div class="sec-modal">
-    <div class="sec-modal-hd">
-      <h3>↕ Ordre des sections</h3>
-      <button onclick="closeSecModal()" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:1.1rem;cursor:pointer">✕</button>
-    </div>
-    <div class="sec-modal-body" id="sec-modal-body"></div>
-  </div>
-</div>
-
 </body></html>`;
   const w=window.open('','_blank');w.document.write(html);w.document.close();
 }
@@ -1550,27 +1508,6 @@ function buildPV(){
 <style>${printCSS()}</style></head><body class="on-setup">
 ${pages}
 <button class="print-btn no-print" onclick="window.print()">🖨 Imprimer</button>
-<div class="hist-overlay" id="hist-overlay" onclick="if(event.target===this)closeHistModal()">
-  <div class="hist-modal">
-    <div class="hist-modal-hd">
-      <h3>🕐 Sessions sauvegardées</h3>
-      <button class="hist-modal-close" onclick="closeHistModal()">✕</button>
-    </div>
-    <div class="hist-modal-body" id="hist-modal-body">
-    </div>
-  </div>
-</div>
-
-<div class="sec-modal-overlay" id="sec-modal-overlay" onclick="if(event.target===this)closeSecModal()">
-  <div class="sec-modal">
-    <div class="sec-modal-hd">
-      <h3>↕ Ordre des sections</h3>
-      <button onclick="closeSecModal()" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:1.1rem;cursor:pointer">✕</button>
-    </div>
-    <div class="sec-modal-body" id="sec-modal-body"></div>
-  </div>
-</div>
-
 </body></html>`;
 }
 
@@ -2008,40 +1945,10 @@ function secDragEnd(e){
   });
 }
 
-function openSecModal(){
-  buildSecList();
-  document.getElementById('sec-modal-overlay').classList.add('open');
-}
-function closeSecModal(){
-  document.getElementById('sec-modal-overlay').classList.remove('open');
-}
-function buildSecList(){
-  var body=document.getElementById('sec-modal-body');if(!body)return;
-  if(!DOSSIERS||!DOSSIERS.length){
-    body.innerHTML='<p style="font-size:.82rem;color:var(--muted)">Aucune section chargée.</p>';return;
-  }
-  var n=DOSSIERS.length;
-  var html='';
-  DOSSIERS.forEach(function(sec,i){
-    html+='<div class="sec-list-item">'
-      +'<span class="sec-list-name">'+sec.section+'</span>'
-      +'<span class="sec-list-count">'+sec.items.length+' dossier'+(sec.items.length>1?'s':'')+'</span>'
-      +'<button class="sec-ud-btn" onclick="secMoveUpDown('+i+',-1)" '+(i===0?'disabled':'')+'title="Monter">↑</button>'
-      +'<button class="sec-ud-btn" onclick="secMoveUpDown('+i+',1)" '+(i===n-1?'disabled':'')+'title="Descendre">↓</button>'
-      +'</div>';
-  });
-  body.innerHTML=html;
-}
-function secMoveUpDown(idx,dir){
-  var newIdx=idx+dir;
-  if(newIdx<0||newIdx>=DOSSIERS.length)return;
-  var tmp=DOSSIERS[idx];DOSSIERS[idx]=DOSSIERS[newIdx];DOSSIERS[newIdx]=tmp;
-  renum();
-  buildSecList();
-  renderAll();
-  updateSidebarRight();
-  autoSave();
-}
+
+
+
+
 function openAudModal(id){
   if(id==='modal-general'){
     var e=function(i){return document.getElementById(i);};
