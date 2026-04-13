@@ -782,7 +782,7 @@ body.on-setup{padding-left:0!important;padding-right:0!important;}
       </div>
       <div style="margin-top:16px;display:flex;justify-content:flex-end;gap:8px">
         <button class="btn btn-ghost" onclick="closeAddModal()">Annuler</button>
-        <button class="btn btn-gold" onclick="addManual()">Ajouter le dossier</button>
+        <button class="btn-primary" onclick="addManual()">Ajouter le dossier</button>
       </div>
     </div>
 
@@ -1253,6 +1253,39 @@ function buildSermentCard(d, s, id){
     +'<div class="preview" id="pv-'+id+'">(aucune saisie)</div>'
     +'</div>';
 }
+
+function buildCompRows(d,s,cRow){
+  // Ordre: dem, def, interv, autre
+  var rows='';
+  var dems=d.dems||[d.dem||''];
+  var defs=d.defs||[d.def||''];
+  // 1. Demandeurs (rôle dem)
+  dems.forEach(function(_,i){
+    var r=(s.dem&&s.dem[i]?s.dem[i].role:null)||'dem';
+    if(r==='dem')rows+=cRow('dem',i);
+  });
+  // 2. Défendeurs (rôle def)
+  defs.forEach(function(_,i){
+    var r=(s.def&&s.def[i]?s.def[i].role:null)||'def';
+    if(r==='def')rows+=cRow('def',i);
+  });
+  // 3. Intervenants
+  defs.forEach(function(_,i){
+    var r=(s.def&&s.def[i]?s.def[i].role:null)||'def';
+    if(r==='interv')rows+=cRow('def',i);
+  });
+  // 4. Autres (dem avec rôle non-dem)
+  dems.forEach(function(_,i){
+    var r=(s.dem&&s.dem[i]?s.dem[i].role:null)||'dem';
+    if(r!=='dem')rows+=cRow('dem',i);
+  });
+  // 5. Autres (def avec rôle non-def/non-interv)
+  defs.forEach(function(_,i){
+    var r=(s.def&&s.def[i]?s.def[i].role:null)||'def';
+    if(r!=='def'&&r!=='interv')rows+=cRow('def',i);
+  });
+  return rows;
+}
 function renderCard(d){
   const s=ST[d.num],id=nid(d.num),dec=s.dec;
   const _isPrononcer=isPrononcer(d.num);
@@ -1265,6 +1298,7 @@ function renderCard(d){
     const comp=s[side][i]||{type:'absent',name:'',loco:''};
     const curRole=comp.role||side;
     const isAbs=comp.type==='absent',isPers=comp.type==='personne';
+    var canRemove=(side==='dem'?_dems:_defs).length>1;
     return`<div style="background:var(--cream);border:1px solid var(--cream-d);border-radius:6px;padding:8px 10px;margin-bottom:6px">
       <div data-name-wrap style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap">
         <select style="font-size:.7rem;font-weight:700;color:var(--navy);border:1px solid var(--cream-dd);border-radius:4px;padding:2px 5px;background:white;cursor:pointer" onchange="updPartieRole('${d.num}','${side}',${i},this.value)">
@@ -1273,8 +1307,9 @@ function renderCard(d){
           <option value="interv" ${curRole==='interv'?'selected':''}>⬡ Interv.</option>
           <option value="autre" ${curRole==='autre'?'selected':''}>◆ Autre</option>
         </select>
+        ${canRemove?`<button onclick="removePartie('${d.num}','${side}',${i})" title="Retirer cette partie" style="background:none;border:1px solid #ffcdd2;border-radius:4px;padding:1px 5px;font-size:11px;color:var(--red);cursor:pointer">✕</button>`:''}
+        <button title="Modifier le nom" onclick="(function(btn){var wrap=btn.closest('div[data-name-wrap]');wrap.querySelector('.partie-nm-lbl').style.display='none';var inp=wrap.querySelector('.partie-nm-inp');inp.style.display='';inp.focus();inp.select();btn.style.display='none';})(this)" style="background:none;border:1px solid #a5d6a7;border-radius:4px;padding:1px 5px;font-size:11px;color:#2e7d32;cursor:pointer;flex-shrink:0">✏</button>
         <span class="partie-nm-lbl" style="flex:1;font-size:.8rem;font-weight:600;color:var(--blue);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:default" title="${nm}">${nm}</span>
-        <button title="Modifier le nom" onclick="(function(btn){var wrap=btn.closest('div[data-name-wrap]');wrap.querySelector('.partie-nm-lbl').style.display='none';var inp=wrap.querySelector('.partie-nm-inp');inp.style.display='';inp.focus();inp.select();btn.style.display='none';})(this)" style="background:none;border:none;cursor:pointer;padding:2px 4px;color:var(--text-s);font-size:12px;flex-shrink:0;border-radius:4px;transition:color .1s" onmouseenter="this.style.color='var(--blue)'" onmouseleave="this.style.color='var(--text-s)'">✏</button>
         <input type="text" class="partie-nm-inp" value="${nm}" placeholder="Nom de la partie…" style="display:none;flex:1;min-width:100px;font-size:.8rem;font-weight:600;color:var(--blue);border:1px solid var(--border);border-radius:5px;padding:3px 8px;background:white" oninput="updPartieName('${d.num}','${side}',${i},this.value)" onblur="(function(inp){var wrap=inp.closest('div[data-name-wrap]');wrap.querySelector('.partie-nm-lbl').textContent=inp.value||'?';wrap.querySelector('.partie-nm-lbl').title=inp.value||'?';wrap.querySelector('.partie-nm-lbl').style.display='';inp.style.display='none';wrap.querySelector('button[title=\"Modifier le nom\"]').style.display='';})(this)">
       </div>
       <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center">
@@ -1324,13 +1359,13 @@ function renderCard(d){
     <div class="c-head" onclick="toggleCard('${d.num}')">
       <span class="d-num">${d.num}</span><span class="d-ref">${d.ref}</span>
       <div class="d-parties"><div class="d-dem">▲ ${(d.dems||[d.dem||'']).map((nm,i)=>{const av=(s.dem[i]||{}).name;const loco=(s.dem[i]||{}).loco;const avNm=loco&&loco.trim()?loco:av;return '<strong>'+nm+'</strong>'+(avNm&&avNm.trim()&&(s.dem[i]||{}).type!=='absent'?' <span style="font-weight:400">(Me '+stripMe(avNm)+')</span>':'');}).join(' / ')}</div><div class="d-def">▼ ${(d.defs||[d.def||'']).filter(nm=>nm&&nm.trim()&&nm!=='?').map((nm,i)=>{const av=(s.def[i]||{}).name;const loco=(s.def[i]||{}).loco;const avNm=loco&&loco.trim()?loco:av;return '<strong>'+nm+'</strong>'+(avNm&&avNm.trim()&&(s.def[i]||{}).type!=='absent'?' <span style="font-weight:400">(Me '+stripMe(avNm)+')</span>':'');}).join(' / ')}</div></div>
-      ${moveBtn}${badge}<span class="chev">▾</span>
+      ${moveBtn}${!s.done?'<span onclick="event.stopPropagation();openCardAndEditName(\''+d.num+'\')" title="Modifier le nom de la première partie" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;border:1px solid #a5d6a7;background:#e8f5e9;color:#2e7d32;font-size:.7rem;cursor:pointer;user-select:none;margin-right:2px">✏</span>':''}${badge}<span class="chev">▾</span>
     </div>
     <div class="c-body"${s.done?' style="pointer-events:none;opacity:.65;user-select:none"':''}>
       ${isSerment(d.num)?buildSermentCard(d,s,id):(_isPrononcer?'':`
       <div class="c-section c-section-comp">
         <div class="c-section-ttl">👥 Comparutions</div>
-        <div class="comp-section">${_dems.map((_,i)=>cRow('dem',i)).join('')}${_defs.map((_,i)=>cRow('def',i)).join('')}</div>
+        <div class="comp-section">${buildCompRows(d,s,cRow)}<div style="margin-top:6px;display:flex;align-items:center;gap:6px"><button onclick="addPartie('${d.num}','dem')" style="font-size:11px;padding:3px 10px;border:1px dashed var(--border-h);border-radius:5px;background:none;color:var(--blue);cursor:pointer">＋ Ajouter une partie</button></div></div>
       </div>
       <div class="c-section c-section-dec">
         <div class="c-section-ttl">⚖ Décision</div>
@@ -1343,12 +1378,12 @@ function renderCard(d){
         <div class="note-area" style="margin-top:8px"><label style="font-size:.72rem;font-weight:600;color:#2a6e47;display:block;margin-bottom:4px">📝 Note libre</label><textarea oninput="upd('${d.num}','note',this.value)">${s.note}</textarea></div>
       </div>
     </div>
-    <div class="c-foot">
-      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+    <div class="c-foot" style="display:flex;justify-content:space-between;align-items:center">
+      <div style="display:flex;gap:6px;align-items:center">
         <button class="btn-val" onclick="valider('${d.num}')">${s.done?'✓ Validé':'✓ Valider'}</button>
         ${s.done?`<button class="btn-rst" onclick="modCard('${d.num}')">✏ Modifier</button>`:''}
-        ${DOSSIERS.length>1?`<select onchange="moveDossToSec('${d.num}',parseInt(this.value));this.value=''" style="font-size:.7rem;padding:3px 6px;border:1px solid var(--cream-dd);border-radius:5px;color:var(--muted);max-width:140px;cursor:pointer" title="Déplacer vers une section"><option value=''>↗ Section…</option>${DOSSIERS.map((sec,si)=>'<option value="'+si+'"'+(DOSSIERS[si].items.some(x=>x.num===d.num)?' disabled':'')+'>'+sec.section+'</option>').join('')}</select>`:''}
       </div>
+      ${DOSSIERS.length>1?`<select onchange="moveDossToSec('${d.num}',parseInt(this.value));this.value=''" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:5px;color:var(--text-m);cursor:pointer;background:white" title="Déplacer vers une autre section"><option value="">↗ Section…</option>${DOSSIERS.map((sec,si)=>'<option value="'+si+'"'+(DOSSIERS[si].items.some(x=>x.num===d.num)?' disabled':'')+'>'+sec.section+'</option>').join('')}</select>`:''}
     </div>
   </div>`;
 }
@@ -1627,6 +1662,29 @@ ${debutLine}
 ${body}
 ${clotureLine}
 <button class="print-btn no-print" onclick="window.print()">🖨 Imprimer</button>
+<div id="add-partie-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:600;align-items:center;justify-content:center;" onclick="if(event.target===this)closeAddPartieModal()">
+  <div style="background:white;border-radius:12px;width:min(380px,94vw);box-shadow:0 4px 24px rgba(0,0,0,.15);overflow:hidden;">
+    <div style="background:var(--blue);color:white;padding:13px 18px;display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-size:14px;font-weight:600">＋ Ajouter une partie</span>
+      <button onclick="closeAddPartieModal()" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:1.1rem;cursor:pointer">✕</button>
+    </div>
+    <div style="padding:18px;">
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:600;color:var(--text-m);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">Type de partie</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;" id="ap-type-btns">
+          <button onclick="setAddPartieType('dem')" id="ap-dem" style="flex:1;padding:7px 10px;border:2px solid var(--border);border-radius:7px;background:white;font-size:13px;cursor:pointer;transition:all .12s;font-weight:500">▲ Demandeur</button>
+          <button onclick="setAddPartieType('def')" id="ap-def" style="flex:1;padding:7px 10px;border:2px solid var(--border);border-radius:7px;background:white;font-size:13px;cursor:pointer;transition:all .12s;font-weight:500">▼ Défendeur</button>
+          <button onclick="setAddPartieType('interv')" id="ap-interv" style="flex:1;padding:7px 10px;border:2px solid var(--border);border-radius:7px;background:white;font-size:13px;cursor:pointer;transition:all .12s;font-weight:500">⬡ Intervenant</button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
+        <button onclick="closeAddPartieModal()" class="btn-default">Annuler</button>
+        <button onclick="confirmAddPartie()" class="btn-primary">Ajouter</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body></html>`;
 }
 
@@ -1710,6 +1768,29 @@ td,th{border-bottom:1px solid #eee;vertical-align:top}
 <table>${body}</table>
 ${avSection}
 <button class="no-print" onclick="window.print()" style="margin-top:16px;padding:8px 20px;background:#1a2744;color:white;border:none;border-radius:6px;cursor:pointer">🖨 Imprimer</button>
+<div id="add-partie-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:600;align-items:center;justify-content:center;" onclick="if(event.target===this)closeAddPartieModal()">
+  <div style="background:white;border-radius:12px;width:min(380px,94vw);box-shadow:0 4px 24px rgba(0,0,0,.15);overflow:hidden;">
+    <div style="background:var(--blue);color:white;padding:13px 18px;display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-size:14px;font-weight:600">＋ Ajouter une partie</span>
+      <button onclick="closeAddPartieModal()" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:1.1rem;cursor:pointer">✕</button>
+    </div>
+    <div style="padding:18px;">
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:600;color:var(--text-m);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">Type de partie</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;" id="ap-type-btns">
+          <button onclick="setAddPartieType('dem')" id="ap-dem" style="flex:1;padding:7px 10px;border:2px solid var(--border);border-radius:7px;background:white;font-size:13px;cursor:pointer;transition:all .12s;font-weight:500">▲ Demandeur</button>
+          <button onclick="setAddPartieType('def')" id="ap-def" style="flex:1;padding:7px 10px;border:2px solid var(--border);border-radius:7px;background:white;font-size:13px;cursor:pointer;transition:all .12s;font-weight:500">▼ Défendeur</button>
+          <button onclick="setAddPartieType('interv')" id="ap-interv" style="flex:1;padding:7px 10px;border:2px solid var(--border);border-radius:7px;background:white;font-size:13px;cursor:pointer;transition:all .12s;font-weight:500">⬡ Intervenant</button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
+        <button onclick="closeAddPartieModal()" class="btn-default">Annuler</button>
+        <button onclick="confirmAddPartie()" class="btn-primary">Ajouter</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body></html>`;
   const w=window.open('','_blank');w.document.write(html);w.document.close();
 }
@@ -1735,6 +1816,29 @@ function buildPV(){
 <style>${printCSS()}</style></head><body class="on-setup">
 ${pages}
 <button class="print-btn no-print" onclick="window.print()">🖨 Imprimer</button>
+<div id="add-partie-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:600;align-items:center;justify-content:center;" onclick="if(event.target===this)closeAddPartieModal()">
+  <div style="background:white;border-radius:12px;width:min(380px,94vw);box-shadow:0 4px 24px rgba(0,0,0,.15);overflow:hidden;">
+    <div style="background:var(--blue);color:white;padding:13px 18px;display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-size:14px;font-weight:600">＋ Ajouter une partie</span>
+      <button onclick="closeAddPartieModal()" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:1.1rem;cursor:pointer">✕</button>
+    </div>
+    <div style="padding:18px;">
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:600;color:var(--text-m);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">Type de partie</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;" id="ap-type-btns">
+          <button onclick="setAddPartieType('dem')" id="ap-dem" style="flex:1;padding:7px 10px;border:2px solid var(--border);border-radius:7px;background:white;font-size:13px;cursor:pointer;transition:all .12s;font-weight:500">▲ Demandeur</button>
+          <button onclick="setAddPartieType('def')" id="ap-def" style="flex:1;padding:7px 10px;border:2px solid var(--border);border-radius:7px;background:white;font-size:13px;cursor:pointer;transition:all .12s;font-weight:500">▼ Défendeur</button>
+          <button onclick="setAddPartieType('interv')" id="ap-interv" style="flex:1;padding:7px 10px;border:2px solid var(--border);border-radius:7px;background:white;font-size:13px;cursor:pointer;transition:all .12s;font-weight:500">⬡ Intervenant</button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
+        <button onclick="closeAddPartieModal()" class="btn-default">Annuler</button>
+        <button onclick="confirmAddPartie()" class="btn-primary">Ajouter</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body></html>`;
 }
 
@@ -1846,6 +1950,85 @@ function switchAddTab(tab){
   pane.classList.add('active');pane.style.display='block';
 }
 
+
+
+
+var _addPartieNum=null, _addPartieType='dem';
+function addPartieModal(num){
+  _addPartieNum=num;
+  _addPartieType='dem';
+  setAddPartieType('dem');
+  document.getElementById('add-partie-overlay').style.display='flex';
+}
+function closeAddPartieModal(){
+  document.getElementById('add-partie-overlay').style.display='none';
+  _addPartieNum=null;
+}
+function setAddPartieType(type){
+  _addPartieType=type;
+  ['dem','def','interv'].forEach(function(t){
+    var btn=document.getElementById('ap-'+t);
+    if(btn){
+      btn.style.borderColor=t===type?'var(--blue)':'var(--border)';
+      btn.style.background=t===type?'var(--blue-pale)':'white';
+      btn.style.color=t===type?'var(--blue)':'var(--text)';
+    }
+  });
+}
+function confirmAddPartie(){
+  if(!_addPartieNum)return;
+  addPartie(_addPartieNum, _addPartieType==='interv'?'def':_addPartieType);
+  // Si intervenant, mettre le rôle 'interv' sur la nouvelle partie
+  if(_addPartieType==='interv'){
+    var d=getDoss(_addPartieNum);
+    if(d&&d.defs&&ST[_addPartieNum]&&ST[_addPartieNum].def){
+      var idx=ST[_addPartieNum].def.length-1;
+      ST[_addPartieNum].def[idx].role='interv';
+    }
+  }
+  closeAddPartieModal();
+}
+function openCardAndEditName(num){
+  var el=document.getElementById('card-'+nid(num));
+  if(!el)return;
+  document.querySelectorAll('.dossier-card.open').forEach(function(c){c.classList.remove('open');});
+  el.classList.add('open');
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+  setTimeout(function(){
+    var inp=el.querySelector('.partie-nm-inp');
+    if(inp){
+      var lbl=inp.closest('[data-name-wrap]').querySelector('.partie-nm-lbl');
+      var btn=inp.closest('[data-name-wrap]').querySelector('button[title="Modifier le nom"]');
+      if(lbl)lbl.style.display='none';
+      if(btn)btn.style.display='none';
+      inp.style.display='';inp.focus();inp.select();
+    }
+  },150);
+}
+function addPartie(num, side){
+  var d=getDoss(num);if(!d)return;
+  if(side==='dem'){
+    if(!d.dems)d.dems=[d.dem||''];
+    d.dems.push('');
+    if(!ST[num].dem)ST[num].dem=[];
+    ST[num].dem.push({type:'avocat',name:'',loco:''});
+  } else {
+    if(!d.defs)d.defs=[d.def||''];
+    d.defs.push('');
+    if(!ST[num].def)ST[num].def=[];
+    ST[num].def.push({type:'avocat',name:'',loco:''});
+  }
+  replaceCard(num,true);autoSave();
+}
+function removePartie(num, side, idx){
+  var d=getDoss(num);if(!d)return;
+  var arr=side==='dem'?d.dems:d.defs;
+  var stArr=ST[num][side];
+  if(!arr||arr.length<=1)return; // garder au moins 1
+  arr.splice(idx,1);
+  if(stArr&&stArr.length>idx)stArr.splice(idx,1);
+  replaceCard(num,true);autoSave();
+}
 function addManual(){
   const ref=document.getElementById('add-ref').value.trim();
   const dem=document.getElementById('add-dem').value.trim();
@@ -1877,7 +2060,7 @@ function addManual(){
   ST[newNum]={
     dem:d.dems.map((nm,i)=>({type:'avocat',name:_ad[i]||'',loco:''})),
     def:d.defs.map((nm,i)=>({type:'avocat',name:_af[i]||'',loco:''})),
-    dec:null,remDate:null,remPli:false,jugEnt:'conseils',jugDD:false,jugDC:false,jugDT:false,jtt:'mens',jtv:'',note:'',done:false
+    dec:null,remDate:null,remHeure:'9h00',remPli:false,jugEnt:'conseils',jugDD:false,jugDC:false,jugDT:false,jtt:'mens',jtv:'',soCharge:'dem',note:'',done:false,sermentComp:false
   };
   renum();renderAll();autoSave();closeAddModal();
   // Vider les champs
@@ -2091,6 +2274,7 @@ function buildSidebarRight(){
         +'<span class="sbr-dot '+dotCls+'"></span>'
         +'<span class="sbr-num">'+d.num+'</span>'
         +'<div class="sbr-parties"><div class="sbr-dem">'+dem+'</div><div class="sbr-def">'+def+'</div></div>'
+        
         +'</div>';
     });
   });
@@ -3151,6 +3335,29 @@ window.addEventListener('load',function(){
       <button onclick="closeSecModal()" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:1.1rem;cursor:pointer">✕</button>
     </div>
     <div class="sec-modal-body" id="sec-modal-body"></div>
+  </div>
+</div>
+
+<div id="add-partie-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:600;align-items:center;justify-content:center;" onclick="if(event.target===this)closeAddPartieModal()">
+  <div style="background:white;border-radius:12px;width:min(380px,94vw);box-shadow:0 4px 24px rgba(0,0,0,.15);overflow:hidden;">
+    <div style="background:var(--blue);color:white;padding:13px 18px;display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-size:14px;font-weight:600">＋ Ajouter une partie</span>
+      <button onclick="closeAddPartieModal()" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:1.1rem;cursor:pointer">✕</button>
+    </div>
+    <div style="padding:18px;">
+      <div style="margin-bottom:12px;">
+        <label style="font-size:11px;font-weight:600;color:var(--text-m);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">Type de partie</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;" id="ap-type-btns">
+          <button onclick="setAddPartieType('dem')" id="ap-dem" style="flex:1;padding:7px 10px;border:2px solid var(--border);border-radius:7px;background:white;font-size:13px;cursor:pointer;transition:all .12s;font-weight:500">▲ Demandeur</button>
+          <button onclick="setAddPartieType('def')" id="ap-def" style="flex:1;padding:7px 10px;border:2px solid var(--border);border-radius:7px;background:white;font-size:13px;cursor:pointer;transition:all .12s;font-weight:500">▼ Défendeur</button>
+          <button onclick="setAddPartieType('interv')" id="ap-interv" style="flex:1;padding:7px 10px;border:2px solid var(--border);border-radius:7px;background:white;font-size:13px;cursor:pointer;transition:all .12s;font-weight:500">⬡ Intervenant</button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
+        <button onclick="closeAddPartieModal()" class="btn-default">Annuler</button>
+        <button onclick="confirmAddPartie()" class="btn-primary">Ajouter</button>
+      </div>
+    </div>
   </div>
 </div>
 
