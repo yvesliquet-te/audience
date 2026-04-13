@@ -875,6 +875,7 @@ document.addEventListener('click',function(e){
 // ════════════════════════════════════════════
 function getDoss(num){for(const s of DOSSIERS)for(const d of s.items)if(d.num===num)return d;}
 function getSec(num){for(const s of DOSSIERS)for(const d of s.items)if(d.num===num)return s.section;return '';}
+function isSerment(num){const d=getDoss(num);return d&&d.ref&&/^S\//i.test((d.ref||'').trim());}
 function isPrononcer(num){return getSec(num).toLowerCase().includes('prononcer')||getSec(num).toLowerCase().includes('prononcé');}
 function isRO(num){return ST[num]&&ST[num].dec==='ro';}
 function nid(n){return n.replace('.','_');}
@@ -893,6 +894,18 @@ function genText(num){
   const s=ST[num],d=getDoss(num),lines=[];
   if(!d)return'';
   // Section spéciale : Remise pour prononcer
+  if(isSerment(num)){
+    const nm=(d.dems&&d.dems[0]?d.dems[0]:(d.dem||'').trim())||'La personne';
+    if(s.sermentComp){
+      const line=applyTmpl('serment_comp',{dem:nm})||nm+' comparaît. Un PV de prestation de serment est rédigé ce jour.';
+      return line;
+    } else {
+      const rd=s.remDate?fd(s.remDate):'[date]';
+      const rdh=s.remHeure||'9h00';
+      const line=applyTmpl('serment_abs',{dem:nm,date:rd+' à '+rdh})||'Personne ne comparaît. La cause est remise au '+rd+' à '+rdh+'.';
+      return s.note?line+'\n'+s.note:line;
+    }
+  }
   if(isPrononcer(num)){
     const dems=(d.dems||[d.dem||'']).join(' et ');
     const defs=(d.defs||[d.def||'']).join(' et ');
@@ -1110,11 +1123,11 @@ function renderCard(d){
   return`<div class="dossier-card ${s.done?'done':''}" id="card-${id}" data-num="${d.num}">
     <div class="c-head" onclick="toggleCard('${d.num}')">
       <span class="d-num">${d.num}</span><span class="d-ref">${d.ref}</span>
-      <div class="d-parties"><div class="d-dem">▲ ${(d.dems||[d.dem]).join(' / ')}</div><div class="d-def">▼ ${(d.defs||[d.def]).join(' / ')}</div></div>
+      <div class="d-parties"><div class="d-dem">▲ ${(d.dems||[d.dem||'']).map((nm,i)=>{const av=(s.dem[i]||{}).name;const loco=(s.dem[i]||{}).loco;const avNm=loco&&loco.trim()?loco:av;return '<strong>'+nm+'</strong>'+(avNm&&avNm.trim()&&(s.dem[i]||{}).type!=='absent'?' <span style="font-weight:400">(Me '+avNm+')</span>':'');}).join(' / ')}</div><div class="d-def">▼ ${(d.defs||[d.def||'']).filter(nm=>nm&&nm.trim()&&nm!=='?').map((nm,i)=>{const av=(s.def[i]||{}).name;const loco=(s.def[i]||{}).loco;const avNm=loco&&loco.trim()?loco:av;return '<strong>'+nm+'</strong>'+(avNm&&avNm.trim()&&(s.def[i]||{}).type!=='absent'?' <span style="font-weight:400">(Me '+avNm+')</span>':'');}).join(' / ')}</div></div>
       ${moveBtn}${badge}<span class="chev">▾</span>
     </div>
     <div class="c-body"${s.done?' style="pointer-events:none;opacity:.65;user-select:none"':''}>
-      ${_isPrononcer?'':`
+      ${isSerment(d.num)?buildSermentCard(d,s,id):(_isPrononcer?'':`
       <div class="c-section c-section-comp">
         <div class="c-section-ttl">👥 Comparutions</div>
         <div class="comp-section">${_dems.map((_,i)=>cRow('dem',i)).join('')}${_defs.map((_,i)=>cRow('def',i)).join('')}</div>
@@ -1123,7 +1136,7 @@ function renderCard(d){
         <div class="c-section-ttl">⚖ Décision</div>
         <div class="dec-btns">${decBtns}</div>
         ${remSub}${jcSub}${soSub}
-      </div>`}
+      </div>`)}
       <div class="c-section c-section-pv">
         <div class="c-section-ttl">📄 Procès-verbal</div>
         <div class="preview" id="pv-${id}">(aucune saisie)</div>
@@ -1131,9 +1144,10 @@ function renderCard(d){
       </div>
     </div>
     <div class="c-foot">
-      <div style="display:flex;gap:6px">
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
         <button class="btn-val" onclick="valider('${d.num}')">${s.done?'✓ Validé':'✓ Valider'}</button>
         ${s.done?`<button class="btn-rst" onclick="modCard('${d.num}')">✏ Modifier</button>`:''}
+        ${DOSSIERS.length>1?`<select onchange="moveDossToSec('${d.num}',parseInt(this.value));this.value=''" style="font-size:.7rem;padding:3px 6px;border:1px solid var(--cream-dd);border-radius:5px;color:var(--muted);max-width:140px;cursor:pointer" title="Déplacer vers une section"><option value=''>↗ Section…</option>${DOSSIERS.map((sec,si)=>'<option value="'+si+'"'+(DOSSIERS[si].items.some(x=>x.num===d.num)?' disabled':'')+'>'+sec.section+'</option>').join('')}</select>`:''}
       </div>
     </div>
   </div>`;
@@ -1158,6 +1172,19 @@ function renum(){
   Object.assign(ST,newST);
 }
 
+
+function moveDossToSec(num, targetSecIdx){
+  var srcSecIdx=-1, itemIdx=-1;
+  for(var si=0;si<DOSSIERS.length;si++){
+    var ii=DOSSIERS[si].items.findIndex(function(d){return d.num===num;});
+    if(ii!==-1){srcSecIdx=si;itemIdx=ii;break;}
+  }
+  if(srcSecIdx===-1||srcSecIdx===targetSecIdx)return;
+  var item=DOSSIERS[srcSecIdx].items.splice(itemIdx,1)[0];
+  DOSSIERS[targetSecIdx].items.push(item);
+  if(DOSSIERS[srcSecIdx].items.length===0)DOSSIERS.splice(srcSecIdx,1);
+  renum();renderAll();updateSidebarRight();autoSave();
+}
 function deleteDoss(num){
   const d=getDoss(num);
   if(!d)return;
@@ -2394,7 +2421,9 @@ var DEFAULT_TMPLS={
   jd:"La partie ${dem} a déposé ses conclusions. La partie ${def} est défaillante. Un jugement sera prononcé le ${date}.",
   ac:"Les parties sont parvenues à un accord et sollicitent qu'il leur en soit donné acte. La cause est plaidée. Un jugement sera prononcé le ${date}.",
   et:"Les parties qui comparaissent sollicitent la mise en état et la fixation de la cause pour plaidoiries.",
-  pr:"Dans cette affaire, une décision est prononcée ce jour."
+  pr:"Dans cette affaire, une décision est prononcée ce jour.",
+  serment_comp:"${dem} comparaît. Un PV de prestation de serment est rédigé ce jour.",
+  serment_abs:"Personne ne comparaît. La cause est remise au ${date}."
 };
 function getTmpl(dec){return SETTINGS.templates[dec]||DEFAULT_TMPLS[dec]||'';}
 
