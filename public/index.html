@@ -1055,6 +1055,35 @@ function buildDecBtns(d,s,dec){
   html+='</div>';
   return html;
 }
+
+function buildSermentCard(d, s, id){
+  var nm=(d.dems&&d.dems[0]?d.dems[0]:(d.dem||'').trim())||'La personne';
+  var dateRow='';
+  if(!s.sermentComp){
+    var dateLbl=s.remDate?fd(s.remDate):'Choisir';
+    dateRow='<div style="margin-top:10px;display:flex;align-items:center;gap:6px">'
+      +'<div class="mc-wrap"><div class="date-btn" style="color:var(--navy);border-color:var(--cream-dd);background:white" onclick="toggleDC(\''+d.num+'\')">'
+      +'<span id="dl-'+id+'">'+dateLbl+'</span> ▾</div>'
+      +'<div class="popover" id="cp-'+id+'"><div class="mini-cal" id="dc-'+id+'"></div></div></div>'
+      +'<span style="font-size:.75rem;color:var(--muted)">🕐</span>'
+      +'<input type="text" value="'+(s.remHeure||'9h00')+'" style="width:52px;font-size:.75rem;border:1px solid var(--cream-dd);border-radius:4px;padding:2px 6px;text-align:center" oninput="upd(\''+d.num+'\',\'remHeure\',this.value)">'
+      +'</div>';
+  }
+  return '<div class="c-section">'
+    +'<div class="c-section-ttl">📋 Prestation de serment</div>'
+    +'<div style="padding:8px 0">'
+    +'<label class="check-row" style="font-size:.82rem;gap:8px">'
+    +'<input type="checkbox" '+(s.sermentComp?'checked':'')+' onchange="upd(\''+d.num+'\',\'sermentComp\',this.checked)">'
+    +'<span><strong>'+nm+'</strong> comparaît</span>'
+    +'</label>'
+    +dateRow
+    +'</div>'
+    +'</div>'
+    +'<div class="c-section c-section-pv">'
+    +'<div class="c-section-ttl">📄 Procès-verbal</div>'
+    +'<div class="preview" id="pv-'+id+'">(aucune saisie)</div>'
+    +'</div>';
+}
 function renderCard(d){
   const s=ST[d.num],id=nid(d.num),dec=s.dec;
   const _isPrononcer=isPrononcer(d.num);
