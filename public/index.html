@@ -1045,7 +1045,7 @@ document.addEventListener('click',function(e){
 function getDoss(num){for(const s of DOSSIERS)for(const d of s.items)if(d.num===num)return d;}
 function getSec(num){for(const s of DOSSIERS)for(const d of s.items)if(d.num===num)return s.section;return '';}
 function isSerment(num){const d=getDoss(num);return d&&d.ref&&/^S\//i.test((d.ref||'').trim());}
-function isPrononcer(num){return getSec(num).toLowerCase().includes('prononcer')||getSec(num).toLowerCase().includes('prononcé');}
+function isPrononcer(num){var s=getSec(num).toLowerCase();return s.includes('prononcer')||s.includes('prononcé')||s.includes('prononces')||s.includes('prononc');}
 function isRO(num){return ST[num]&&ST[num].dec==='ro';}
 function nid(n){return n.replace('.','_');}
 
